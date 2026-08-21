@@ -15,6 +15,7 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 const healthRoutes = require('./routes/healthRoutes');
 const authRoutes = require('./routes/authRoutes');
 const playerRoutes = require('./routes/playerRoutes');
+const matchRoutes = require('./routes/matchRoutes');
 
 const app = express();
 
@@ -49,9 +50,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/players', playerRoutes);
+app.use('/api/matches', matchRoutes);
 
 // Future route mounts will go here:
-// app.use('/api/matches', matchRoutes);
+// app.use('/api/admin', adminRoutes);
 // app.use('/api/admin', adminRoutes);
 
 // ---------------------
@@ -66,11 +68,13 @@ app.use(errorHandler);
 // ---------------------
 
 const startServer = async () => {
-  // Connect to MongoDB
-  await connectDB();
-
   const server = app.listen(PORT, () => {
     console.log(`\n🏓 The PickleHub server running on port ${PORT} [${NODE_ENV}]\n`);
+  });
+
+  // Connect to MongoDB
+  connectDB().catch((err) => {
+    console.error('❌ MongoDB initial connection failed:', err.message);
   });
 
   // Graceful shutdown

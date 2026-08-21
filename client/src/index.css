@@ -3,7 +3,7 @@
 
 /* ============================================
    The PickleHub — Design System Tokens
-   Cinematic Editorial Dark Theme
+   Cinematic Editorial Dark Theme & Motion System
    ============================================ */
 
 @theme {
@@ -53,6 +53,16 @@
   --spacing-margin-mobile: 24px;
   --spacing-stack-xl: 120px;
   --spacing-stack-md: 48px;
+
+  /* ── Motion & Easing Tokens (DESIGN.md) ── */
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-interactive: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 600ms;
+  --duration-cinematic: 1000ms;
+  --stagger-step: 80ms;
 }
 
 /* ── Base Reset ── */
@@ -83,6 +93,7 @@ body {
   color: var(--color-on-surface);
   line-height: 1.6;
   min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 #root {
@@ -192,11 +203,11 @@ input, textarea, select {
   outline: none;
 }
 
-/* ── Animations ── */
+/* ── Core Animation Keyframes ── */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(28px);
   }
   to {
     opacity: 1;
@@ -212,7 +223,7 @@ input, textarea, select {
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(24px);
+    transform: translateX(28px);
   }
   to {
     opacity: 1;
@@ -220,23 +231,215 @@ input, textarea, select {
   }
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(255, 59, 63, 0.4);
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  50% {
-    box-shadow: 0 0 20px 4px rgba(255, 59, 63, 0.15);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 59, 63, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 24px 6px rgba(255, 59, 63, 0.2);
+  }
+}
+
+@keyframes livePulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(74, 222, 128, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
+@keyframes shimmerSweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes ratingDeltaPop {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes subtleGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ── Animation Utility Classes ── */
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out both;
+  animation: fadeInUp 0.7s var(--ease-reveal) both;
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out both;
+  animation: fadeIn 0.5s var(--ease-interactive) both;
 }
 
 .animate-slide-in-right {
-  animation: slideInRight 0.5s ease-out both;
+  animation: slideInRight 0.6s var(--ease-reveal) both;
+}
+
+.animate-slide-in-down {
+  animation: slideInDown 0.6s var(--ease-reveal) both;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.6s var(--ease-reveal) both;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 3s infinite ease-in-out;
+}
+
+.animate-live-pulse {
+  animation: livePulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.animate-rating-pop {
+  animation: ratingDeltaPop 0.5s var(--ease-spring) both;
+}
+
+.animate-gradient-drift {
+  background-size: 200% 200%;
+  animation: subtleGradientShift 16s ease infinite;
+}
+
+/* ── Scroll-Triggered Reveal Classes ── */
+.reveal-init {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: opacity 0.8s var(--ease-reveal), transform 0.8s var(--ease-reveal);
+}
+
+.reveal-fade-rise {
+  transform: translateY(36px);
+}
+
+.reveal-fade-slide-left {
+  transform: translateX(-40px);
+}
+
+.reveal-fade-slide-right {
+  transform: translateX(40px);
+}
+
+.reveal-scale {
+  transform: scale(0.94);
+}
+
+.reveal-active {
+  opacity: 1 !important;
+  transform: translate(0, 0) scale(1) !important;
+}
+
+/* ── Nav Underline Grow Effect ── */
+.nav-link-animated {
+  position: relative;
+}
+
+.nav-link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+  transition: width 0.25s var(--ease-interactive), left 0.25s var(--ease-interactive);
+}
+
+.nav-link-animated:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+.nav-link-animated.active::after {
+  width: 100%;
+  left: 0;
+}
+
+/* ── Card Lift & Hover Glow ── */
+.hover-lift {
+  transition: transform 0.3s var(--ease-reveal), border-color 0.3s var(--ease-interactive), box-shadow 0.3s var(--ease-interactive);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-primary);
+  box-shadow: 0 12px 30px -10px rgba(255, 59, 63, 0.15);
+}
+
+/* ── Skeleton Shimmer Loader ── */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-container) 0%,
+    var(--color-surface-container-high) 50%,
+    var(--color-surface-container) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 1.6s infinite ease-in-out;
+}
+
+/* ── Reduced Motion Guardrail (DESIGN.md & Rule I) ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal-init {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

@@ -28,12 +28,12 @@ Two other files this works alongside:
 
 > Overwrite this section every time. It should always describe *right now*, not history.
 
-- **Last completed milestone:** Milestone 4 — Rating Engine (Sprint 4)
+- **Last completed milestone:** Milestone 6 — Leaderboard (Sprint 6)
 - **In progress:** None
-- **Next milestone to start:** Milestone 5 — Match Submissions (Sprint 5)
-- **Repo state:** Client builds cleanly with zero errors/warnings; Server test suites pass (62/62 tests ok — auth 14, player 14, duplicate email 4, rating engine 44 [including singles/doubles/edge cases/config]); ESLint & Oxlint clean; Full Elo rating engine implemented with individually-weighted doubles delta distribution (PRD Section 7.2 full spec, not MVP fallback); K-factor configurable via `DEFAULT_K_FACTOR` env variable.
+- **Next milestone to start:** Milestone 7 — Admin Approvals Queue (Sprint 7)
+- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0/0, Vite 103 modules); Server test suites pass (82/82 tests ok); Live, filterable Leaderboard operational (`GET /api/players`, `GET /api/players/leaders`, `GET /api/players/compare`, specialty leader showcase cards, multi-sort, category filtering, search, interactive head-to-head compare modal with expected win probability engine, active-only player filtering).
 - **Environment/deploy state:** Local development (`client: localhost:5173`, `server: localhost:5000`)
-- **Last updated:** 2026-08-21 by AI Coding Agent (Milestone 4 Complete)
+- **Last updated:** 2026-08-22 by AI Coding Agent (Milestone 6 Complete)
 
 ---
 
@@ -243,7 +243,114 @@ Two other files this works alongside:
 - [x] Existing functionality preserved (Rule B — 62/62 regression pass)
 
 **Resume point for next agent:**
-- Start **Milestone 5 — Match Submissions (Sprint 5)**: Build `Match` schema (PRD Section 10.3), implement `POST /api/matches/submit` with score/winner validation (Section 6.2), `GET /api/matches/pending`, submission UI with player autocomplete, and "Pending Admin Approval" labels on the Dashboard.
+- Milestone 4 completed. Proceed to Milestone 5.
+
+---
+
+### Milestone 5 — Match Submissions (Sprint 5)
+- **Status:** Completed
+- **Date:** 2026-08-22
+- **Session/Agent:** Sprint 5
+
+**What was built:**
+- `Match.js` Mongoose model per PRD Section 10.3:
+  - `matchId` (`PH-M00001`), `court`, `matchType` (`SINGLES`/`DOUBLES`), `teamA`, `teamB`, `scores`, `winnerTeam`, `status` (`PENDING_APPROVAL`), `submittedBy`, `ratingChanges`, `recordedByAdmin`, `correction`.
+- Match submission controller & validation logic in `matchController.js` and `matchRoutes.js`:
+  - `POST /api/matches/submit` (Protected) — validates participant counts (1v1 for Singles, 2v2 for Doubles), disallows duplicate participants within or across teams, rejects game-level ties (PRD 6.2.3), rejects match-level ties (PRD 6.2.4), and enforces declared `winnerTeam` consistency with majority games won (PRD 6.2.2).
+  - `GET /api/matches/pending` (Protected) — returns active matches awaiting administrator verification for the current player.
+  - `GET /api/matches/my-history` (Protected) — returns player's approved match history.
+  - `GET /api/matches/:id` (Protected) — returns single populated match details.
+- Player directory autocomplete search `GET /api/players/search?q=...` supporting both `q` and `query` params, sanitized projection, and suspended-player filtering.
+- Frontend Match Recording UI in `SubmitMatchPage.jsx` (`/matches/submit`):
+  - Singles/Doubles toggle, court selector, tournament checkbox.
+  - Interactive player pickers with live debounce search.
+  - Dynamic game score inputs with auto-computed game-winner detection.
+  - Real-time series decision calculations.
+- Integrated active pending match indicators and submission link in `DashboardPage.jsx`.
+- Comprehensive unit test suite in `server/test/match.test.js` (14 new test cases across 2 suites).
+
+**Files touched:**
+- `server/src/models/Match.js` (NEW)
+- `server/src/controllers/matchController.js` (NEW)
+- `server/src/routes/matchRoutes.js` (NEW)
+- `server/src/controllers/playerController.js`
+- `server/src/server.js`
+- `server/test/match.test.js` (NEW)
+- `server/package.json`
+- `client/src/pages/SubmitMatchPage.jsx` (NEW)
+- `client/src/pages/DashboardPage.jsx`
+- `client/src/App.jsx`
+- `docs/milestone.md.md`
+- `docs/MEMORY.md`
+
+**Key decisions made:**
+- Matches strictly created in `PENDING_APPROVAL` status. Rating engine is not triggered on submission, preserving DoD #2 and #3.
+- Submitter must be a match participant (in `teamA` or `teamB`) unless the user is an `ADMIN`.
+
+**Deviations from PRD:** None.
+
+**Tests run and results:**
+- `node --test test/match.test.js` — 14/14 pass
+- `npm test` (full regression) — 76/76 pass (auth + player + duplicate_email + rating + match)
+- `npm run lint` (client oxlint) — 0 errors, 0 warnings (28 files)
+- `npm run build` (client vite) — built in 1.32s with 0 errors
+
+**Acceptance checklist status:**
+- [x] A player can submit a match, entering `PENDING_APPROVAL` status (DoD #2)
+- [x] Pending match is completely hidden from Elo updates and the public leaderboard (DoD #3)
+- [x] All inputs validated server-side (Rule F, DoD #8)
+
+**Resume point for next agent:**
+- Milestone 5 completed. Proceed to Milestone 6.
+
+---
+
+### Milestone 6 — Leaderboard (Sprint 6)
+- **Status:** Completed
+- **Date:** 2026-08-22
+- **Session/Agent:** Sprint 6
+
+**What was built:**
+- Backend Leaderboard & Specialty Endpoints in `playerController.js` and `playerRoutes.js`:
+  - `GET /api/players` — Multi-sort (`rating`, `wins`, `winPercentage`, `streak`, `matches`), category filtering (`ALL`, `BEGINNER`, `INTERMEDIATE`, `ADVANCED_INTERMEDIATE`, `PRO`), search by name/ID, and strict active-only filtering.
+  - `GET /api/players/leaders` — Computes 4 specialty leader blocks (Highest Rated, Most Wins, Highest Win Rate requiring `matchesPlayed >= 5` per PRD Section 8.2, and Longest Active Winning Streak).
+  - `GET /api/players/compare?p1=...&p2=...` — Head-to-head comparison engine computing historical approved match records and algorithmic win probabilities using `calculateExpectedScore` from `ratingService.js`.
+- Frontend Leaderboard UI in `LeaderboardPage.jsx` (`/leaderboard`):
+  - 4 Specialty Leader showcase cards with count-up animations.
+  - Interactive category filter tabs and multi-sort dropdown.
+  - Real-time search bar for player name and `PH-XXXXX` lookup.
+  - Standings table with top-3 gold/silver/bronze badges, tier pills, dynamic ratings, records, streaks, and quick compare buttons.
+  - Head-to-head matchup modal featuring animated win probability gauge, stat differentials, and direct matchup history.
+- Backend test suite `server/test/leaderboard.test.js` (6 new test cases across 2 suites).
+
+**Files touched:**
+- `server/src/controllers/playerController.js`
+- `server/src/routes/playerRoutes.js`
+- `server/test/leaderboard.test.js` (NEW)
+- `server/package.json`
+- `client/src/pages/LeaderboardPage.jsx`
+- `docs/milestone.md.md`
+- `docs/MEMORY.md`
+
+**Key decisions made:**
+- Win % leader strictly enforces the minimum 5 matches played threshold (PRD Section 8.2) to prevent players with a 1-0 record from overtaking active competitors.
+- Head-to-head win probabilities are computed via the centralized Elo formula (`calculateExpectedScore`).
+
+**Deviations from PRD:** None.
+
+**Tests run and results:**
+- `node --test test/leaderboard.test.js` — 6/6 pass
+- `npm test` (full regression) — 82/82 pass (auth + player + duplicate_email + rating + match + leaderboard)
+- `npm run lint` (client oxlint) — 0 errors, 0 warnings (28 files)
+- `npm run build` (client vite) — built in 1.31s with 0 errors
+
+**Acceptance checklist status:**
+- [x] Leaderboard reflects only `APPROVED` match data (no pending/rejected leakage)
+- [x] Specialty leader blocks calculate correctly with min-5 threshold
+- [x] Mobile layout verified (Rule I)
+
+**Resume point for next agent:**
+- Start **Milestone 7 — Admin Approvals Queue (Sprint 7)**: The core trust mechanism of the platform — `GET /api/admin/matches/pending`, `POST /api/admin/matches/:id/approve` (single atomic MongoDB transaction updating player ratings, appending `RatingHistory`, updating stats/streaks, and recalculating categories), `POST /api/admin/matches/:id/reject`, `POST /api/admin/matches/direct`, and `AuditLog` schema.
 
 ---
 

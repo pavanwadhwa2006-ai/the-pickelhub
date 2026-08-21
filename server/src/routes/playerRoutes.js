@@ -12,6 +12,8 @@ const {
   getMyPlayerProfile,
   updateMyProfile,
   searchPlayers,
+  getLeaderboardSpecialties,
+  comparePlayers,
 } = require('../controllers/playerController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -19,6 +21,8 @@ const router = express.Router();
 
 // Specific routes before parameterized routes
 router.get('/search', searchPlayers);
+router.get('/leaders', getLeaderboardSpecialties);
+router.get('/compare', comparePlayers);
 router.get('/me', protect, getMyPlayerProfile);
 router.put('/me', protect, updateMyProfile);
 router.get('/', getPlayers);

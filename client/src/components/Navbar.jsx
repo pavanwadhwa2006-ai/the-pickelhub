@@ -2,7 +2,8 @@
  * Navbar Component
  *
  * Cinematic Editorial navigation bar with sharp aesthetics,
- * active state indicators, role badges, and mobile responsiveness.
+ * animated underline hover states, brand micro-interactions,
+ * role indicators, and mobile drawer transitions.
  */
 
 import { useState } from 'react';
@@ -23,6 +24,8 @@ const Navbar = () => {
 
   const navLinks = [
     { label: 'HOME', path: '/' },
+    { label: 'LEADERBOARD', path: '/leaderboard' },
+    { label: 'TOURNAMENTS', path: '/tournaments' },
     ...(isAuthenticated ? [{ label: 'DASHBOARD', path: '/dashboard' }] : []),
     ...(isAdmin ? [{ label: 'ADMIN PANEL', path: '/admin' }] : []),
   ];
@@ -33,14 +36,14 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#181305]/95 backdrop-blur-md border-b border-[#3b3423]">
+    <header className="sticky top-0 z-50 bg-[#181305]/90 backdrop-blur-lg border-b border-[#3b3423] transition-colors">
       <div className="max-w-[1440px] mx-auto px-6 sm:px-10 md:px-20 h-20 flex items-center justify-between">
-        {/* Brand Logo */}
+        {/* Brand Logo with micro-interaction */}
         <Link
           to="/"
           className="flex items-center gap-3 group focus:outline-none"
         >
-          <div className="w-8 h-8 bg-[#ff3b3f] flex items-center justify-center text-white font-bold text-lg font-mono">
+          <div className="w-8 h-8 bg-[#ff3b3f] flex items-center justify-center text-white font-bold text-lg font-mono group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(255,59,63,0.6)] transition-all duration-300">
             P
           </div>
           <div className="flex flex-col">
@@ -53,7 +56,7 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Desktop Navigation Links */}
+        {/* Desktop Navigation Links with animated growing underline */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
             const active = isActive(link.path);
@@ -61,20 +64,17 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`relative py-2 text-xs font-bold tracking-[0.2em] transition-colors ${
-                  active ? 'text-[#ede1c9]' : 'text-[#9a8e7a] hover:text-[#ede1c9]'
+                className={`nav-link-animated py-2 text-xs font-bold tracking-[0.2em] transition-colors ${
+                  active ? 'text-white active' : 'text-[#9a8e7a] hover:text-[#ede1c9]'
                 }`}
               >
                 {link.label}
-                {active && (
-                  <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#ff3b3f]" />
-                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Desktop User Actions */}
+        {/* Desktop User Actions with smooth button states */}
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
@@ -89,7 +89,7 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="px-4 py-2 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] bg-[#251f10] hover:bg-[#3b3423] border border-[#3b3423] transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] bg-[#251f10] hover:bg-[#3b3423] hover:text-white border border-[#3b3423] hover:border-[#ad8885] transition-all cursor-pointer"
               >
                 LOGOUT
               </button>
@@ -98,13 +98,13 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                className="px-5 py-2 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] hover:text-white border border-[#3b3423] hover:border-[#ad8885] bg-[#1a1508] transition-all"
+                className="px-5 py-2 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] hover:text-white border border-[#3b3423] hover:border-[#ad8885] bg-[#1a1508] hover:bg-[#251f10] transition-all"
               >
                 LOGIN
               </Link>
               <Link
                 to="/register"
-                className="px-5 py-2 text-xs font-bold tracking-[0.15em] uppercase text-white bg-[#ff3b3f] hover:bg-[#e02b2f] transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)]"
+                className="px-5 py-2 text-xs font-bold tracking-[0.15em] uppercase text-white bg-[#ff3b3f] hover:bg-[#e02b2f] transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)]"
               >
                 JOIN THE CLUB
               </Link>
@@ -116,11 +116,11 @@ const Navbar = () => {
         <button
           type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 text-[#ede1c9] hover:text-white focus:outline-none"
+          className="md:hidden p-2 text-[#ede1c9] hover:text-white focus:outline-none transition-colors"
           aria-label="Toggle menu"
         >
           <svg
-            className="w-6 h-6"
+            className="w-6 h-6 transition-transform duration-200"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -144,7 +144,7 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Drawer Menu with smooth animation */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#181305] border-b border-[#3b3423] px-6 py-6 animate-fade-in">
           <div className="flex flex-col gap-4">
@@ -153,8 +153,8 @@ const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`text-sm font-bold tracking-[0.15em] py-2 border-b border-[#251f10] ${
-                  isActive(link.path) ? 'text-[#ff3b3f]' : 'text-[#ede1c9]'
+                className={`text-sm font-bold tracking-[0.15em] py-2 border-b border-[#251f10] transition-colors ${
+                  isActive(link.path) ? 'text-[#ff3b3f]' : 'text-[#ede1c9] hover:text-white'
                 }`}
               >
                 {link.label}
@@ -169,7 +169,7 @@ const Navbar = () => {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full py-3 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] bg-[#251f10] border border-[#3b3423]"
+                  className="w-full py-3 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] bg-[#251f10] hover:bg-[#3b3423] border border-[#3b3423] transition-all"
                 >
                   LOGOUT
                 </button>
@@ -179,14 +179,14 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3 text-center text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] border border-[#3b3423] bg-[#1a1508]"
+                  className="w-full py-3 text-center text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] border border-[#3b3423] bg-[#1a1508] hover:bg-[#251f10] transition-all"
                 >
                   LOGIN
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3 text-center text-xs font-bold tracking-[0.15em] uppercase text-white bg-[#ff3b3f]"
+                  className="w-full py-3 text-center text-xs font-bold tracking-[0.15em] uppercase text-white bg-[#ff3b3f] hover:bg-[#e02b2f] transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)]"
                 >
                   JOIN THE CLUB
                 </Link>

@@ -100,20 +100,20 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 **Goal:** Players can submit match results; nothing affects ratings yet.
 
 **Tasks**
-- [ ] Build `Match` schema (Section 10.3)
-- [ ] Build `POST /api/matches/submit` — validates match type, court, participants, scores
-- [ ] Enforce match always created with status `PENDING_APPROVAL`
-- [ ] Build `GET /api/matches/pending` (player's own pending matches)
-- [ ] Build submission UI with player search/autocomplete for fast entry
-- [ ] Add "Pending Admin Approval" label on the Player Dashboard
+- [x] Build `Match` schema (Section 10.3)
+- [x] Build `POST /api/matches/submit` — validates match type, court, participants, scores
+- [x] Enforce match always created with status `PENDING_APPROVAL`
+- [x] Build `GET /api/matches/pending` (player's own pending matches)
+- [x] Build submission UI with player search/autocomplete for fast entry
+- [x] Add "Pending Admin Approval" label on the Player Dashboard
 
 **Deliverables**
 - Full submission flow from UI to DB, visibly excluded from ratings
 
 **Acceptance Checklist (ties to DoD #2, #3)**
-- [ ] A player can submit a match, entering `PENDING_APPROVAL` status
-- [ ] Pending match is completely hidden from Elo updates and the public leaderboard
-- [ ] All inputs validated server-side (Rule F)
+- [x] A player can submit a match, entering `PENDING_APPROVAL` status
+- [x] Pending match is completely hidden from Elo updates and the public leaderboard
+- [x] All inputs validated server-side (Rule F)
 
 ---
 
@@ -121,18 +121,18 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 **Goal:** Live, filterable public leaderboard.
 
 **Tasks**
-- [ ] Build sortable leaderboard (primary sort: current rating, descending)
-- [ ] Filter by Category and Match Type (Singles/Doubles)
-- [ ] Only show active, non-suspended players
-- [ ] Build specialty leader blocks: Highest Rated, Most Wins, Highest Win % (min. 5 matches), Longest Active Streak
-- [ ] Build player search UI (`GET /api/players/search`) and head-to-head compare UI (`GET /api/players/compare`)
+- [x] Build sortable leaderboard (primary sort: current rating, descending)
+- [x] Filter by Category and Match Type (Singles/Doubles)
+- [x] Only show active, non-suspended players
+- [x] Build specialty leader blocks: Highest Rated, Most Wins, Highest Win % (min. 5 matches), Longest Active Streak
+- [x] Build player search UI (`GET /api/players/search`) and head-to-head compare UI (`GET /api/players/compare`)
 
 **Deliverables**
 - Public leaderboard page, responsive and filterable
 
 **Acceptance Checklist**
-- [ ] Leaderboard reflects only `APPROVED` match data (no pending/rejected leakage)
-- [ ] Mobile layout verified (Rule I)
+- [x] Leaderboard reflects only `APPROVED` match data (no pending/rejected leakage)
+- [x] Mobile layout verified (Rule I)
 
 ---
 

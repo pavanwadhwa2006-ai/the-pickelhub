@@ -114,6 +114,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (credential) => {
+    setError(null);
+    try {
+      const response = await api.post('/auth/google', { credential });
+      const { token: newToken, user: userData, player: playerData } = response.data;
+
+      setToken(newToken);
+      setUser(userData);
+      setPlayer(playerData || null);
+      localStorage.setItem('picklehub_token', newToken);
+      localStorage.setItem('picklehub_user', JSON.stringify(userData));
+      if (playerData) {
+        localStorage.setItem('picklehub_player', JSON.stringify(playerData));
+      }
+
+      return { success: true, user: userData, player: playerData };
+    } catch (err) {
+      const message =
+        err.response?.data?.message || 'Google authentication failed. Please try again.';
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
   const refreshProfile = async () => {
     try {
       const res = await api.get('/players/me');
@@ -138,6 +162,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin: user?.role === 'ADMIN',
     login,
     register,
+    googleLogin,
     logout,
     refreshProfile,
     clearError,
