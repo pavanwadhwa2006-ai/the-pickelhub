@@ -265,3 +265,44 @@ A thin `2px` horizontal bar fixed to the top of the viewport, using `primary` co
 - Canvas particle effects must use `requestAnimationFrame` and pause when the tab is not visible (`document.hidden`).
 - On devices reporting `prefers-reduced-motion: reduce`, replace all motion with instant state changes.
 - On mobile, cap particle count at 20, disable parallax and cursor-aware tilt, and reduce stagger counts to max 5 items.
+
+---
+
+## Theme: Garden Light (new — added alongside existing Classic Dark)
+
+Second selectable theme. Does not replace or modify Classic Dark — both themes coexist, switchable via the theme selector in Profile Settings.
+
+### Color tokens
+
+| Token | Value | Role |
+|---|---|---|
+| `--bg-page` | `#FBF8ED` | Page background (soft beige-cream) |
+| `--bg-card` | `#FFFFFF` | Primary card surface |
+| `--bg-card-alt` | `#F7F4D5` | Secondary card tint (stat tiles) |
+| `--border` | `#E5DFC4` | Default hairline border |
+| `--text-primary` | `#10241F` | Body text (near-midnight, not pure black) |
+| `--text-secondary` | `#5C6B62` | Supporting text |
+| `--text-muted` | `#9CA79C` | Placeholders, captions |
+| `--accent-primary` | `#1D3461` | Sapphire — primary CTAs, links, active nav |
+| `--accent-primary-hover` | `#16294D` | Sapphire hover state |
+| `--accent-secondary` | `#2C4A7C` | Royal blue — secondary buttons, info states |
+| `--accent-warm` | `#D3968C` | Rosy brown — highlight/notification accent |
+| `--success` | `#839958` | Moss green — positive Elo delta, win streaks |
+| `--danger` | `#A3453D` | Muted brick — negative Elo delta, losses |
+
+### Skill tier badge mapping (Garden Light only)
+
+| Tier | Color | Hex |
+|---|---|---|
+| Beginner | Quicksand | `#B9AE7E` |
+| Intermediate | Rosy brown | `#D3968C` |
+| Adv. Intermediate | Moss green | `#839958` |
+| Pro Division | Midnight green | `#10586B` |
+
+Colors escalate in visual weight from Beginner → Pro so the tier ladder reads at a glance, matching the same semantic pattern as Classic Dark's tier treatment.
+
+### Implementation notes
+- Applied via `data-theme="garden-light"` attribute, third value alongside existing dark theme value(s).
+- Theme selector lives in the Profile Settings dropdown — radio-style list, not a binary toggle, since there are now 2+ theme options.
+- Preference persists via `localStorage` / user settings, same mechanism as current theme handling.
+- Every existing component (dashboard stat cards, tier badges, landing hero, nav) must have a Garden Light variant before this ships — no half-styled screens.

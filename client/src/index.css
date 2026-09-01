@@ -65,6 +65,115 @@
   --stagger-step: 80ms;
 }
 
+/* ============================================
+   The PickleHub — Dual Theme Engine
+   1. Classic Dark (Default)
+   2. Garden Light (Jewel-Tone & Botanical)
+   ============================================ */
+
+:root,
+:root[data-theme="classic-dark"] {
+  --bg-page: #181305;
+  --bg-page-dim: #120e03;
+  --bg-card: #251f10;
+  --bg-card-alt: #201b0c;
+  --bg-card-subtle: #1a1508;
+  --border: #3b3423;
+  --border-strong: #5d3f3d;
+
+  --text-primary: #ede1c9;
+  --text-secondary: #d8cdb5;
+  --text-muted: #9a8e7a;
+  --text-subtle: #ad8885;
+
+  --accent-primary: #ff3b3f;
+  --accent-primary-hover: #e02b2f;
+  --accent-secondary: #ffb3ad;
+  --accent-warm: #ffb3ad;
+
+  --accent-tier-pro: #ff3b3f;
+  --accent-tier-advint: #ede1c9;
+  --accent-tier-int: #ffb3ad;
+  --accent-tier-beginner: #9a8e7a;
+
+  --success: #4ade80;
+  --danger: #ff5451;
+  --glow-shadow: rgba(255, 59, 63, 0.35);
+  --header-bg: rgba(24, 19, 5, 0.92);
+
+  /* Navbar Tokens */
+  --nav-bg: rgba(24, 19, 5, 0.96);
+  --nav-border: #3b3423;
+  --nav-text: #ede1c9;
+  --nav-text-muted: #9a8e7a;
+  --nav-accent: #ff3b3f;
+  --nav-logo-bg: #ff3b3f;
+  --nav-logo-text: #ffffff;
+
+  /* Stats / Trust Strip Tokens */
+  --strip-bg: rgba(18, 14, 3, 0.85);
+  --strip-border: #3b3423;
+  --strip-text-label: #ad8885;
+  --strip-text-value: #ede1c9;
+  --strip-text-sub: #9a8e7a;
+  --strip-badge-bg: rgba(255, 59, 63, 0.15);
+  --strip-badge-border: rgba(255, 59, 63, 0.4);
+  --strip-badge-text: #ffb3ad;
+}
+
+:root[data-theme="garden-light"] {
+  /* Surfaces */
+  --bg-page: #FBF8ED;        /* soft beige-cream base */
+  --bg-page-dim: #F2EEDA;
+  --bg-card: #FFFFFF;        /* clean white card surface */
+  --bg-card-alt: #F7F4D5;    /* beige — secondary card tint */
+  --bg-card-subtle: #EDE9CE;
+  --border: #E5DFC4;         /* warm hairline border */
+  --border-strong: #D4CDAC;
+
+  /* Text */
+  --text-primary: #10241F;   /* near-midnight green-black, not pure black */
+  --text-secondary: #5C6B62; /* muted sage-gray */
+  --text-muted: #9CA79C;
+  --text-subtle: #738279;
+
+  /* Accent roles — assign by MEANING, not decoration */
+  --accent-primary: #1D3461;        /* sapphire — primary CTAs, links, active nav */
+  --accent-primary-hover: #16294D;
+  --accent-secondary: #2C4A7C;      /* royal blue — secondary buttons, info badges */
+
+  /* Meaningful Tier Ladder (Garden Light) */
+  --accent-tier-pro: #10586B;       /* midnight green — Pro Division tier tag */
+  --accent-tier-advint: #839958;    /* moss green — Adv. Intermediate tier tag */
+  --accent-tier-int: #D3968C;       /* rosy brown — Intermediate tier tag */
+  --accent-tier-beginner: #B9AE7E;  /* quicksand — Beginner tier tag */
+
+  --accent-warm: #D3968C;    /* rosy brown — highlight/notification dot */
+  --success: #839958;        /* moss green — win streak, positive Elo delta */
+  --danger: #A3453D;         /* muted brick — loss, negative Elo delta */
+  --glow-shadow: rgba(29, 52, 97, 0.25);
+  --header-bg: #722F37;
+
+  /* Navbar Tokens (Garnet Vintage Maroon + Cream + Brass) */
+  --nav-bg: #722F37;         /* Garnet — vintage maroon navbar background */
+  --nav-border: #5B242A;     /* Deep garnet border */
+  --nav-text: #FBF8ED;       /* Beige-cream — logo, nav links, default text */
+  --nav-text-muted: #E5DFC4; /* Soft cream muted text */
+  --nav-accent: #B08D57;     /* Brass/gold — active nav item underline & indicator */
+  --nav-logo-bg: #B08D57;    /* Brass logo tile */
+  --nav-logo-text: #10241F;  /* Dark text on brass logo */
+
+  /* Stats / Trust Strip Tokens (Garnet #722F37 matching Navbar) */
+  --strip-bg: var(--nav-bg);      /* Garnet #722F37 — same as navbar */
+  --strip-border: #5B242A;        /* Deep garnet border */
+  --strip-text-label: #D9C9A8;    /* Muted brass-cream for small uppercase labels */
+  --strip-text-value: #FBF8ED;    /* Cream for large stat values */
+  --strip-text-sub: #E5DFC4;      /* Soft cream for sub-labels */
+  --strip-badge-bg: #1D3461;      /* Deep sapphire for Club Beta badge */
+  --strip-badge-border: #B08D57;  /* Brass border */
+  --strip-badge-text: #FBF8ED;    /* Cream text */
+}
+
 /* ── Base Reset ── */
 *,
 *::before,
@@ -89,17 +198,315 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--font-sans);
-  background-color: var(--color-surface);
-  color: var(--color-on-surface);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   line-height: 1.6;
   min-height: 100dvh;
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 #root {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+}
+
+/* ── Garden Light Dynamic Surface & Text Mapping ── */
+[data-theme="garden-light"] body,
+[data-theme="garden-light"] .bg-\[\#181305\] {
+  background-color: var(--bg-page) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="garden-light"] .bg-\[\#120e03\] {
+  background-color: var(--bg-page-dim) !important;
+}
+
+[data-theme="garden-light"] .bg-\[\#251f10\],
+[data-theme="garden-light"] .bg-\[\#1f190a\] {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="garden-light"] .bg-\[\#201b0c\],
+[data-theme="garden-light"] .bg-\[\#1a1508\],
+[data-theme="garden-light"] .bg-\[\#140f02\] {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="garden-light"] .border-\[\#3b3423\],
+[data-theme="garden-light"] .border-\[\#2f2919\],
+[data-theme="garden-light"] .border-\[\#251f10\] {
+  border-color: var(--border) !important;
+}
+
+[data-theme="garden-light"] .border-\[\#5d3f3d\],
+[data-theme="garden-light"] .border-\[\#ad8885\] {
+  border-color: var(--border-strong) !important;
+}
+
+[data-theme="garden-light"] .text-\[\#ede1c9\] {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="garden-light"] .text-\[\#d8cdb5\] {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="garden-light"] .text-\[\#9a8e7a\],
+[data-theme="garden-light"] .text-\[\#ad8885\] {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="garden-light"] .text-\[\#ffb3ad\],
+[data-theme="garden-light"] .text-\[\#ffdad6\] {
+  color: var(--accent-primary) !important;
+}
+
+[data-theme="garden-light"] .bg-\[\#ff3b3f\] {
+  background-color: var(--accent-primary) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="garden-light"] .hover\:bg-\[\#e02b2f\]:hover {
+  background-color: var(--accent-primary-hover) !important;
+}
+
+[data-theme="garden-light"] .text-\[\#ff3b3f\] {
+  color: var(--accent-primary) !important;
+}
+
+[data-theme="garden-light"] .border-\[\#ff3b3f\] {
+  border-color: var(--accent-primary) !important;
+}
+
+[data-theme="garden-light"] .shadow-\[0_0_20px_rgba\(255\,59\,63\,0\.35\)\] {
+  box-shadow: 0 0 20px rgba(29, 52, 97, 0.25) !important;
+}
+
+[data-theme="garden-light"] ::-webkit-scrollbar-track {
+  background: var(--bg-page-dim);
+}
+
+[data-theme="garden-light"] ::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+}
+
+/* ── Navbar Header & Links ── */
+.navbar-header {
+  background-color: var(--nav-bg) !important;
+  border-color: var(--nav-border) !important;
+  color: var(--nav-text) !important;
+}
+
+.nav-link-animated {
+  position: relative;
+  display: inline-block;
+  color: var(--nav-text-muted) !important;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav-link-animated:hover {
+  color: var(--nav-text) !important;
+}
+
+.nav-link-animated.active {
+  color: var(--nav-text) !important;
+  font-weight: 700;
+}
+
+.nav-link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: var(--nav-accent);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-link-animated:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+.nav-link-animated.active::after {
+  width: 100%;
+  left: 0;
+}
+
+/* ============================================
+   Skill Tier Badge System (Semantic Color Ladder)
+   ============================================ */
+
+/* ── Classic Dark Tier Badges ── */
+:root[data-theme="classic-dark"] .tier-badge[data-tier="pro"],
+:root:not([data-theme="garden-light"]) .tier-badge[data-tier="pro"] {
+  background-color: rgba(255, 59, 63, 0.15);
+  border-color: #ff3b3f;
+  color: #ffb3ad;
+}
+
+:root[data-theme="classic-dark"] .tier-badge[data-tier="advanced_intermediate"],
+:root:not([data-theme="garden-light"]) .tier-badge[data-tier="advanced_intermediate"] {
+  background-color: rgba(74, 222, 128, 0.12);
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
+:root[data-theme="classic-dark"] .tier-badge[data-tier="intermediate"],
+:root:not([data-theme="garden-light"]) .tier-badge[data-tier="intermediate"] {
+  background-color: rgba(255, 179, 173, 0.12);
+  border-color: #ad8885;
+  color: #ede1c9;
+}
+
+:root[data-theme="classic-dark"] .tier-badge[data-tier="beginner"],
+:root:not([data-theme="garden-light"]) .tier-badge[data-tier="beginner"] {
+  background-color: rgba(154, 142, 122, 0.12);
+  border-color: #5d3f3d;
+  color: #9a8e7a;
+}
+
+/* ── Garden Light Tier Badges (Jewel-Tone Botanical) ── */
+[data-theme="garden-light"] .tier-badge[data-tier="pro"] {
+  background-color: #E0EFF3 !important;
+  border-color: #10586B !important;
+  color: #09343F !important;
+}
+
+[data-theme="garden-light"] .tier-badge[data-tier="advanced_intermediate"] {
+  background-color: #EEF3E4 !important;
+  border-color: #839958 !important;
+  color: #3D521F !important;
+}
+
+[data-theme="garden-light"] .tier-badge[data-tier="intermediate"] {
+  background-color: #FAECE9 !important;
+  border-color: #D3968C !important;
+  color: #733B31 !important;
+}
+
+[data-theme="garden-light"] .tier-badge[data-tier="beginner"] {
+  background-color: #F4F0E0 !important;
+  border-color: #B9AE7E !important;
+  color: #5C5328 !important;
+}
+
+/* ── Filter Pills (Division Tabs in Garden Light) ── */
+[data-theme="garden-light"] .filter-pill-all {
+  border-color: #D4CDAC !important;
+  color: #5C6B62 !important;
+  background-color: #FFFFFF !important;
+}
+[data-theme="garden-light"] .filter-pill-all.active {
+  background-color: #1D3461 !important;
+  border-color: #1D3461 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="garden-light"] .filter-pill-pro {
+  background-color: rgba(16, 88, 107, 0.08) !important;
+  border-color: rgba(16, 88, 107, 0.45) !important;
+  color: #09343F !important;
+}
+[data-theme="garden-light"] .filter-pill-pro:hover {
+  background-color: rgba(16, 88, 107, 0.16) !important;
+  border-color: #10586B !important;
+}
+[data-theme="garden-light"] .filter-pill-pro.active {
+  background-color: #10586B !important;
+  border-color: #10586B !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="garden-light"] .filter-pill-advanced_intermediate {
+  background-color: rgba(131, 153, 88, 0.1) !important;
+  border-color: rgba(131, 153, 88, 0.45) !important;
+  color: #3D521F !important;
+}
+[data-theme="garden-light"] .filter-pill-advanced_intermediate:hover {
+  background-color: rgba(131, 153, 88, 0.2) !important;
+  border-color: #839958 !important;
+}
+[data-theme="garden-light"] .filter-pill-advanced_intermediate.active {
+  background-color: #839958 !important;
+  border-color: #839958 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="garden-light"] .filter-pill-intermediate {
+  background-color: rgba(211, 150, 140, 0.12) !important;
+  border-color: rgba(211, 150, 140, 0.45) !important;
+  color: #733B31 !important;
+}
+[data-theme="garden-light"] .filter-pill-intermediate:hover {
+  background-color: rgba(211, 150, 140, 0.24) !important;
+  border-color: #D3968C !important;
+}
+[data-theme="garden-light"] .filter-pill-intermediate.active {
+  background-color: #D3968C !important;
+  border-color: #D3968C !important;
+  color: #10241F !important;
+}
+
+[data-theme="garden-light"] .filter-pill-beginner {
+  background-color: rgba(185, 174, 126, 0.14) !important;
+  border-color: rgba(185, 174, 126, 0.45) !important;
+  color: #5C5328 !important;
+}
+[data-theme="garden-light"] .filter-pill-beginner:hover {
+  background-color: rgba(185, 174, 126, 0.28) !important;
+  border-color: #B9AE7E !important;
+}
+[data-theme="garden-light"] .filter-pill-beginner.active {
+  background-color: #B9AE7E !important;
+  border-color: #B9AE7E !important;
+  color: #10241F !important;
+}
+
+/* ── Specialty Leader Cards in Garden Light ── */
+[data-theme="garden-light"] .specialty-card-highest {
+  background-color: #FFFFFF !important;
+  border: 2px solid #1D3461 !important;
+  box-shadow: 0 4px 20px rgba(29, 52, 97, 0.12) !important;
+}
+[data-theme="garden-light"] .specialty-card-highest .card-title {
+  color: #1D3461 !important;
+}
+
+[data-theme="garden-light"] .specialty-card-wins {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E5DFC4 !important;
+  border-left: 5px solid #2C4A7C !important;
+  box-shadow: 0 2px 12px rgba(44, 74, 124, 0.08) !important;
+}
+[data-theme="garden-light"] .specialty-card-wins .card-title {
+  color: #2C4A7C !important;
+}
+
+[data-theme="garden-light"] .specialty-card-winrate {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E5DFC4 !important;
+  border-left: 5px solid #839958 !important;
+  box-shadow: 0 2px 12px rgba(131, 153, 88, 0.08) !important;
+}
+[data-theme="garden-light"] .specialty-card-winrate .card-title {
+  color: #3D521F !important;
+}
+
+[data-theme="garden-light"] .specialty-card-streak {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E5DFC4 !important;
+  border-left: 5px solid #D3968C !important;
+  box-shadow: 0 2px 12px rgba(211, 150, 140, 0.08) !important;
+}
+[data-theme="garden-light"] .specialty-card-streak .card-title {
+  color: #733B31 !important;
 }
 
 /* ── Typography Utilities ── */

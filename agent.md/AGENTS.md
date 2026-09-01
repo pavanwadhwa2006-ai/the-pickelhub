@@ -34,6 +34,7 @@ Rules while in Builder mode:
   - Reuse components; don't duplicate UI logic.
   - Use meaningful, descriptive naming.
   - Any change to rating logic must ship with tests.
+  - **Standing CI Guardrail Requirement:** Every milestone must pass `npm run ci:guardrails` (`node scripts/ci-guardrails.js`), ensuring zero mock data patterns in production files and zero unwired/dead interactive buttons or links across all UI views.
 - Work only on the current milestone's scope. If you discover unrelated bugs or improvements, note them in `## Known Issues / Deviations` in `MEMORY.md` rather than fixing them mid-milestone, unless they block the current task.
 - Do not mark anything as done yet. Builder mode ends when you believe the tasks are implemented — verification is a separate mode, not your own call to make.
 

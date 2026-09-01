@@ -12,6 +12,7 @@ import api from '../services/api';
 import PageTransition from '../components/PageTransition';
 import TiltCard from '../components/TiltCard';
 import AnimatedNumber from '../components/AnimatedNumber';
+import TierBadge from '../components/TierBadge';
 
 const LeaderboardPage = () => {
   // Leaderboard Data State
@@ -166,9 +167,9 @@ const LeaderboardPage = () => {
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* 1. Highest Rated */}
-              <TiltCard className="p-6 bg-[#251f10] border-2 border-[#ff3b3f]/70 shadow-[0_0_20px_rgba(255,59,63,0.15)] hover-lift">
+              <TiltCard className="specialty-card-highest p-6 bg-[#251f10] border-2 border-[#ff3b3f]/70 shadow-[0_0_20px_rgba(255,59,63,0.15)] hover-lift">
                 <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-bold tracking-widest text-[#ffb3ad] uppercase">
+                  <span className="card-title text-[10px] font-bold tracking-widest text-[#ffb3ad] uppercase">
                     👑 HIGHEST RATED
                   </span>
                   <span className="w-2 h-2 bg-[#ff3b3f] rounded-full animate-ping" />
@@ -180,14 +181,19 @@ const LeaderboardPage = () => {
                 <div className="font-bold text-sm text-[#ede1c9] truncate">
                   {specialties.highestRated?.name || 'Unclaimed'}
                 </div>
-                <div className="text-[10px] text-[#ad8885] font-mono mt-0.5">
-                  {specialties.highestRated?.playerId} • Tier: {specialties.highestRated?.category?.toUpperCase()}
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-[10px] text-[#ad8885] font-mono">
+                    {specialties.highestRated?.playerId}
+                  </span>
+                  {specialties.highestRated?.category && (
+                    <TierBadge category={specialties.highestRated.category} size="sm" />
+                  )}
                 </div>
               </TiltCard>
 
               {/* 2. Most Wins */}
-              <TiltCard className="p-6 bg-[#201b0c] border border-[#5d3f3d] hover:border-[#ad8885] hover-lift">
-                <div className="text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
+              <TiltCard className="specialty-card-wins p-6 bg-[#201b0c] border border-[#5d3f3d] hover:border-[#ad8885] hover-lift">
+                <div className="card-title text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
                   🏆 MOST WINS
                 </div>
                 <div className="font-['Playfair_Display'] text-3xl font-bold text-[#ede1c9] mb-1">
@@ -203,8 +209,8 @@ const LeaderboardPage = () => {
               </TiltCard>
 
               {/* 3. Top Win % (min 5 matches) */}
-              <TiltCard className="p-6 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] hover-lift">
-                <div className="text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
+              <TiltCard className="specialty-card-winrate p-6 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] hover-lift">
+                <div className="card-title text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
                   🎯 TOP WIN RATE (MIN 5)
                 </div>
                 <div className="font-['Playfair_Display'] text-3xl font-bold text-[#ede1c9] mb-1">
@@ -220,8 +226,8 @@ const LeaderboardPage = () => {
               </TiltCard>
 
               {/* 4. Longest Winning Streak */}
-              <TiltCard className="p-6 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] hover-lift">
-                <div className="text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
+              <TiltCard className="specialty-card-streak p-6 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] hover-lift">
+                <div className="card-title text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
                   🔥 ACTIVE STREAK
                 </div>
                 <div className="font-['Playfair_Display'] text-3xl font-bold text-[#ede1c9] mb-1">
@@ -241,22 +247,26 @@ const LeaderboardPage = () => {
 
         {/* Filters, Search & Sort Control Bar */}
         <div className="p-6 bg-[#201b0c] border border-[#3b3423] mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          {/* Category Tabs */}
+          {/* Category Tabs with Jewel-Tone Styling */}
           <div className="flex flex-wrap items-center gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                type="button"
-                onClick={() => setCategory(cat.value)}
-                className={`px-3.5 py-1.5 text-xs font-bold tracking-wider uppercase border transition-all cursor-pointer ${
-                  category === cat.value
-                    ? 'bg-[#ff3b3f] text-white border-[#ff3b3f] shadow-[0_0_12px_rgba(255,59,63,0.3)]'
-                    : 'bg-[#181305] text-[#9a8e7a] border-[#3b3423] hover:border-[#ad8885] hover:text-[#ede1c9]'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const isActive = category === cat.value;
+              const pillClass = `filter-pill-${cat.value.toLowerCase()}`;
+              return (
+                <button
+                  key={cat.value}
+                  type="button"
+                  onClick={() => setCategory(cat.value)}
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wider uppercase border transition-all cursor-pointer ${pillClass} ${
+                    isActive
+                      ? 'active bg-[#ff3b3f] text-white border-[#ff3b3f] shadow-[0_0_12px_rgba(255,59,63,0.3)]'
+                      : 'bg-[#181305] text-[#9a8e7a] border-[#3b3423] hover:border-[#ad8885] hover:text-[#ede1c9]'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Search & Sort Dropdowns */}
@@ -360,9 +370,7 @@ const LeaderboardPage = () => {
 
                       {/* Tier Division */}
                       <td className="py-4 px-6">
-                        <span className="px-2.5 py-1 bg-[#181305] border border-[#3b3423] text-[10px] font-bold tracking-wider uppercase text-[#ffdad6]">
-                          {p.category?.toUpperCase() || 'INTERMEDIATE'}
-                        </span>
+                        <TierBadge category={p.category} />
                       </td>
 
                       {/* Elo Rating */}

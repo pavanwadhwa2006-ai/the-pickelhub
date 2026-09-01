@@ -16,6 +16,8 @@ const healthRoutes = require('./routes/healthRoutes');
 const authRoutes = require('./routes/authRoutes');
 const playerRoutes = require('./routes/playerRoutes');
 const matchRoutes = require('./routes/matchRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -51,10 +53,8 @@ app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/players', playerRoutes);
 app.use('/api/matches', matchRoutes);
-
-// Future route mounts will go here:
-// app.use('/api/admin', adminRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ---------------------
 // Error Handling

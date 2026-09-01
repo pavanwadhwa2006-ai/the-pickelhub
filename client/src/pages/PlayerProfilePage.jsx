@@ -13,6 +13,7 @@ import PageTransition from '../components/PageTransition';
 import TiltCard from '../components/TiltCard';
 import AnimatedNumber from '../components/AnimatedNumber';
 import RevealOnScroll from '../components/RevealOnScroll';
+import TierBadge from '../components/TierBadge';
 
 const PlayerProfilePage = () => {
   const { id } = useParams();
@@ -109,8 +110,16 @@ const PlayerProfilePage = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="flex items-center gap-6">
               {/* Profile Avatar / Initial with glow on hover */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#181305] border-2 border-[#5d3f3d] hover:border-[#ff3b3f] hover:shadow-[0_0_20px_rgba(255,59,63,0.4)] flex items-center justify-center text-3xl sm:text-4xl font-bold font-['Playfair_Display'] text-[#ff3b3f] shrink-0 transition-all duration-300">
-                {player.name.charAt(0).toUpperCase()}
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#181305] border-2 border-[#5d3f3d] hover:border-[#ff3b3f] hover:shadow-[0_0_20px_rgba(255,59,63,0.4)] flex items-center justify-center text-3xl sm:text-4xl font-bold font-['Playfair_Display'] text-[#ff3b3f] shrink-0 transition-all duration-300">
+                {player.profilePhoto ? (
+                  <img
+                    src={player.profilePhoto}
+                    alt={player.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  player.name.charAt(0).toUpperCase()
+                )}
               </div>
 
               <div>
@@ -141,9 +150,9 @@ const PlayerProfilePage = () => {
                 <AnimatedNumber value={player.currentRating} duration={1000} />
                 <span className="text-xs font-sans font-normal text-[#ffb3ad]">Elo</span>
               </div>
-              <span className="mt-2 text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 bg-[#2f2919] text-[#ede1c9] border border-[#5d3f3d]">
-                {player.category.toUpperCase()}
-              </span>
+              <div className="mt-2">
+                <TierBadge category={player.category} />
+              </div>
             </div>
           </div>
         </div>

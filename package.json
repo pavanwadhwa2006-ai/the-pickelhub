@@ -9,7 +9,8 @@
     "dev:client": "npm --prefix client run dev",
     "build": "npm --prefix client run build",
     "test": "npm --prefix server test",
-    "lint": "npm --prefix server run lint && npm --prefix client run lint"
+    "lint": "npm --prefix server run lint && npm --prefix client run lint && npm run ci:guardrails",
+    "ci:guardrails": "node scripts/ci-guardrails.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

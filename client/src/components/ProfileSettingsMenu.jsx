@@ -1,0 +1,326 @@
+/**
+ * ProfileSettingsMenu Component
+ *
+ * User Profile & Settings dropdown menu with:
+ * 1. Profile Picture upload with client-side validation, live preview, loading ring, and delete link.
+ * 2. Radio-style theme selector for "Classic dark" (default) and "Garden light".
+ * 3. Quick athlete navigation links and logout action.
+ */
+
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
+import { useTheme } from '../context/useTheme';
+import { THEMES } from '../context/themeConstants';
+import api from '../services/api';
+
+const ProfileSettingsMenu = () => {
+  const { user, player, logout, refreshProfile } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+
+  const menuRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getInitials = (name) => {
+    if (!name) return 'P';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    // Client-side validation
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setErrorMsg('Invalid format. Only PNG, JPEG, or WEBP images are allowed.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg('Image size exceeds 5MB limit.');
+      return;
+    }
+
+    // Live local preview
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      const res = await api.post('/profile/photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data.success) {
+        await refreshProfile();
+        setSuccessMsg('Photo updated ✓');
+        setTimeout(() => setSuccessMsg(null), 2500);
+      }
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || 'Failed to upload photo.');
+      setPreviewUrl(null);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setUploading(true);
+
+    try {
+      const res = await api.delete('/profile/photo');
+      if (res.data.success) {
+        setPreviewUrl(null);
+        await refreshProfile();
+        setSuccessMsg('Photo removed ✓');
+        setTimeout(() => setSuccessMsg(null), 2500);
+      }
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || 'Failed to remove photo.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+    setIsOpen(false);
+  };
+
+  const currentPhoto = previewUrl || player?.profilePhoto;
+
+  return (
+    <div className="relative" ref={menuRef}>
+      {/* Navbar Avatar Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 p-1 border transition-all cursor-pointer rounded-full group focus:outline-none shadow-sm hover:brightness-110"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          borderColor: 'var(--nav-accent)',
+        }}
+        aria-label="User Profile & Settings Menu"
+        aria-expanded={isOpen}
+      >
+        <div
+          className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center font-bold text-xs font-mono shrink-0 shadow-md"
+          style={{ backgroundColor: 'var(--nav-accent)', color: 'var(--nav-logo-text)' }}
+        >
+          {currentPhoto ? (
+            <img
+              src={currentPhoto}
+              alt={player?.name || 'Athlete'}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            getInitials(player?.name || user?.email)
+          )}
+        </div>
+        <span
+          className="text-xs font-bold hidden sm:inline-block pr-2 transition-colors"
+          style={{ color: 'var(--nav-text)' }}
+        >
+          {player?.name?.split(' ')[0] || user?.email?.split('@')[0]}
+        </span>
+      </button>
+
+      {/* Dropdown Menu Modal */}
+      {isOpen && (
+        <div className="absolute right-0 mt-3 w-80 bg-[#1f190a] border-2 border-[#3b3423] shadow-2xl p-6 z-50 animate-fade-in divide-y divide-[#2f2919]">
+          {/* Header Profile Section with Avatar & Upload */}
+          <div className="pb-5 flex flex-col items-center text-center">
+            {/* Avatar Circle with Camera Overlay */}
+            <div className="relative mb-3 group">
+              <div
+                className={`w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-2xl shadow-xl relative ${
+                  uploading ? 'ring-4 ring-[#ff3b3f] ring-offset-2 animate-pulse' : ''
+                }`}
+              >
+                {currentPhoto ? (
+                  <img
+                    src={currentPhoto}
+                    alt={player?.name || 'Athlete'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  getInitials(player?.name || user?.email)
+                )}
+              </div>
+
+              {/* Camera Icon Overlay */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                title="Change profile picture"
+                className="absolute bottom-0 right-0 w-7 h-7 bg-[#181305] border border-[#ff3b3f] hover:bg-[#ff3b3f] text-white rounded-full flex items-center justify-center transition-colors shadow-md cursor-pointer disabled:opacity-50"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+
+            {/* Remove Photo Action */}
+            {currentPhoto && !uploading && (
+              <button
+                type="button"
+                onClick={handleRemovePhoto}
+                className="text-[10px] text-[#ff5451] hover:text-white font-bold uppercase underline cursor-pointer mb-2"
+              >
+                Remove photo
+              </button>
+            )}
+
+            {/* Inline Notifications */}
+            {errorMsg && (
+              <div className="text-[11px] text-[#ff5451] font-semibold mb-2">
+                {errorMsg}
+              </div>
+            )}
+            {successMsg && (
+              <div className="text-[11px] text-[#4ade80] font-semibold mb-2">
+                {successMsg}
+              </div>
+            )}
+
+            {/* Identity Info */}
+            <h4 className="font-['Playfair_Display'] text-lg font-bold text-[#ede1c9]">
+              {player?.name || user?.email?.split('@')[0]}
+            </h4>
+            <div className="text-[10px] text-[#ad8885] font-mono mt-0.5">
+              {player?.playerId} • {player?.currentRating || 1000} Elo
+            </div>
+            <span className="text-[10px] text-[#9a8e7a] truncate max-w-full block mt-0.5">
+              {user?.email}
+            </span>
+          </div>
+
+          {/* Theme Selector (Radio List per Instructions) */}
+          <div className="py-4">
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase block mb-3">
+              THEME SELECTION
+            </span>
+            <div className="space-y-2">
+              <label
+                className={`flex items-center justify-between p-2.5 border text-xs font-bold uppercase cursor-pointer transition-all ${
+                  theme === THEMES.CLASSIC_DARK
+                    ? 'bg-[#181305] border-[#ff3b3f] text-[#ffdad6] shadow-[0_0_10px_rgba(255,59,63,0.2)]'
+                    : 'bg-[#140f02] border-[#3b3423] text-[#9a8e7a] hover:border-[#ad8885]'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="radio"
+                    name="theme"
+                    checked={theme === THEMES.CLASSIC_DARK}
+                    onChange={() => setTheme(THEMES.CLASSIC_DARK)}
+                    className="accent-[#ff3b3f] cursor-pointer"
+                  />
+                  <span>Classic dark</span>
+                </div>
+                <span className="text-[9px] text-[#ad8885] font-mono">MAROON</span>
+              </label>
+
+              <label
+                className={`flex items-center justify-between p-2.5 border text-xs font-bold uppercase cursor-pointer transition-all ${
+                  theme === THEMES.GARDEN_LIGHT
+                    ? 'bg-[#181305] border-[#ff3b3f] text-[#ffdad6] shadow-[0_0_10px_rgba(255,59,63,0.2)]'
+                    : 'bg-[#140f02] border-[#3b3423] text-[#9a8e7a] hover:border-[#ad8885]'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="radio"
+                    name="theme"
+                    checked={theme === THEMES.GARDEN_LIGHT}
+                    onChange={() => setTheme(THEMES.GARDEN_LIGHT)}
+                    className="accent-[#ff3b3f] cursor-pointer"
+                  />
+                  <span>Garden light</span>
+                </div>
+                <span className="text-[9px] text-[#839958] font-mono">BOTANICAL</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Quick Actions & Logout */}
+          <div className="pt-4 space-y-2">
+            <Link
+              to="/dashboard"
+              onClick={() => setIsOpen(false)}
+              className="w-full py-2 px-3 bg-[#181305] hover:bg-[#251f10] border border-[#3b3423] hover:border-[#ad8885] text-xs font-bold text-[#ede1c9] uppercase tracking-wider block text-center transition-colors"
+            >
+              DASHBOARD
+            </Link>
+
+            {player?.playerId && (
+              <Link
+                to={`/players/${player.playerId}`}
+                onClick={() => setIsOpen(false)}
+                className="w-full py-2 px-3 bg-[#181305] hover:bg-[#251f10] border border-[#3b3423] hover:border-[#ad8885] text-xs font-bold text-[#ede1c9] uppercase tracking-wider block text-center transition-colors"
+              >
+                VIEW PUBLIC PROFILE
+              </Link>
+            )}
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full py-2 px-3 bg-[#251f10] hover:bg-[#93000a]/40 border border-[#5d3f3d] hover:border-[#ff5451] text-xs font-bold text-[#ffdad6] uppercase tracking-wider block text-center transition-colors cursor-pointer"
+            >
+              SIGN OUT
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProfileSettingsMenu;

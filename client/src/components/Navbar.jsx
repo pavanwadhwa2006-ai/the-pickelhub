@@ -7,20 +7,14 @@
  */
 
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import ProfileSettingsMenu from './ProfileSettingsMenu';
 
 const Navbar = () => {
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-    setMobileMenuOpen(false);
-  };
 
   const navLinks = [
     { label: 'HOME', path: '/' },
@@ -36,21 +30,33 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#181305]/90 backdrop-blur-lg border-b border-[#3b3423] transition-colors">
+    <header
+      className="navbar-header sticky top-0 z-50 backdrop-blur-lg border-b transition-colors duration-200"
+      style={{ backgroundColor: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}
+    >
       <div className="max-w-[1440px] mx-auto px-6 sm:px-10 md:px-20 h-20 flex items-center justify-between">
         {/* Brand Logo with micro-interaction */}
         <Link
           to="/"
           className="flex items-center gap-3 group focus:outline-none"
         >
-          <div className="w-8 h-8 bg-[#ff3b3f] flex items-center justify-center text-white font-bold text-lg font-mono group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(255,59,63,0.6)] transition-all duration-300">
+          <div
+            className="w-8 h-8 flex items-center justify-center font-bold text-lg font-mono group-hover:scale-105 transition-all duration-300 shadow-md"
+            style={{ backgroundColor: 'var(--nav-logo-bg)', color: 'var(--nav-logo-text)' }}
+          >
             P
           </div>
           <div className="flex flex-col">
-            <span className="font-['Playfair_Display'] text-xl sm:text-2xl font-bold tracking-tight text-[#ede1c9] group-hover:text-white transition-colors">
+            <span
+              className="font-['Playfair_Display'] text-xl sm:text-2xl font-bold tracking-tight transition-colors"
+              style={{ color: 'var(--nav-text)' }}
+            >
               THE PICKLEHUB
             </span>
-            <span className="text-[10px] tracking-[0.25em] text-[#ad8885] uppercase font-semibold">
+            <span
+              className="text-[10px] tracking-[0.25em] uppercase font-semibold"
+              style={{ color: 'var(--nav-accent)' }}
+            >
               RATING & LEAGUE
             </span>
           </div>
@@ -65,7 +71,7 @@ const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 className={`nav-link-animated py-2 text-xs font-bold tracking-[0.2em] transition-colors ${
-                  active ? 'text-white active' : 'text-[#9a8e7a] hover:text-[#ede1c9]'
+                  active ? 'active' : ''
                 }`}
               >
                 {link.label}
@@ -74,37 +80,30 @@ const Navbar = () => {
           })}
         </nav>
 
-        {/* Desktop User Actions with smooth button states */}
+        {/* Desktop User Actions */}
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-end">
-                <span className="text-xs font-medium text-[#ede1c9]">
-                  {user?.email}
-                </span>
-                <span className="text-[10px] tracking-wider uppercase px-1.5 py-0.5 bg-[#251f10] border border-[#3b3423] text-[#ffb3ad] font-bold">
-                  {user?.role}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-4 py-2 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] bg-[#251f10] hover:bg-[#3b3423] hover:text-white border border-[#3b3423] hover:border-[#ad8885] transition-all cursor-pointer"
-              >
-                LOGOUT
-              </button>
-            </div>
+            <ProfileSettingsMenu />
           ) : (
             <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                className="px-5 py-2 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] hover:text-white border border-[#3b3423] hover:border-[#ad8885] bg-[#1a1508] hover:bg-[#251f10] transition-all"
+                className="px-5 py-2 text-xs font-bold tracking-[0.15em] uppercase transition-all hover:brightness-110"
+                style={{
+                  color: 'var(--nav-text)',
+                  border: '1px solid var(--nav-accent)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                }}
               >
                 LOGIN
               </Link>
               <Link
                 to="/register"
-                className="px-5 py-2 text-xs font-bold tracking-[0.15em] uppercase text-white bg-[#ff3b3f] hover:bg-[#e02b2f] transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)]"
+                className="px-5 py-2 text-xs font-bold tracking-[0.15em] uppercase transition-all hover:brightness-110 shadow-md"
+                style={{
+                  backgroundColor: 'var(--nav-accent)',
+                  color: 'var(--nav-logo-text)',
+                }}
               >
                 JOIN THE CLUB
               </Link>
@@ -116,7 +115,8 @@ const Navbar = () => {
         <button
           type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 text-[#ede1c9] hover:text-white focus:outline-none transition-colors"
+          className="md:hidden p-2 focus:outline-none transition-colors"
+          style={{ color: 'var(--nav-text)' }}
           aria-label="Toggle menu"
         >
           <svg
@@ -146,47 +146,50 @@ const Navbar = () => {
 
       {/* Mobile Drawer Menu with smooth animation */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#181305] border-b border-[#3b3423] px-6 py-6 animate-fade-in">
+        <div
+          className="md:hidden border-b px-6 py-6 animate-fade-in"
+          style={{ backgroundColor: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}
+        >
           <div className="flex flex-col gap-4">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`text-sm font-bold tracking-[0.15em] py-2 border-b border-[#251f10] transition-colors ${
-                  isActive(link.path) ? 'text-[#ff3b3f]' : 'text-[#ede1c9] hover:text-white'
+                className={`text-sm font-bold tracking-[0.15em] py-2 border-b transition-colors ${
+                  isActive(link.path) ? 'font-bold' : 'opacity-80 hover:opacity-100'
                 }`}
+                style={{
+                  color: isActive(link.path) ? 'var(--nav-accent)' : 'var(--nav-text)',
+                  borderColor: 'var(--nav-border)',
+                }}
               >
                 {link.label}
               </Link>
             ))}
 
-            {isAuthenticated ? (
-              <div className="pt-4 flex flex-col gap-3">
-                <div className="text-xs text-[#9a8e7a]">
-                  Logged in as <span className="text-[#ede1c9] font-bold">{user?.email}</span> ({user?.role})
-                </div>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="w-full py-3 text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] bg-[#251f10] hover:bg-[#3b3423] border border-[#3b3423] transition-all"
-                >
-                  LOGOUT
-                </button>
-              </div>
-            ) : (
+            {!isAuthenticated && (
               <div className="pt-4 flex flex-col gap-3">
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3 text-center text-xs font-bold tracking-[0.15em] uppercase text-[#ede1c9] border border-[#3b3423] bg-[#1a1508] hover:bg-[#251f10] transition-all"
+                  className="w-full py-3 text-center text-xs font-bold tracking-[0.15em] uppercase transition-all"
+                  style={{
+                    color: 'var(--nav-text)',
+                    border: '1px solid var(--nav-accent)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                  }}
                 >
                   LOGIN
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3 text-center text-xs font-bold tracking-[0.15em] uppercase text-white bg-[#ff3b3f] hover:bg-[#e02b2f] transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)]"
+                  className="w-full py-3 text-center text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-md"
+                  style={{
+                    backgroundColor: 'var(--nav-accent)',
+                    color: 'var(--nav-logo-text)',
+                  }}
                 >
                   JOIN THE CLUB
                 </Link>

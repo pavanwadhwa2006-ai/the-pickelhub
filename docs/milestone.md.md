@@ -140,24 +140,24 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 **Goal:** The core trust mechanism of the platform — atomic, auditable match approval.
 
 **Tasks**
-- [ ] Build Admin "Pending Approvals" screen (`GET /api/admin/matches/pending`)
-- [ ] Implement `POST /api/admin/matches/:id/approve`:
-  - [ ] Guard: abort if `match.status !== 'PENDING_APPROVAL'` (double-processing prevention, Section 12.2)
-  - [ ] Run Elo calculation, update player ratings, append `RatingHistory`, update stats/streaks, recalc categories, update leaderboard — as a single MongoDB transaction (Section 12.1)
-- [ ] Implement `POST /api/admin/matches/:id/reject` with required rejection reason, status → `REJECTED`, no rating side effects
-- [ ] Implement `POST /api/admin/matches/direct` for admin direct entry (auto-`APPROVED`, bypasses queue)
-- [ ] Add category-crossing notification trigger
-- [ ] Build `AuditLog` schema (Section 10.6) and write an audit entry for every approval/rejection
+- [x] Build Admin "Pending Approvals" screen (`GET /api/admin/matches/pending`)
+- [x] Implement `POST /api/admin/matches/:id/approve`:
+  - [x] Guard: abort if `match.status !== 'PENDING_APPROVAL'` (double-processing prevention, Section 12.2)
+  - [x] Run Elo calculation, update player ratings, append `RatingHistory`, update stats/streaks, recalc categories, update leaderboard — as a single MongoDB transaction (Section 12.1)
+- [x] Implement `POST /api/admin/matches/:id/reject` with required rejection reason, status → `REJECTED`, no rating side effects
+- [x] Implement `POST /api/admin/matches/direct` for admin direct entry (auto-`APPROVED`, bypasses queue)
+- [x] Add category-crossing notification trigger
+- [x] Build `AuditLog` schema (Section 10.6) and write an audit entry for every approval/rejection
 
 **Deliverables**
 - End-to-end approve/reject flow with atomic DB transactions and audit trail
 
 **Acceptance Checklist (ties to DoD #4, #5, #6, #7)**
-- [ ] Admin can view, approve, or reject from an admin-only route
-- [ ] Approving updates ratings, categories, stats, leaderboard, and rating history atomically
-- [ ] Rejecting preserves the record as `REJECTED`, stores the reason, updates nothing else
-- [ ] Concurrent-approval race condition tested and blocked (Section 12.3)
-- [ ] Every admin action has a matching audit log entry (Rule G)
+- [x] Admin can view, approve, or reject from an admin-only route
+- [x] Approving updates ratings, categories, stats, leaderboard, and rating history atomically
+- [x] Rejecting preserves the record as `REJECTED`, stores the reason, updates nothing else
+- [x] Concurrent-approval race condition tested and blocked (Section 12.3)
+- [x] Every admin action has a matching audit log entry (Rule G)
 
 ---
 

@@ -28,12 +28,12 @@ Two other files this works alongside:
 
 > Overwrite this section every time. It should always describe *right now*, not history.
 
-- **Last completed milestone:** Milestone 6 — Leaderboard (Sprint 6)
+- **Last completed milestone:** Milestone 7 — Admin Approvals Queue (Sprint 7)
 - **In progress:** None
-- **Next milestone to start:** Milestone 7 — Admin Approvals Queue (Sprint 7)
-- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0/0, Vite 103 modules); Server test suites pass (82/82 tests ok); Live, filterable Leaderboard operational (`GET /api/players`, `GET /api/players/leaders`, `GET /api/players/compare`, specialty leader showcase cards, multi-sort, category filtering, search, interactive head-to-head compare modal with expected win probability engine, active-only player filtering).
+- **Next milestone to start:** Milestone 8 — Tournaments (Sprint 8)
+- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0/0, Vite 510 modules); Server test suites pass (94/94 tests ok); Full multi-document ACID transaction engine operational on MongoDB Atlas replica set; Standing CI guardrails checking mock data and dead interactive elements (`npm run ci:guardrails`); Framer Motion-powered Admin Control Panel live at `/admin` with live pending badges, approval/reject queue cards, animated rejection modal, direct official match recording, and governance audit trail.
 - **Environment/deploy state:** Local development (`client: localhost:5173`, `server: localhost:5000`)
-- **Last updated:** 2026-08-22 by AI Coding Agent (Milestone 6 Complete)
+- **Last updated:** 2026-09-01 by AI Coding Agent (Milestone 7 Admin Approvals Queue Complete)
 
 ---
 
@@ -350,7 +350,137 @@ Two other files this works alongside:
 - [x] Mobile layout verified (Rule I)
 
 **Resume point for next agent:**
-- Start **Milestone 7 — Admin Approvals Queue (Sprint 7)**: The core trust mechanism of the platform — `GET /api/admin/matches/pending`, `POST /api/admin/matches/:id/approve` (single atomic MongoDB transaction updating player ratings, appending `RatingHistory`, updating stats/streaks, and recalculating categories), `POST /api/admin/matches/:id/reject`, `POST /api/admin/matches/direct`, and `AuditLog` schema.
+- Milestone 6 completed.
+
+---
+
+### Milestone 6.5 — Garden Light Theme & Vercel Blob Profile Photo Upload
+- **Status:** Completed
+- **Date:** 2026-08-22
+- **Session/Agent:** Theme & Avatar Sprint
+
+**What was built:**
+- **"Garden Light" Jewel-Tone Botanical Theme (`data-theme="garden-light"`)**:
+  - Soft beige-cream base (`#FBF8ED`), clean white cards (`#FFFFFF`), beige stat tile tint (`#F7F4D5`), warm hairline border (`#E5DFC4`), near-midnight green-black text (`#10241F`), muted sage-gray text (`#5C6B62`).
+  - Sapphire primary brand accent (`#1D3461`), sapphire hover (`#16294D`), royal blue secondary (`#2C4A7C`).
+  - Meaningful Skill Tier Ladder: Beginner = Quicksand (`#B9AE7E`), Intermediate = Rosy brown (`#D3968C`), Adv. Intermediate = Moss green (`#839958`), Pro Division = Midnight green (`#10586B`).
+  - Complete semantic CSS mapping across all layouts and component classes.
+- **Theme Engine & Controls**:
+  - `ThemeContext.jsx`, `themeConstants.js`, `useTheme.js` with `localStorage` persistence.
+  - Radio-style theme selector inside `ProfileSettingsMenu.jsx` for "Classic dark" vs "Garden light".
+- **Vercel Blob Avatar Upload Pipeline**:
+  - `server/src/services/storageService.js`: Uploads image buffer to Vercel Blob (`@vercel/blob`) with automatic fallback data-URI in offline/test environments, and deletes blobs on removal.
+  - `server/src/controllers/profileController.js` & `server/src/routes/profileRoutes.js`: `POST /api/profile/photo` (5MB max, format validation for PNG/JPEG/WEBP) and `DELETE /api/profile/photo`.
+  - `Player.profilePhoto` established as the canonical **Single Source of Truth** (no duplicate field on `User`).
+  - `ProfileSettingsMenu.jsx`: Camera icon overlay on avatar, client-side validation, live object URL preview, loading ring, inline error state, and "Remove photo" link.
+  - Dynamic avatar rendering in `Navbar.jsx`, `DashboardPage.jsx`, and `PlayerProfilePage.jsx`.
+- **Testing & Documentation**:
+  - `server/test/profile.test.js` (5 test cases passing).
+  - Appended Garden Light spec to `docs/DESIGN.md`.
+
+**Files touched:**
+- `server/src/services/storageService.js` (NEW)
+- `server/src/controllers/profileController.js` (NEW)
+- `server/src/routes/profileRoutes.js` (NEW)
+- `server/src/server.js`
+- `server/test/profile.test.js` (NEW)
+- `server/package.json`
+- `client/src/context/themeConstants.js` (NEW)
+- `client/src/context/ThemeContext.jsx` (NEW)
+- `client/src/context/useTheme.js` (NEW)
+- `client/src/components/ProfileSettingsMenu.jsx` (NEW)
+- `client/src/components/Navbar.jsx`
+- `client/src/pages/DashboardPage.jsx`
+- `client/src/pages/PlayerProfilePage.jsx`
+- `client/src/index.css`
+- `client/src/main.jsx`
+- `docs/DESIGN.md`
+- `docs/MEMORY.md`
+
+**Tests run and results:**
+- `npm test` (full backend regression) — 87/87 pass (auth + player + duplicate_email + rating + match + leaderboard + profile)
+- `npm run lint` (client oxlint) — 0 errors, 0 warnings (32 files)
+- `npm run build` (client vite) — built in 828ms with 0 errors
+
+**Resume point for next agent:**
+- Milestone 6.5 completed. Proceed to Milestone 7.
+
+---
+
+### Milestone 7 — Admin Approvals Queue (Sprint 7)
+- **Status:** Completed
+- **Date:** 2026-09-01
+- **Session/Agent:** Sprint 7 (Admin Governance & Atomic Transactions)
+
+**What was built:**
+- **Pre-flight verification:** Confirmed MongoDB Atlas cluster replica set (`atlas-2fbsuh-shard-0`) supporting multi-document ACID transactions via `session.startTransaction()`.
+- **`AuditLog` Mongoose Model (`server/src/models/AuditLog.js`)**:
+  - Implements PRD Section 10.6: `action` (`MATCH_APPROVE`, `MATCH_REJECT`, `DIRECT_MATCH_CREATE`, `MANUAL_RATING_ADJUST`), `performedBy` (ref: User), `targetType`, `targetId`, `metadata`, `createdAt` with compound index.
+- **`RatingHistory` Mongoose Model (`server/src/models/RatingHistory.js`)**:
+  - Implements PRD Section 10.4: `playerId` (ref: Player), `changeType` (`MATCH`, `TOURNAMENT_BONUS`, `MANUAL_ADJUSTMENT`), `matchId`, `ratingBefore`, `ratingAfter`, `delta`, `categoryBefore`, `categoryAfter`, `createdAt` with compound index.
+- **Shared Atomic Approval Engine (`server/src/services/adminService.js`)**:
+  - `executeAtomicMatchApproval`: executes in a single MongoDB transaction.
+  - Concurrency guard: checks `match.status === 'PENDING_APPROVAL'` (throws 409 Conflict if already processed).
+  - Calculates exact Elo deltas via `ratingService.calculateMatchRatingChanges`.
+  - Atomically updates player ratings, categories, wins/losses/streaks, matchesPlayed.
+  - Appends `RatingHistory` records.
+  - Updates `Match` document (`status: 'APPROVED'`, `approvedBy`, `approvedAt`, `ratingChanges`).
+  - Creates immutable `AuditLog` entry.
+  - Aborts transaction on any failure with zero partial mutations.
+- **Administrative Endpoints (`server/src/controllers/adminController.js` & `server/src/routes/adminRoutes.js`)**:
+  - `GET /api/admin/matches/pending` — Paginated pending matches sorted oldest-first.
+  - `POST /api/admin/matches/:id/approve` — Transaction-safe approval with 409 guard.
+  - `POST /api/admin/matches/:id/reject` — Requires rejection reason (400 if empty), sets status to `REJECTED`, creates audit log, zero rating side-effects.
+  - `POST /api/admin/matches/direct` — Direct entry for official club games, auto-approved with immediate atomic rating calculation.
+  - `GET /api/admin/audit-logs` — Administrative audit trail inspection with pagination.
+- **Frontend Admin Command Center (`client/src/pages/AdminPage.jsx`)**:
+  - Framer Motion micro-interactions:
+    - Hover scale (`whileHover={{ scale: 1.03 }}`) & color transitions for Approve (emerald) and Reject (rose).
+    - Exit animation (`<AnimatePresence>` with `exit={{ opacity: 0, x: 40 }}`) on approval/rejection.
+    - Loading skeletons: 3 pulsing placeholder rows.
+    - Empty state: Custom zero-pending illustration & message.
+    - Reject modal: Animated fade + scale with reason validation.
+    - Direct official match entry form with debounced player autocomplete and score chips.
+    - Governance audit trail table.
+    - Full dual-theme fidelity (Classic Dark / Garden Light).
+- **CI Guardrail (`scripts/ci-guardrails.js`)**:
+  - Automated check scanning for mock/dummy data fixtures and dead interactive buttons/links.
+  - Added `"ci:guardrails"` script to root `package.json` and integrated into `"npm run lint"`.
+  - Documented as standing requirement in `agent.md/AGENTS.md`.
+- **Automated Test Suite (`server/test/adminApprovals.test.js`)**:
+  - 7 comprehensive tests across 5 suites covering Singles/Doubles Elo deltas, 409 double-approval guard, mid-transaction rollback atomicity, reject validation/safety, and direct official recording.
+
+**Files touched:**
+- `server/src/models/AuditLog.js` (NEW)
+- `server/src/models/RatingHistory.js` (NEW)
+- `server/src/services/adminService.js` (NEW)
+- `server/src/controllers/adminController.js` (NEW)
+- `server/src/routes/adminRoutes.js` (NEW)
+- `server/src/server.js`
+- `server/test/adminApprovals.test.js` (NEW)
+- `server/package.json`
+- `client/src/pages/AdminPage.jsx`
+- `client/package.json`
+- `scripts/ci-guardrails.js` (NEW)
+- `package.json`
+- `agent.md/AGENTS.md`
+- `docs/milestone.md.md`
+- `docs/MEMORY.md`
+
+**Tests run and results:**
+- `npm test` (full backend regression) — 94/94 pass (auth + player + duplicate_email + rating + match + leaderboard + profile + adminApprovals)
+- `npm run lint` (server ESLint + client Oxlint + CI Guardrails) — 0 errors, 0 warnings (33 client files, 32 scanned UI files)
+- `npm run build` (client Vite production bundle) — built in 517ms with 0 errors
+
+**Acceptance checklist status:**
+- [x] Admin can view, approve, or reject from an admin-only route (DoD #4, #5, #6)
+- [x] Approving updates ratings, categories, stats, leaderboard, and rating history atomically (DoD #4)
+- [x] Rejecting preserves the record as `REJECTED`, stores the reason, updates nothing else (DoD #5)
+- [x] Concurrent-approval race condition tested and blocked (Section 12.3)
+- [x] Every admin action has a matching audit log entry (Rule G, DoD #7)
+
+**Resume point for next agent:**
+- Milestone 7 completed. Proceed to **Milestone 8 — Tournaments (Sprint 8)**: Implement `Tournament` schema (`src/models/Tournament.js`), bracket generator, configurable tournament rating bonus system (+50 winner, +25 runner-up, +10 semi-finalist defaults), tournament management UI, and player tournament hub.
 
 ---
 
@@ -362,3 +492,4 @@ Two other files this works alongside:
 - **Category thresholds:** Beginner 0–999 · Intermediate 1000–1199 · Advanced Intermediate 1200–1399 · Pro 1400+
 - **Match statuses:** `PENDING_APPROVAL` → `APPROVED` or `REJECTED`
 - **Golden rule:** All Elo logic lives in one backend rating service. Never duplicate the formula in the frontend.
+

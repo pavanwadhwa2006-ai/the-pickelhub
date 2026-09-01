@@ -174,7 +174,7 @@ const logout = async (req, res) => {
  * @route   POST /api/auth/google
  * @access  Public
  */
-const googleAuth = async (req, res, next) => {
+const googleAuth = async (req, res, _next) => {
   try {
     const { credential } = req.body;
 
@@ -226,7 +226,7 @@ const googleAuth = async (req, res, next) => {
     }
 
     // Retrieve or auto-create linked Player profile
-    let player = await getOrCreatePlayerProfile(user);
+    const player = await getOrCreatePlayerProfile(user);
 
     // If new player profile or default name/empty photo, update with Google details
     if (player && (player.name === user.email.split('@')[0] || !player.profilePhoto)) {

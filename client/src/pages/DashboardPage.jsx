@@ -15,6 +15,7 @@ import TiltCard from '../components/TiltCard';
 import AnimatedNumber from '../components/AnimatedNumber';
 import RevealOnScroll from '../components/RevealOnScroll';
 import EmptyState from '../components/EmptyState';
+import TierBadge from '../components/TierBadge';
 
 const DashboardPage = () => {
   const { user, player, isAdmin, refreshProfile } = useAuth();
@@ -109,35 +110,48 @@ const DashboardPage = () => {
 
         {/* Welcome & Player Identity Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[#3b3423] mb-12 animate-fade-in">
-          <div>
-            <div className="flex flex-wrap items-center gap-3 mb-2">
-              <span className="text-[10px] font-bold tracking-[0.25em] text-[#ff3b3f] uppercase">
-                ATHLETE DASHBOARD
-              </span>
-              <span className="px-2 py-0.5 bg-[#251f10] border border-[#3b3423] text-[#ffb3ad] text-[10px] font-bold tracking-wider uppercase font-mono">
-                {player?.playerId || 'GENERATING ID...'}
-              </span>
-              <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#1a1508] border border-[#3b3423] text-[#4ade80] text-[10px] font-bold tracking-wider uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-live-pulse" />
-                {player?.accountStatus || 'ACTIVE'}
-              </span>
+          <div className="flex items-start gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex items-center justify-center bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-2xl sm:text-3xl shrink-0 shadow-lg border-2 border-[#3b3423]">
+              {player?.profilePhoto ? (
+                <img
+                  src={player.profilePhoto}
+                  alt={player.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                (player?.name ? player.name.slice(0, 2) : 'P').toUpperCase()
+              )}
             </div>
 
-            <div className="flex items-baseline gap-4 mt-2">
-              <h1 className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[#ede1c9]">
-                {player?.name || user?.email?.split('@')[0]}
-              </h1>
-              <button
-                type="button"
-                onClick={() => {
-                  setNameInput(player?.name || '');
-                  setEditingName(!editingName);
-                }}
-                className="text-[11px] font-bold tracking-wider text-[#ad8885] hover:text-[#ff3b3f] uppercase underline cursor-pointer transition-colors"
-              >
-                {editingName ? 'CANCEL' : 'EDIT NAME'}
-              </button>
-            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <span className="text-[10px] font-bold tracking-[0.25em] text-[#ff3b3f] uppercase">
+                  ATHLETE DASHBOARD
+                </span>
+                <span className="px-2 py-0.5 bg-[#251f10] border border-[#3b3423] text-[#ffb3ad] text-[10px] font-bold tracking-wider uppercase font-mono">
+                  {player?.playerId || 'GENERATING ID...'}
+                </span>
+                <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#1a1508] border border-[#3b3423] text-[#4ade80] text-[10px] font-bold tracking-wider uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-live-pulse" />
+                  {player?.accountStatus || 'ACTIVE'}
+                </span>
+              </div>
+
+              <div className="flex items-baseline gap-4 mt-2">
+                <h1 className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[#ede1c9]">
+                  {player?.name || user?.email?.split('@')[0]}
+                </h1>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNameInput(player?.name || '');
+                    setEditingName(!editingName);
+                  }}
+                  className="text-[11px] font-bold tracking-wider text-[#ad8885] hover:text-[#ff3b3f] uppercase underline cursor-pointer transition-colors"
+                >
+                  {editingName ? 'CANCEL' : 'EDIT NAME'}
+                </button>
+              </div>
 
             {editingName && (
               <form onSubmit={handleUpdateName} className="mt-4 flex items-center gap-3 animate-fade-in">
@@ -165,6 +179,7 @@ const DashboardPage = () => {
               <span>Member since {formattedDate}</span>
             </div>
           </div>
+        </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <Link
@@ -219,8 +234,8 @@ const DashboardPage = () => {
               <AnimatedNumber value={player?.currentRating || 1000} duration={1000} />
               <span className="text-xs font-sans font-normal text-[#ffb3ad]">Elo</span>
             </div>
-            <div className="inline-block px-2.5 py-1 bg-[#181305] border border-[#ff3b3f]/40 text-[#ffdad6] text-[11px] font-bold tracking-wider uppercase">
-              TIER: {player?.category?.toUpperCase() || 'INTERMEDIATE'}
+            <div>
+              <TierBadge category={player?.category} />
             </div>
           </TiltCard>
 
