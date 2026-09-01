@@ -76,8 +76,11 @@ const createRateLimiter = ({
 
       next();
     } catch (err) {
-      // In case of database error in rate limiter, fail open to avoid breaking app, but log error
-      console.error('❌ Rate limiter error:', err.message);
+      // INTENTIONAL FAIL-OPEN: If the rate-limit DB query fails (e.g. transient
+      // Atlas hiccup), we let the request through rather than blocking all logins.
+      // This is a deliberate tradeoff — availability over strict enforcement during
+      // a DB outage. Do NOT change to fail-closed without understanding the impact.
+      console.error(`[RATE_LIMITER_DOWN] Rate limiter DB error for prefix="${prefix}": ${err.message}`);
       next();
     }
   };

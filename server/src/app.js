@@ -33,7 +33,7 @@ app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. same-origin, mobile apps, curl)
+      // Allow requests with no origin (e.g. same-origin, mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
       if (
         origin === CLIENT_URL ||
@@ -43,7 +43,8 @@ app.use(
       ) {
         return callback(null, true);
       }
-      return callback(null, true);
+      // Reject all other origins — do NOT fall through to an unconditional allow
+      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
   })
@@ -54,8 +55,9 @@ if (NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
+// Body parsing — 1mb is sufficient for all JSON endpoints;
+// photo uploads use multer (multipart), not the JSON parser.
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Global NoSQL injection sanitization
