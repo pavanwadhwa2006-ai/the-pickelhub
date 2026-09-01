@@ -161,34 +161,55 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 
 ---
 
-## Milestone 8 — Tournaments (Sprint 8)
-**Goal:** Tournament creation, brackets, and separate bonus system.
+## Security & Serverless Hardening Patch (Master Plan v2)
+**Goal:** Serverless rate limiting, NoSQL injection defense, admin promotion governance, and OpenGraph social metadata.
 
 **Tasks**
-- [ ] Build `Tournament` schema/model (Section 9.1): states, type, category, participants, bracket, matches, winner/runner-up
-- [ ] Build bracket generator (Singles/Doubles/Mixed/Category-based/Open)
-- [ ] Implement configurable tournament rating bonuses (Winner +50, Runner-up +25, Semi-finalist +10 defaults), stored in DB and admin-editable
-- [ ] Apply bonuses via `RatingHistory` with `changeType: 'TOURNAMENT_BONUS'`, separate from normal match Elo
-- [ ] Build admin tournament management UI + player-facing Tournament Hub (view brackets/rules)
-
-**Deliverables**
-- Admin can run a full tournament from creation to bonus payout
-
-**Acceptance Checklist**
-- [ ] Tournament bonuses never distort standard match-based Elo calculations
-- [ ] Bonus values configurable without code changes
+- [x] Implement atomic MongoDB-backed rate limiter (`server/src/models/RateLimit.js` & `server/src/middleware/rateLimiter.js`) with 15-minute TTL index and `Retry-After` header:
+  - Auth Limiter: 5 attempts / 15 min on `/api/auth/login` and `/api/auth/register`.
+  - Match Submit Limiter: 100 requests / 15 min on `/api/matches/submit`.
+- [x] Add global NoSQL injection defense: `mongoose.set('sanitizeFilter', true)` in `db.js` and `sanitizeInput` middleware in `server.js` stripping `$` and `.` operator keys.
+- [x] Implement `POST /api/admin/users/:id/promote` endpoint guarded by `authorize('ADMIN')` with `USER_ROLE_PROMOTE` AuditLog and explicit re-login instruction.
+- [x] Add Open Graph (`og:type`, `og:title`, `og:description`, `og:image`) and Twitter Card meta tags in `client/index.html`.
+- [x] Create automated CI workflow in `.github/workflows/ci.yml` (server lint/test/guardrails, client lint/build).
+- [x] Add Standing Definition of Done to `agent.md/AGENTS.md`.
+- [x] Write dedicated security test suite (`server/test/securityPatch.test.js`, 99/99 tests passing).
 
 ---
 
-## Milestone 9 — Analytics (Sprint 9)
-**Goal:** Player-facing performance insight via Recharts.
+## Milestone 8 — Tournaments (Sprint 8)
+**Goal:** Tournament creation, brackets, separate bonus system, pulled-forward rating history table, and event-page UX.
+
+**Tasks**
+- [x] Build `Tournament` schema/model (Section 9.1): states, type, category, participants, bracket, matches, winner/runner-up
+- [x] Build bracket generator (Singles/Doubles/Mixed/Category-based/Open, power-of-2 size, automated Byes)
+- [x] Implement configurable tournament rating bonuses (Winner +50, Runner-up +25, Semi-finalist +10 defaults), stored in DB and admin-editable
+- [x] Apply bonuses via `RatingHistory` with `changeType: 'TOURNAMENT_BONUS'`, separate from normal match Elo
+- [x] **Pulled-Forward M9 Item (A3):** Plain sortable Rating History table on the admin side to inspect bonus payouts and rating transitions
+- [x] **Event-Page UX (D5):** Countdown to registration deadline, visual SVG/CSS bracket tree, clear "Registered" / "Closes in X days" states
+- [x] Build admin tournament management UI + player-facing Tournament Hub (view brackets/rules)
+
+**Deliverables**
+- Admin can run a full tournament from creation to bonus payout; players can register and view live tournament brackets
+
+**Acceptance Checklist**
+- [x] Tournament bonuses never distort standard match-based Elo calculations
+- [x] Bonus values configurable without code changes
+- [x] UI feedback in both themes (Classic Dark and Garden Light) with Framer Motion animations
+- [x] Passes Standing Definition of Done and CI Guardrails
+
+---
+
+## Milestone 9 — Analytics & Head-to-Head (Sprint 9)
+**Goal:** Player-facing performance insight via Recharts, shareable head-to-head comparison, and admin governance tools.
 
 **Tasks**
 - [ ] Integrate Recharts for historical Elo tracking graph (pulled from `RatingHistory`)
-- [ ] Build match-win analysis views (win/loss trends, streaks)
-- [ ] Build head-to-head comparison page (`GET /api/players/compare`)
+- [ ] Build match-win analysis views (win/loss trends, streaks, "Most Improved" 30-day specialty leader board — D2)
+- [ ] Build shareable head-to-head comparison page (`GET /api/players/compare?p1=PH-XXXXX&p2=PH-YYYYY` — D6)
 - [ ] Add manual rating adjustment tool for admins (`POST /api/admin/ratings/adjust`) with required audit reason
 - [ ] Add match correction endpoint (`PUT /api/admin/matches/:id/correct`) that re-triggers historical Elo recalculation
+- [ ] Track & execute JWT storage migration (Part E: short-lived in-memory token + `httpOnly` refresh cookie)
 
 **Deliverables**
 - Player profile page with rating graph and stats; admin correction/adjustment tools live
@@ -198,39 +219,37 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 
 ---
 
-## Milestone 10 — UI Polish (Sprint 10)
-**Goal:** Production-quality UX across the whole app.
+## Milestone 10 — UI Polish & Cross-Cutting Polish (Sprint 10)
+**Goal:** Cross-cutting responsive layout, WCAG AA accessibility, and design token consistency.
 
 **Tasks**
 - [ ] Full responsive/mobile-first pass on every screen (Rule I)
-- [ ] Add loading states, empty-state placeholders, and error states throughout
-- [ ] Add transition/animation polish
+- [ ] Ensure consistent empty states, skeletons, and micro-interactions across all views (D7)
 - [ ] Deduplicate shared UI into reusable components (Rule K)
-- [ ] Accessibility pass (contrast, tap targets, keyboard nav where relevant)
+- [ ] Accessibility pass (WCAG AA color contrast in both themes, tap targets, keyboard navigation)
 
 **Deliverables**
 - Consistent, polished UI ready for real-world use on phones and desktop
 
 ---
 
-## Milestone 11 — Testing (Sprint 11)
-**Goal:** Confidence that the rating/approval core is correct and secure.
+## Milestone 11 — Deep Testing & Security Pen-Test (Sprint 11)
+**Goal:** Full adversarial security audit, concurrency stress testing, and mobile UX validation.
 
 **Tasks**
-- [ ] Security review: JWT handling, role checks on every protected route, input sanitization
-- [ ] Concurrency test: simulate simultaneous approval requests on the same match
+- [ ] Security audit: role verification on all endpoints, payload bounds, secret leak checks
+- [ ] Concurrency stress testing: simulate simultaneous match approvals, promotions, and score submissions
 - [ ] Full regression pass on rating engine unit tests (Rule M)
 - [ ] Mobile UX validation across common breakpoints/devices
-- [ ] Verify no mock data remains in any production code path (Rule D)
-- [ ] Verify no dead/fake buttons remain (Rule C)
+- [ ] Verify zero mock data and zero dead interactive buttons (`npm run ci:guardrails`)
 
 **Deliverables**
-- Test report covering security, concurrency, and mobile UX
+- Comprehensive test & security report covering penetration testing, concurrency, and mobile UX
 
 ---
 
 ## Milestone 12 — Deployment (Sprint 12)
-**Goal:** Live, production-ready platform.
+**Goal:** Live, production-ready platform on Vercel and MongoDB Atlas.
 
 **Tasks**
 - [ ] Configure production environment variables on Vercel (JWT secret, Mongo URI, etc.) — never in source (Rule H)

@@ -50,6 +50,15 @@ const ratingHistorySchema = new mongoose.Schema(
       type: String,
       required: [true, 'New category is required'],
     },
+    reason: {
+      type: String,
+      default: '',
+    },
+    recordedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

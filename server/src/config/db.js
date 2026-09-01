@@ -8,6 +8,9 @@
 const mongoose = require('mongoose');
 const { MONGO_URI } = require('./env');
 
+// Defense-in-depth: automatically sanitize query filter inputs against NoSQL operator injection
+mongoose.set('sanitizeFilter', true);
+
 let isConnecting = false;
 
 const connectDB = async () => {

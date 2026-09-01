@@ -48,8 +48,19 @@ Rules while in Builder mode:
 
 Switch mindset explicitly. Do not assume the build is correct because you just wrote it.
 
+### Standing Definition of Done (every milestone, no exceptions)
+
+- [ ] **Pre-flight:** Any infrastructure assumption (replica set, package version, env var) verified before coding starts; blockers reported immediately.
+- [ ] **PRD Fidelity:** Implementation matches the referenced PRD section — no silent scope narrowing (Rule N: any MVP fallback must be logged in `MEMORY.md`'s Known Issues / Deviations, not implemented quietly).
+- [ ] **Security Self-Check:** Input validated, rate-limited if public-facing, sanitized against injection, role-checked server-side from verified JWT (never from client-supplied fields).
+- [ ] **UI & Dual-Theme Fidelity:** New UI includes hover/interaction feedback, loading state, empty state, and works with high contrast in both themes (Classic Dark & Garden Light) — not deferred to a later "polish" pass.
+- [ ] **Business Logic Tests:** Tests written for all new business logic (same bar Rule M sets for rating logic — extended to tournament, analytics, admin logic).
+- [ ] **CI & Linter Cleanliness:** `npm run lint`, `npm run build`, and `npm run ci:guardrails` clean with zero errors and zero warnings.
+- [ ] **Manual Verification:** Manual verification steps listed and actually walked through once.
+- [ ] **Report-Back Integrity:** Report-back includes: summary → test output → verification results → explicit answer to "any shortcuts vs. the PRD, and are they logged in `MEMORY.md`?"
+
 Rules while in Reviewer mode:
-- Go through the milestone's **Acceptance Checklist** in `MILESTONES.md` item by item. For each item, verify — don't assume:
+- Go through the milestone's **Acceptance Checklist** in `MILESTONES.md` and the Standing DoD item by item. For each item, verify — don't assume:
   - Run the tests that exist. If a checklist item requires a test that doesn't exist yet, that item is not satisfied — go back to Builder mode and write it.
   - For DB/transaction-related items (e.g. atomic approval, race-condition guards), trace the actual code path, don't take the diff's word for it.
   - For "no secrets committed" / "no mock data" / "no fake buttons" — actually grep for it, don't assume.
@@ -58,7 +69,7 @@ Rules while in Reviewer mode:
 - If **any** checklist item fails: state exactly what failed and why, go back to **Builder mode** to fix it, then return to Reviewer mode and re-check from the top of the checklist. Do not partially pass a milestone.
 - If everything passes: explicitly state "All acceptance criteria met" and list the checklist with each item marked, before proceeding.
 
-**Exit condition:** Every item in the milestone's Acceptance Checklist is verifiably satisfied. Proceed to Memory Manager mode.
+**Exit condition:** Every item in the milestone's Acceptance Checklist and Standing DoD is verifiably satisfied. Proceed to Memory Manager mode.
 
 **Hard rule:** Never proceed to Memory Manager mode on a partial pass. A milestone is either fully done or still in Builder mode — there is no shortcut.
 

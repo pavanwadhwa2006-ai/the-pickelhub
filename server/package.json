@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "node --test test/auth.test.js test/player.test.js test/duplicate_email.test.js test/rating.test.js test/match.test.js test/leaderboard.test.js test/profile.test.js test/adminApprovals.test.js",
+    "test": "node --test test/auth.test.js test/player.test.js test/duplicate_email.test.js test/rating.test.js test/match.test.js test/leaderboard.test.js test/profile.test.js test/adminApprovals.test.js test/securityPatch.test.js test/tournaments.test.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.js\""

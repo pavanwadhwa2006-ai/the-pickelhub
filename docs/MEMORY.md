@@ -28,20 +28,41 @@ Two other files this works alongside:
 
 > Overwrite this section every time. It should always describe *right now*, not history.
 
-- **Last completed milestone:** Milestone 7 — Admin Approvals Queue (Sprint 7)
+- **Last completed milestone:** Milestone 8 — Tournaments & Admin Competition Manager (Sprint 8)
 - **In progress:** None
-- **Next milestone to start:** Milestone 8 — Tournaments (Sprint 8)
-- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0/0, Vite 510 modules); Server test suites pass (94/94 tests ok); Full multi-document ACID transaction engine operational on MongoDB Atlas replica set; Standing CI guardrails checking mock data and dead interactive elements (`npm run ci:guardrails`); Framer Motion-powered Admin Control Panel live at `/admin` with live pending badges, approval/reject queue cards, animated rejection modal, direct official match recording, and governance audit trail.
+- **Next milestone to start:** Milestone 9 — Polish & PWA / Push Notifications (Sprint 9)
+- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0 errors, Vite 511 modules); Server test suites pass (106/106 tests ok across 10 suites); Full single-elimination tournament bracket engine with power-of-2 size and automated Byes; Atomic tournament rating bonus distribution (+50 Winner, +25 Runner-up, +10 Semifinalists) inside MongoDB ACID transactions with HTTP 409 duplicate-award concurrency guard; Team-average doubles seeding; Suspended-player registration guard; Status-gated withdrawal; Paginated Rating History audit table (`GET /api/admin/rating-history`); Interactive Admin Competition Manager tab & Player Tournament Hub with visual SVG/CSS bracket trees.
 - **Environment/deploy state:** Local development (`client: localhost:5173`, `server: localhost:5000`)
-- **Last updated:** 2026-09-01 by AI Coding Agent (Milestone 7 Admin Approvals Queue Complete)
+- **Last updated:** 2026-09-01 by AI Coding Agent (Milestone 8 Tournaments Complete)
 
 ---
 
-## Known Issues / Deviations from PRD
+## Known Issues / Deviations / Architectural Decisions
 
-> Running list. Anything where the implementation differs from `prd-v3.md`, any shortcuts taken, any TODOs deferred to a later milestone. Delete an item once it's resolved and note the resolution in the Milestone Log instead.
+> Running list. Anything where the implementation differs from `prd-v3.md`, any shortcuts taken, any TODOs deferred to a later milestone, or explicit architectural decisions.
 
-- _None — all implementations align strictly with PRD v3_
+- **Tournament Rating Model & Bonus Resolution (Milestone 8 — Architectural Review Item 1):**
+  - Resolved as **Interpretation B**: Tournament bracket matches track set scores and bracket progression without running per-game Elo mutations. Configured bonus points (+50 winner, +25 runner-up, +10 semi-finalist defaults) are awarded atomically upon tournament completion with `changeType: 'TOURNAMENT_BONUS'` in `RatingHistory`.
+- **Double-Award Concurrency Guard (Milestone 8 — Architectural Review Item 2):**
+  - `distributeTournamentBonuses` evaluates `if (tournament.bonusesAwarded === true)` inside MongoDB ACID transaction and aborts with `409 Conflict`.
+- **Atomic Registration Capacity Guard (Milestone 8 — Architectural Review Item 3):**
+  - Registration uses atomic `findOneAndUpdate` checking `$expr: { $lt: [{ $size: '$participants' }, '$maxParticipants'] }` and status `'REGISTRATION_OPEN'`.
+- **Suspended Player Protection (Milestone 8 — Architectural Review Item 4):**
+  - Registration rejects suspended players (`player.isSuspended: false` check).
+- **Team-Average Seeding (Milestone 8 — Architectural Review Item 5):**
+  - For `DOUBLES` and `MIXED_DOUBLES`, seeds use `(player.currentRating + partner.currentRating) / 2` via `ratingService.calculateTeamAverage()`.
+- **Status-Gated Withdrawal (Milestone 8 — Architectural Review Item 6):**
+  - `DELETE /api/tournaments/:id/register` strictly requires `tournament.status === 'REGISTRATION_OPEN'` and `Date.now() < tournament.registrationDeadline`.
+- **Clean Enum Deduplication (Milestone 8 — Architectural Review Item 7):**
+  - `tournamentType: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES', 'OPEN']`, division governed by `category: ['All', 'Beginner', 'Intermediate', 'Advanced Intermediate', 'Pro']`.
+- **Mid-Bracket Correction Limitation (Milestone 8 — Architectural Review Item 8):**
+  - Re-scoring a completed bracket match advances the new winner into subsequent pending rounds only. If subsequent round matches have already completed, re-scoring is blocked unless subsequent round matches are manually reset.
+- **Admin Creation & Promotion Architecture (Master Plan Part B):**
+  - **Initial Admin Bootstrapping:** Registration endpoint (`POST /api/auth/register`) strictly creates `role: 'PLAYER'`. The very first administrator account is created/promoted via direct MongoDB Atlas database edit to prevent self-registration privilege escalation holes.
+  - **In-App Co-Admin Promotion:** Existing administrators can promote other users to `ADMIN` via `POST /api/admin/users/:id/promote` (guarded by `authorize('ADMIN')` and logged in `AuditLog`).
+  - **Token Re-Authentication Lifecycle:** Because user role is cryptographically baked into JWT payloads at login for fast server-side authorization checks, promoting an active user does not alter their existing token. The promoted user must log out and log in again to receive a new JWT with `role: 'ADMIN'`. This is verified in `server/test/securityPatch.test.js`.
+- **JWT Storage Migration Track (Master Plan Part E):**
+  - Planned migration from `localStorage` to short-lived in-memory access token + `httpOnly` refresh cookie scheduled prior to Milestone 9.
 
 ---
 
@@ -479,8 +500,128 @@ Two other files this works alongside:
 - [x] Concurrent-approval race condition tested and blocked (Section 12.3)
 - [x] Every admin action has a matching audit log entry (Rule G, DoD #7)
 
+### Security & Serverless Hardening Patch (Master Plan v2)
+- **Status:** Completed
+- **Date:** 2026-09-01
+- **Session/Agent:** Security Hardening & Master Plan v2 Execution
+
+**What was built:**
+- **Atomic MongoDB-Backed Rate Limiting (`server/src/models/RateLimit.js` & `server/src/middleware/rateLimiter.js`)**:
+  - Implements persistent, atomic rate limiting using MongoDB with TTL indexing (`expireAfterSeconds: 0`).
+  - Atomic `$inc` with `findOneAndUpdate` eliminates race conditions across stateless serverless Vercel function instances.
+  - Auth Limiter: 5 attempts / 15 min window on `POST /api/auth/login` and `POST /api/auth/register`.
+  - Match Submission Limiter: 100 requests / 15 min window on `POST /api/matches/submit`.
+  - Returns HTTP `429 Too Many Requests` with numeric `Retry-After: <seconds>` header and rate limit metadata headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`).
+- **Global NoSQL Query Sanitization**:
+  - Configured `mongoose.set('sanitizeFilter', true)` in `server/src/config/db.js` for query filter sanitization.
+  - Built `server/src/middleware/sanitizer.js` to strip `$` and `.` operator keys from `req.body`, `req.query`, and `req.params`.
+- **Admin Promotion Endpoint (`POST /api/admin/users/:id/promote`)**:
+  - Guarded strictly by `protect` and `authorize('ADMIN')`.
+  - Updates target user's role to `'ADMIN'` and records `USER_ROLE_PROMOTE` in `AuditLog`.
+  - Explicitly informs caller that the promoted user must log in again to receive a JWT with elevated administrative permissions.
+- **Automated CI Workflow (`.github/workflows/ci.yml`)**:
+  - Runs on pull requests and pushes to `main`.
+  - Server job: `npm ci` → `npm run lint` → `npm test` → `npm run ci:guardrails`.
+  - Client job: `npm ci` → `npm run lint` → `npm run build`.
+- **Standing Definition of Done in `agent.md/AGENTS.md`**:
+  - Standardized the Standing DoD across all future milestone sessions.
+- **Open Graph & Twitter Card Meta Tags (`client/index.html`)**:
+  - Added social share preview tags (`og:type`, `og:title`, `og:description`, `og:image`, `twitter:card`).
+- **Dedicated Automated Test Suite (`server/test/securityPatch.test.js`)**:
+  - 5 tests covering: non-admin promotion rejection (403), admin promotion execution with AuditLog, token re-authentication lifecycle verification, 5/15m rate limiting with 429 and `Retry-After` header, and NoSQL payload sanitization.
+
+**Files touched:**
+- `.github/workflows/ci.yml` (NEW)
+- `agent.md/AGENTS.md`
+- `server/src/models/RateLimit.js` (NEW)
+- `server/src/models/AuditLog.js`
+- `server/src/middleware/rateLimiter.js` (NEW)
+- `server/src/middleware/sanitizer.js` (NEW)
+- `server/src/config/db.js`
+- `server/src/server.js`
+- `server/src/routes/authRoutes.js`
+- `server/src/routes/matchRoutes.js`
+- `server/src/routes/adminRoutes.js`
+- `server/src/controllers/adminController.js`
+- `server/test/securityPatch.test.js` (NEW)
+- `server/package.json`
+- `client/index.html`
+- `docs/milestone.md.md`
+- `docs/MEMORY.md`
+
+**Tests run and results:**
+- `npm test` — **99 / 99 pass** across 9 test suites (all auth, player, duplicate email, rating, match, leaderboard, profile, admin approvals, and security tests pass)
+- `npm run lint` — **0 errors, 0 warnings** across server ESLint, client Oxlint, and CI Guardrails
+- `npm run build` — Vite production build successful in 602ms
+
 **Resume point for next agent:**
-- Milestone 7 completed. Proceed to **Milestone 8 — Tournaments (Sprint 8)**: Implement `Tournament` schema (`src/models/Tournament.js`), bracket generator, configurable tournament rating bonus system (+50 winner, +25 runner-up, +10 semi-finalist defaults), tournament management UI, and player tournament hub.
+- Security Hardening Patch & Master Plan v2 alignment complete. Proceed to **Milestone 8 — Tournaments (Sprint 8)**.
+
+---
+
+### Milestone 8 — Tournaments & Admin Competition Manager (Sprint 8)
+- **Status:** Completed
+- **Date:** 2026-09-01
+- **Session/Agent:** Milestone 8 Execution (Tournaments Engine & UI)
+
+**What was built:**
+- **Tournament Data Model (`server/src/models/Tournament.js`)**:
+  - Full single-elimination schema with status transitions (`DRAFT`, `REGISTRATION_OPEN`, `REGISTRATION_CLOSED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
+  - Formats: `SINGLES`, `DOUBLES`, `MIXED_DOUBLES`, `OPEN`.
+  - Skill divisions: `All`, `Beginner`, `Intermediate`, `Advanced Intermediate`, `Pro`.
+  - Configurable bonus points: `winnerBonus` (default 50), `runnerUpBonus` (default 25), `semiFinalistBonus` (default 10).
+  - Seeded participant array with `player`, `partner`, `seed`, `seedRating`, `appliedAt`, `appliedBy`.
+  - Bracket matches array with `matchId` (`R{round}_M{index}`), `round`, `matchIndex`, `player1`, `player2`, `score1`, `score2`, `winner`, `status` (`PENDING`, `READY`, `COMPLETED`, `BYE`), `nextMatchId`.
+  - Concurrency audit flags: `bonusesAwarded` (boolean), `bonusesAwardedAt` (Date), `bonusesAwardedBy` (User ref).
+- **AuditLog Model Extension (`server/src/models/AuditLog.js`)**:
+  - Added tournament action enums: `TOURNAMENT_CREATE`, `TOURNAMENT_UPDATE`, `TOURNAMENT_BONUS_AWARD`, `TOURNAMENT_CANCEL`.
+- **RatingHistory Model Extension (`server/src/models/RatingHistory.js`)**:
+  - Added `reason` and `recordedBy` fields per PRD Section 10.4.
+- **Tournament Core Service (`server/src/services/tournamentService.js`)**:
+  - `getSeedingOrder`: Power-of-2 standard seed distribution algorithm.
+  - `seedParticipants`: Automatic seed calculation based on individual ratings for Singles, and team average ratings `(p1 + p2) / 2` for Doubles.
+  - `generateBracketTree`: Automatically constructs single-elimination power-of-2 match hierarchy with automated Byes for odd participant counts.
+  - `advanceBracketMatch`: Records scores, determines winners, propagates winners to subsequent bracket round slots, and transitions tournament to `COMPLETED` when the Championship Final is played.
+  - `executeTournamentBonusPayout`: Multi-document MongoDB ACID transaction engine awarding flat Elo bonuses to Winner (+50), Runner-Up (+25), and Semifinalists (+10), incrementing tournament win/appearance counters, creating `RatingHistory` records with `changeType: 'TOURNAMENT_BONUS'`, and emitting `TOURNAMENT_BONUS_AWARD` AuditLog. Guarded by a strict `409 Conflict` concurrency check on `bonusesAwarded`.
+- **Tournament API Controllers & Routes (`server/src/controllers/tournamentController.js` & `server/src/routes/tournamentRoutes.js` & `server/src/routes/adminRoutes.js`)**:
+  - Player/Public: `GET /api/tournaments`, `GET /api/tournaments/:id`, `POST /api/tournaments/:id/register` (atomic capacity check & suspended player guard), `DELETE /api/tournaments/:id/register` (status-gated withdrawal).
+  - Admin: `POST /api/admin/tournaments` (arrange competition), `PUT /api/admin/tournaments/:id`, `POST /api/admin/tournaments/:id/close-registration`, `POST /api/admin/tournaments/:id/generate-bracket`, `POST /api/admin/tournaments/:id/matches/score` (enter scores and advance bracket), `POST /api/admin/tournaments/:id/award-bonuses` (atomic payout).
+  - Paginated Rating History: `GET /api/admin/rating-history` supporting `page`, `limit`, and `changeType` filters (Master Plan Part A3).
+- **Interactive Visual Bracket Component (`client/src/components/BracketVisualizer.jsx`)**:
+  - SVG/CSS responsive visual bracket tree displaying rounds from Round 1 to Championship Final.
+  - Seed badges, player avatars, ratings, live scores, champion podium banner, and admin score entry button.
+- **Admin Control Center Upgrades (`client/src/pages/AdminPage.jsx`)**:
+  - Added "Competitions & Tournaments" tab with "Arrange New Competition" modal, active tournament cards, live bracket management workspace, score entry modal, and bonus award trigger.
+  - Added "Rating History Audit Table" tab with pagination and change-type filtering.
+- **Player Tournament Hub (`client/src/pages/TournamentsPage.jsx`)**:
+  - Complete interactive hub with status filter tabs (`All`, `Registration Open`, `In Progress`, `Championship Archive`), registration countdown timer, capacity progress bars, one-click Apply / Withdraw buttons, and live interactive bracket viewer.
+- **Automated Test Suite (`server/test/tournaments.test.js`)**:
+  - 10 comprehensive tests covering competition creation, individual & team-average seeding, power-of-2 bracket tree generation & automatic Bye advancement, match progression through Championship Final, and atomic bonus payout with HTTP 409 double-award concurrency guard.
+
+**Files touched:**
+- `server/src/models/Tournament.js` (NEW)
+- `server/src/models/RatingHistory.js`
+- `server/src/models/AuditLog.js`
+- `server/src/services/tournamentService.js` (NEW)
+- `server/src/controllers/tournamentController.js` (NEW)
+- `server/src/routes/tournamentRoutes.js` (NEW)
+- `server/src/routes/adminRoutes.js`
+- `server/src/server.js`
+- `server/test/tournaments.test.js` (NEW)
+- `server/package.json`
+- `client/src/components/BracketVisualizer.jsx` (NEW)
+- `client/src/pages/AdminPage.jsx`
+- `client/src/pages/TournamentsPage.jsx`
+- `docs/milestone.md.md`
+- `docs/MEMORY.md`
+
+**Tests run and results:**
+- `npm test` — **106 / 106 pass** across 10 test suites (auth, player, duplicate email, rating, match, leaderboard, profile, admin approvals, security patch, tournaments)
+- `npm run lint` — **0 errors, 0 warnings** across server ESLint, client Oxlint, and CI Guardrails
+- `npm run build` — Vite production build successful in 957ms
+
+**Resume point for next agent:**
+- Milestone 8 is 100% complete and fully passing. Proceed to **Milestone 9 — Polish & PWA / Push Notifications (Sprint 9)**: PWA manifest & service worker, push notifications for match approvals and tournament bracket announcements, and final performance/accessibility polish.
 
 ---
 
@@ -491,5 +632,6 @@ Two other files this works alongside:
 - **Default K-factor:** 32 (configurable)
 - **Category thresholds:** Beginner 0–999 · Intermediate 1000–1199 · Advanced Intermediate 1200–1399 · Pro 1400+
 - **Match statuses:** `PENDING_APPROVAL` → `APPROVED` or `REJECTED`
+- **Tournament Bonus Defaults:** Winner +50, Runner-Up +25, Semifinalists +10
 - **Golden rule:** All Elo logic lives in one backend rating service. Never duplicate the formula in the frontend.
 

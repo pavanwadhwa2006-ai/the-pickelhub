@@ -8,6 +8,7 @@
  */
 
 const mongoose = require('mongoose');
+const User = require('../models/User');
 const Match = require('../models/Match');
 const AuditLog = require('../models/AuditLog');
 const Counter = require('../models/Counter');
@@ -254,10 +255,75 @@ const getAuditLogs = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Promote a user account to ADMIN role
+ * @route   POST /api/admin/users/:id/promote
+ * @access  Private (Admin Only)
+ */
+const promoteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    let targetUser;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      targetUser = await User.findById(id);
+    } else {
+      targetUser = await User.findOne({ email: id.toLowerCase().trim() });
+    }
+
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        message: `User '${id}' not found.`,
+      });
+    }
+
+    if (targetUser.role === 'ADMIN') {
+      return res.status(200).json({
+        success: true,
+        message: `User ${targetUser.email} is already an administrator.`,
+        data: {
+          userId: targetUser._id,
+          email: targetUser.email,
+          role: targetUser.role,
+        },
+      });
+    }
+
+    targetUser.role = 'ADMIN';
+    await targetUser.save();
+
+    // Log action in AuditLog
+    await AuditLog.create({
+      action: 'USER_ROLE_PROMOTE',
+      performedBy: req.user._id,
+      targetType: 'User',
+      targetId: targetUser._id,
+      metadata: {
+        email: targetUser.email,
+        promotedRole: 'ADMIN',
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'User promoted to ADMIN. The user must log in again for elevated admin access to take effect.',
+      data: {
+        userId: targetUser._id,
+        email: targetUser.email,
+        role: targetUser.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPendingMatches,
   approveMatch,
   rejectMatch,
   createDirectMatch,
   getAuditLogs,
+  promoteUser,
 };

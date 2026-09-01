@@ -13,13 +13,14 @@ const {
   getMatchById,
 } = require('../controllers/matchController');
 const { protect } = require('../middleware/authMiddleware');
+const { matchSubmitLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
 // All match submission and retrieval routes require authentication
 router.use(protect);
 
-router.post('/submit', submitMatch);
+router.post('/submit', matchSubmitLimiter, submitMatch);
 router.get('/pending', getPendingMatchesForPlayer);
 router.get('/my-history', getPlayerMatchHistory);
 router.get('/:id', getMatchById);
