@@ -17,8 +17,12 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
  * @returns {string} Signed JWT token
  */
 const generateToken = (userId, role) => {
+  let expiry = JWT_EXPIRES_IN || '7d';
+  if (typeof expiry === 'number' || /^\d+$/.test(expiry)) {
+    expiry = `${expiry}d`;
+  }
   return jwt.sign({ id: userId, role }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
+    expiresIn: expiry,
   });
 };
 
@@ -28,7 +32,7 @@ const generateToken = (userId, role) => {
  * @returns {object} Decoded token payload
  */
 const verifyToken = (token) => {
-  return jwt.verify(token, JWT_SECRET);
+  return jwt.verify(token, JWT_SECRET, { clockTolerance: 60 });
 };
 
 /**
