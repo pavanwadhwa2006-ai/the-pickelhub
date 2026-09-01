@@ -1,77 +1,13 @@
 /**
- * The PickleHub — Server Entry Point
+ * The PickleHub — Server Entry Point (Local / Standalone)
  *
- * Express application with middleware stack, route mounting,
- * MongoDB connection, and graceful shutdown.
+ * Imports Express application from app.js, starts HTTP listener,
+ * and initiates MongoDB connection.
  */
 
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
+const app = require('./app');
 const connectDB = require('./config/db');
-const { PORT, NODE_ENV, CLIENT_URL } = require('./config/env');
-const { errorHandler, notFound } = require('./middleware/errorHandler');
-const { sanitizeInput } = require('./middleware/sanitizer');
-const healthRoutes = require('./routes/healthRoutes');
-const authRoutes = require('./routes/authRoutes');
-const playerRoutes = require('./routes/playerRoutes');
-const matchRoutes = require('./routes/matchRoutes');
-const profileRoutes = require('./routes/profileRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const tournamentRoutes = require('./routes/tournamentRoutes');
-
-const app = express();
-
-// ---------------------
-// Middleware
-// ---------------------
-
-// Security headers
-app.use(helmet());
-
-// CORS — allow client origin
-app.use(
-  cors({
-    origin: CLIENT_URL,
-    credentials: true,
-  })
-);
-
-// Request logging
-if (NODE_ENV !== 'test') {
-  app.use(morgan('dev'));
-}
-
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-
-// Global NoSQL injection sanitization
-app.use(sanitizeInput);
-
-// ---------------------
-// Routes
-// ---------------------
-
-app.use('/api', healthRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/players', playerRoutes);
-app.use('/api/matches', matchRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/tournaments', tournamentRoutes);
-
-// ---------------------
-// Error Handling
-// ---------------------
-
-app.use(notFound);
-app.use(errorHandler);
-
-// ---------------------
-// Start Server
-// ---------------------
+const { PORT, NODE_ENV } = require('./config/env');
 
 const startServer = async () => {
   const server = app.listen(PORT, () => {

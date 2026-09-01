@@ -24,12 +24,14 @@ if (fs.existsSync(rootEnvPath)) {
 const requiredVars = ['MONGO_URI', 'JWT_SECRET'];
 
 const missing = requiredVars.filter((key) => !process.env[key]);
-if (missing.length > 0) {
+if (missing.length > 0 && process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   console.error(
     `\n❌ Missing required environment variables:\n   ${missing.join(', ')}\n\n` +
-    `   Copy .env.example to .env and fill in real values.\n`
+    `   Copy .env.example to .env and fill in real values, or configure in Vercel Project Settings.\n`
   );
-  process.exit(1);
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
 }
 
 module.exports = {
