@@ -17,8 +17,10 @@ const GoogleAuthButton = ({ text = 'signin_with', onSuccessCustom, onErrorCustom
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const isConfigured = Boolean(clientId && !clientId.includes('dummy'));
+  const clientId =
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+    '667753727792-uusm1s2podnhrh63s2i7jnduu6auc8s0.apps.googleusercontent.com';
+  const isConfigured = Boolean(clientId && !clientId.includes('dummy') && !clientId.includes('placeholder'));
 
   const from = location.state?.from?.pathname || '/dashboard';
 
