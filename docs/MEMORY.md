@@ -28,12 +28,12 @@ Two other files this works alongside:
 
 > Overwrite this section every time. It should always describe *right now*, not history.
 
-- **Last completed milestone:** Milestone 8 — Tournaments & Admin Competition Manager (Sprint 8)
+- **Last completed milestone:** Milestone 9 — Analytics & Head-to-Head (Sprint 9)
 - **In progress:** None
-- **Next milestone to start:** Milestone 9 — Polish & PWA / Push Notifications (Sprint 9)
-- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0 errors, Vite 511 modules); Server test suites pass (106/106 tests ok across 10 suites); Full single-elimination tournament bracket engine with power-of-2 size and automated Byes; Atomic tournament rating bonus distribution (+50 Winner, +25 Runner-up, +10 Semifinalists) inside MongoDB ACID transactions with HTTP 409 duplicate-award concurrency guard; Team-average doubles seeding; Suspended-player registration guard; Status-gated withdrawal; Paginated Rating History audit table (`GET /api/admin/rating-history`); Interactive Admin Competition Manager tab & Player Tournament Hub with visual SVG/CSS bracket trees.
+- **Next milestone to start:** Milestone 10 — UI Polish & Cross-Cutting Polish (Sprint 10)
+- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0 errors, Vite 1122 modules in 4.08s); Server test suites pass (125/125 tests ok across 13 suites); Interactive historical Elo trajectory graphs with Recharts on Player Profile and Dashboard; 30-day "Most Improved" specialty leaderboard calculation; Standalone shareable Head-to-Head compare page (`/compare?p1=PH-XXXXX&p2=PH-YYYYY`) with win probability gauges and match archives; Admin Manual Rating Adjustment (`POST /api/admin/ratings/adjust`) and Match Score Correction (`PUT /api/admin/matches/:id/correct`) tools with mandatory audit reasons adhering strictly to Rule G & Section 13 "No Quiet Changes".
 - **Environment/deploy state:** Local development (`client: localhost:5173`, `server: localhost:5000`)
-- **Last updated:** 2026-09-01 by AI Coding Agent (Milestone 8 Tournaments Complete)
+- **Last updated:** 2026-09-04 by AI Coding Agent (Milestone 9 Complete)
 
 ---
 
@@ -62,7 +62,7 @@ Two other files this works alongside:
   - **In-App Co-Admin Promotion:** Existing administrators can promote other users to `ADMIN` via `POST /api/admin/users/:id/promote` (guarded by `authorize('ADMIN')` and logged in `AuditLog`).
   - **Token Re-Authentication Lifecycle:** Because user role is cryptographically baked into JWT payloads at login for fast server-side authorization checks, promoting an active user does not alter their existing token. The promoted user must log out and log in again to receive a new JWT with `role: 'ADMIN'`. This is verified in `server/test/securityPatch.test.js`.
 - **JWT Storage Migration Track (Master Plan Part E):**
-  - Planned migration from `localStorage` to short-lived in-memory access token + `httpOnly` refresh cookie scheduled prior to Milestone 9.
+  - Completed on 2026-09-03 prior to Milestone 9. Migrated from `localStorage` token storage to short-lived in-memory access token (15m) + `httpOnly`, `Secure`, `SameSite` refresh cookie (7d). Added `POST /api/auth/refresh`, silent refresh interceptor queue on client, and full regression test suite (`server/test/authRefresh.test.js`).
 
 ---
 
@@ -621,7 +621,53 @@ Two other files this works alongside:
 - `npm run build` — Vite production build successful in 957ms
 
 **Resume point for next agent:**
-- Milestone 8 is 100% complete and fully passing. Proceed to **Milestone 9 — Polish & PWA / Push Notifications (Sprint 9)**: PWA manifest & service worker, push notifications for match approvals and tournament bracket announcements, and final performance/accessibility polish.
+- Proceed to **Milestone 9 — Analytics & Head-to-Head (Sprint 9)**: Recharts integration for player Elo trajectories, performance insights, shareable head-to-head comparison page, and admin manual rating adjustments / match corrections with audit logging.
+
+---
+
+### Pre-Milestone 9 Cleanup & Dual-Token JWT Migration (Sprint 8.5)
+- **Status:** Completed
+- **Date:** 2026-09-03
+- **Session/Agent:** Security & Linter Cleanup
+
+**What was built:**
+- **Oxlint React Compiler Warning Elimination:**
+  - Resolved `Date.now()` purity warning in `TournamentsPage.jsx` using state-driven `now` timestamp updated via interval.
+  - Inlined async fetch operations in `TournamentsPage.jsx` and `AdminPage.jsx` to eliminate `setState-in-effect` cascading render patterns.
+  - Removed dead/unused `fetchPendingQueue` callback in `AdminPage.jsx`. Oxlint clean: 0 warnings, 0 errors across 34 files.
+- **Roadmap Scope Correction:**
+  - Aligned `MEMORY.md` with canonical PRD roadmap `milestone.md.md`: Milestone 9 is designated as "Analytics & Head-to-Head".
+- **Dual-Token Authentication Architecture (Master Plan Part E):**
+  - Short-lived Access Token (15m default) stored purely in-memory in `client/src/services/api.js`, completely XSS-proof.
+  - Long-lived Refresh Token (7d default) stored in `httpOnly`, `Secure`, `SameSite=Strict/Lax` cookie mounted at path `/api/auth`.
+  - Added `cookie-parser` middleware to server `app.js`.
+  - Added `POST /api/auth/refresh` endpoint in `authController.js` and `authRoutes.js`.
+  - Built automatic silent token refresh in Axios response interceptors with concurrency queuing via subscriber callbacks.
+  - Updated `AuthContext.jsx` to remove all localStorage token persistence, hydrating sessions on mount via silent `/api/auth/refresh`.
+  - Created automated test suite `server/test/authRefresh.test.js` (11 new tests, 117/117 passing total).
+
+**Files touched:**
+- `client/src/pages/TournamentsPage.jsx`
+- `client/src/pages/AdminPage.jsx`
+- `client/src/services/api.js`
+- `client/src/context/AuthContext.jsx`
+- `server/src/app.js`
+- `server/src/config/env.js`
+- `server/src/services/authService.js`
+- `server/src/controllers/authController.js`
+- `server/src/routes/authRoutes.js`
+- `server/test/authRefresh.test.js` (NEW)
+- `server/package.json`
+- `.env.example`
+- `docs/MEMORY.md`
+
+**Tests run and results:**
+- `npm test` — **117 / 117 pass** across 11 test suites (100% pass)
+- `npm run lint` — **0 errors, 0 warnings** (server ESLint + client Oxlint + CI Guardrails)
+- `npm run build` — Vite production build successful in 499ms
+
+**Resume point for next agent:**
+- Proceed to **Milestone 9 — Analytics & Head-to-Head (Sprint 9)**.
 
 ---
 

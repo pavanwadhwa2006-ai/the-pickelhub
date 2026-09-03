@@ -40,7 +40,11 @@ module.exports = {
     'mongodb+srv://pavanwadhwa2006_db_user:pickelhub12345@fullstack-1.ks86kwk.mongodb.net/picklehub?retryWrites=true&w=majority&appName=Fullstack-1',
   JWT_SECRET:
     process.env.JWT_SECRET || 'picklehub_secret_jwt_key_production_vault_99281',
+  REFRESH_TOKEN_SECRET:
+    process.env.REFRESH_TOKEN_SECRET || 'picklehub_refresh_secret_vault_83721',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
+  ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY || '15m',
+  REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY || '7d',
   PORT: parseInt(process.env.PORT, 10) || 5000,
   NODE_ENV: process.env.NODE_ENV || 'development',
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',

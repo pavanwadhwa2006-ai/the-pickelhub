@@ -20,6 +20,7 @@ const Navbar = () => {
     { label: 'HOME', path: '/' },
     { label: 'LEADERBOARD', path: '/leaderboard' },
     { label: 'TOURNAMENTS', path: '/tournaments' },
+    { label: 'COMPARE', path: '/compare' },
     ...(isAuthenticated ? [{ label: 'DASHBOARD', path: '/dashboard' }] : []),
     ...(isAdmin ? [{ label: 'ADMIN PANEL', path: '/admin' }] : []),
   ];

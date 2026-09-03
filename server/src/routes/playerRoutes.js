@@ -14,6 +14,7 @@ const {
   searchPlayers,
   getLeaderboardSpecialties,
   comparePlayers,
+  getPlayerRatingHistory,
 } = require('../controllers/playerController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -26,6 +27,7 @@ router.get('/compare', comparePlayers);
 router.get('/me', protect, getMyPlayerProfile);
 router.put('/me', protect, updateMyProfile);
 router.get('/', getPlayers);
+router.get('/:id/rating-history', getPlayerRatingHistory);
 router.get('/:id', getPlayerById);
 
 module.exports = router;

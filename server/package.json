@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "node --test test/auth.test.js test/player.test.js test/duplicate_email.test.js test/rating.test.js test/match.test.js test/leaderboard.test.js test/profile.test.js test/adminApprovals.test.js test/securityPatch.test.js test/tournaments.test.js",
+    "test": "node --test test/auth.test.js test/player.test.js test/duplicate_email.test.js test/rating.test.js test/match.test.js test/leaderboard.test.js test/profile.test.js test/adminApprovals.test.js test/securityPatch.test.js test/tournaments.test.js test/authRefresh.test.js test/batchApproval.test.js test/analyticsGovernance.test.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.js\""
@@ -14,6 +14,7 @@
   "dependencies": {
     "@vercel/blob": "^2.8.0",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

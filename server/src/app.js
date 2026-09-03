@@ -9,6 +9,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const { NODE_ENV, CLIENT_URL } = require('./config/env');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const { sanitizeInput } = require('./middleware/sanitizer');
@@ -54,6 +55,9 @@ app.use(
 if (NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
+
+// Cookie parsing (for httpOnly refresh token)
+app.use(cookieParser());
 
 // Body parsing — 1mb is sufficient for all JSON endpoints;
 // photo uploads use multer (multipart), not the JSON parser.

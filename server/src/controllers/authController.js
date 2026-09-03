@@ -1,12 +1,47 @@
 /**
  * Auth Controller
  *
- * Handles user registration, login with lockout protection, logout, and profile retrieval.
+ * Handles user registration, login with lockout protection, logout, token refresh, and profile retrieval.
+ * Implements dual-token architecture:
+ * - Access Token (15m) returned in JSON body, stored in-memory on client
+ * - Refresh Token (7d) set as httpOnly cookie, used only to mint new access tokens
  */
 
 const User = require('../models/User');
-const { generateToken, verifyGoogleToken } = require('../services/authService');
+const {
+  generateToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+  verifyGoogleToken,
+  getRefreshCookieMaxAge,
+} = require('../services/authService');
 const { createPlayerProfile, getOrCreatePlayerProfile } = require('../services/playerService');
+const { NODE_ENV } = require('../config/env');
+
+/**
+ * Helper: Set refresh token as httpOnly cookie
+ */
+const setRefreshCookie = (res, refreshToken) => {
+  res.cookie('picklehub_refresh', refreshToken, {
+    httpOnly: true,
+    secure: NODE_ENV === 'production',
+    sameSite: NODE_ENV === 'production' ? 'strict' : 'lax',
+    maxAge: getRefreshCookieMaxAge(),
+    path: '/api/auth', // only sent to auth routes
+  });
+};
+
+/**
+ * Helper: Clear refresh token cookie
+ */
+const clearRefreshCookie = (res) => {
+  res.clearCookie('picklehub_refresh', {
+    httpOnly: true,
+    secure: NODE_ENV === 'production',
+    sameSite: NODE_ENV === 'production' ? 'strict' : 'lax',
+    path: '/api/auth',
+  });
+};
 
 /**
  * @desc    Register a new user & auto-create player profile
@@ -60,12 +95,15 @@ const register = async (req, res, next) => {
       // Lazy repair will handle profile creation if needed
     }
 
-    const token = generateToken(user._id, user.role);
+    const accessToken = generateToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+
+    setRefreshCookie(res, refreshToken);
 
     res.status(201).json({
       success: true,
       message: 'Registration successful.',
-      token,
+      token: accessToken,
       user: {
         id: user._id,
         email: user.email,
@@ -137,13 +175,16 @@ const login = async (req, res, next) => {
     // Reset failed attempts upon successful login
     await user.handleSuccessfulLogin();
 
-    const token = generateToken(user._id, user.role);
+    const accessToken = generateToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
     const player = await getOrCreatePlayerProfile(user);
+
+    setRefreshCookie(res, refreshToken);
 
     res.status(200).json({
       success: true,
       message: 'Login successful.',
-      token,
+      token: accessToken,
       user: {
         id: user._id,
         email: user.email,
@@ -155,18 +196,6 @@ const login = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-/**
- * @desc    Log out user (stateless JWT confirmation)
- * @route   POST /api/auth/logout
- * @access  Public
- */
-const logout = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Logged out successfully.',
-  });
 };
 
 /**
@@ -244,12 +273,15 @@ const googleAuth = async (req, res, _next) => {
       }
     }
 
-    const token = generateToken(user._id, user.role);
+    const accessToken = generateToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+
+    setRefreshCookie(res, refreshToken);
 
     res.status(200).json({
       success: true,
       message: 'Google authentication successful.',
-      token,
+      token: accessToken,
       user: {
         id: user._id,
         email: user.email,
@@ -263,6 +295,70 @@ const googleAuth = async (req, res, _next) => {
     return res.status(401).json({
       success: false,
       message: 'Google authentication failed. ' + (error.message || 'Invalid token.'),
+    });
+  }
+};
+
+/**
+ * @desc    Log out user — clear refresh cookie
+ * @route   POST /api/auth/logout
+ * @access  Public
+ */
+const logout = async (req, res) => {
+  clearRefreshCookie(res);
+  res.status(200).json({
+    success: true,
+    message: 'Logged out successfully.',
+  });
+};
+
+/**
+ * @desc    Refresh access token using httpOnly refresh cookie
+ * @route   POST /api/auth/refresh
+ * @access  Public (cookie required)
+ */
+const refresh = async (req, res) => {
+  try {
+    const refreshCookie = req.cookies?.picklehub_refresh;
+
+    if (!refreshCookie) {
+      return res.status(401).json({
+        success: false,
+        message: 'No refresh token provided.',
+      });
+    }
+
+    const decoded = verifyRefreshToken(refreshCookie);
+
+    // Fetch the user to get current role (in case of promotion since last login)
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      clearRefreshCookie(res);
+      return res.status(401).json({
+        success: false,
+        message: 'User not found.',
+      });
+    }
+
+    const accessToken = generateToken(user._id, user.role);
+    const player = await getOrCreatePlayerProfile(user);
+
+    res.status(200).json({
+      success: true,
+      token: accessToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
+      player,
+    });
+  } catch (error) {
+    clearRefreshCookie(res);
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or expired refresh token. Please log in again.',
     });
   }
 };
@@ -296,5 +392,6 @@ module.exports = {
   login,
   googleAuth,
   logout,
+  refresh,
   getMe,
 };

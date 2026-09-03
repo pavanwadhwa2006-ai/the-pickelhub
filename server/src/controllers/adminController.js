@@ -14,7 +14,12 @@ const AuditLog = require('../models/AuditLog');
 const Counter = require('../models/Counter');
 const { getOrCreatePlayerProfile } = require('../services/playerService');
 const { validateMatchPayload } = require('./matchController');
-const { executeAtomicMatchApproval } = require('../services/adminService');
+const {
+  executeAtomicMatchApproval,
+  executeBatchMatchApproval,
+  executeManualRatingAdjustment,
+  executeMatchCorrection,
+} = require('../services/adminService');
 
 /**
  * @desc    Get all pending match submissions awaiting admin approval
@@ -75,6 +80,30 @@ const approveMatch = async (req, res, next) => {
       success: true,
       message: `Match ${approvedMatch.matchId} approved successfully. Ratings and standings updated.`,
       data: approvedMatch,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Batch approve multiple pending matches in sequence
+ * @route   POST /api/admin/matches/batch-approve
+ * @access  Private (Admin Only)
+ */
+const batchApproveMatches = async (req, res, next) => {
+  try {
+    const { matchIds } = req.body;
+
+    const result = await executeBatchMatchApproval({
+      adminUserId: req.user._id,
+      matchIds,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Batch approval complete. Approved ${result.approvedCount} match(es).`,
+      data: result,
     });
   } catch (error) {
     next(error);
@@ -319,11 +348,68 @@ const promoteUser = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Manually adjust player rating with mandatory audit reason (Rule G, PRD Section 13)
+ * @route   POST /api/admin/ratings/adjust
+ * @access  Private (Admin Only)
+ */
+const adjustRating = async (req, res, next) => {
+  try {
+    const { playerId, newRating, reason } = req.body;
+
+    const result = await executeManualRatingAdjustment({
+      adminUserId: req.user._id,
+      playerId,
+      newRating,
+      reason,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Rating for ${result.player.name} (${result.player.playerId}) successfully adjusted to ${result.player.currentRating} Elo.`,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Correct match score with mandatory audit reason (Rule G, PRD Section 13)
+ * @route   PUT /api/admin/matches/:id/correct
+ * @access  Private (Admin Only)
+ */
+const correctMatch = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { scores, winnerTeam, reason } = req.body;
+
+    const corrected = await executeMatchCorrection({
+      adminUserId: req.user._id,
+      matchId: id,
+      newScores: scores,
+      newWinnerTeam: winnerTeam,
+      reason,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Match ${corrected.matchId} score successfully corrected.`,
+      data: corrected,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPendingMatches,
   approveMatch,
+  batchApproveMatches,
   rejectMatch,
   createDirectMatch,
   getAuditLogs,
   promoteUser,
+  adjustRating,
+  correctMatch,
 };

@@ -16,6 +16,10 @@ import AnimatedNumber from '../components/AnimatedNumber';
 import RevealOnScroll from '../components/RevealOnScroll';
 import EmptyState from '../components/EmptyState';
 import TierBadge from '../components/TierBadge';
+import TierProgressBar from '../components/TierProgressBar';
+import HowItWorksCard from '../components/HowItWorksCard';
+import DigitalClubPassModal from '../components/DigitalClubPassModal';
+import RatingHistoryChart from '../components/RatingHistoryChart';
 
 const DashboardPage = () => {
   const { user, player, isAdmin, refreshProfile } = useAuth();
@@ -24,18 +28,30 @@ const DashboardPage = () => {
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [updateMsg, setUpdateMsg] = useState(null);
+  const [showClubPass, setShowClubPass] = useState(false);
 
-  // Active Pending Matches State
+  // Active Pending Matches & Rating History State
   const [pendingMatches, setPendingMatches] = useState([]);
   const [loadingPending, setLoadingPending] = useState(true);
+  const [ratingHistory, setRatingHistory] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
-    const fetchPending = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const res = await api.get('/matches/pending');
-        if (isMounted && res.data.success) {
-          setPendingMatches(res.data.data || []);
+        const promises = [api.get('/matches/pending')];
+        if (player?.playerId) {
+          promises.push(api.get(`/players/${player.playerId}/rating-history`));
+        }
+
+        const [pendingRes, historyRes] = await Promise.allSettled(promises);
+        if (isMounted) {
+          if (pendingRes.status === 'fulfilled' && pendingRes.value.data.success) {
+            setPendingMatches(pendingRes.value.data.data || []);
+          }
+          if (historyRes && historyRes.status === 'fulfilled' && historyRes.value.data.success) {
+            setRatingHistory(historyRes.value.data.data.history || []);
+          }
         }
       } catch {
         if (isMounted) setPendingMatches([]);
@@ -43,11 +59,11 @@ const DashboardPage = () => {
         if (isMounted) setLoadingPending(false);
       }
     };
-    fetchPending();
+    fetchDashboardData();
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [player?.playerId]);
 
   const formattedDate = player?.createdAt || user?.createdAt
     ? new Date(player?.createdAt || user?.createdAt).toLocaleDateString('en-US', {
@@ -182,9 +198,18 @@ const DashboardPage = () => {
         </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowClubPass(true)}
+              className="px-4 py-2.5 bg-[var(--color-bg-card,#251f10)] hover:bg-[var(--color-bg-card-hover,#352c16)] border border-[var(--color-accent-primary,#ff3b3f)]/60 text-[var(--color-text-primary,#ede1c9)] text-xs font-bold tracking-[0.15em] uppercase transition-all rounded-xl flex items-center gap-2 cursor-pointer shadow-sm"
+              title="Open Digital Club Pass with QR Code"
+            >
+              <span>🪪</span>
+              <span>View Club Pass</span>
+            </button>
             <Link
               to="/matches/submit"
-              className="px-5 py-2.5 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)]"
+              className="px-5 py-2.5 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] rounded-xl"
             >
               + SUBMIT MATCH SCORES
             </Link>
@@ -219,6 +244,13 @@ const DashboardPage = () => {
             )}
           </div>
         </div>
+
+        {/* Next Skill Tier Progression Bar */}
+        <TierProgressBar
+          rating={player?.currentRating || 1000}
+          category={player?.category || 'Intermediate'}
+          className="mb-10 animate-fade-in"
+        />
 
         {/* Rating & Performance Metrics Grid with Tiered Elevation */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -283,6 +315,16 @@ const DashboardPage = () => {
             </div>
           </TiltCard>
         </div>
+
+        {/* Official Historical Rating Trajectory Chart (Milestone 9) */}
+        <RatingHistoryChart
+          history={ratingHistory}
+          currentRating={player?.currentRating || 1000}
+          className="mb-12 animate-fade-in"
+        />
+
+        {/* How It Works Explainer Card */}
+        <HowItWorksCard className="mb-12 animate-fade-in" />
 
         {/* Active Pending Matches Section (PRD Section 6.1.4: "Pending Admin Approval") */}
         {pendingMatches.length > 0 && (
@@ -448,6 +490,13 @@ const DashboardPage = () => {
           </RevealOnScroll>
         </div>
       </div>
+
+      {/* Digital Club Pass Modal with QR Challenge Link */}
+      <DigitalClubPassModal
+        isOpen={showClubPass}
+        onClose={() => setShowClubPass(false)}
+        player={player}
+      />
     </PageTransition>
   );
 };

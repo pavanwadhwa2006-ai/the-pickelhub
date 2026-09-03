@@ -159,13 +159,13 @@ const LeaderboardPage = () => {
           </Link>
         </div>
 
-        {/* 4 Specialty Leader Showcase Blocks (PRD Section 8.2) */}
+        {/* 5 Specialty Leader Showcase Blocks (PRD Section 8.2 & Deliverable D2) */}
         {specialties && (
           <div className="mb-12">
             <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase block mb-4">
               SPECIALTY DIVISION LEADERS
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
               {/* 1. Highest Rated */}
               <TiltCard className="specialty-card-highest p-6 bg-[#251f10] border-2 border-[#ff3b3f]/70 shadow-[0_0_20px_rgba(255,59,63,0.15)] hover-lift">
                 <div className="flex justify-between items-start mb-2">
@@ -239,6 +239,25 @@ const LeaderboardPage = () => {
                 </div>
                 <div className="text-[10px] text-[#ad8885] font-mono mt-0.5">
                   {specialties.longestStreak?.playerId} • Current Streak
+                </div>
+              </TiltCard>
+
+              {/* 5. Most Improved (30 Days — Deliverable D2) */}
+              <TiltCard className="specialty-card-improved p-6 bg-[#201b0c] border border-emerald-500/40 hover:border-emerald-500 hover-lift">
+                <div className="card-title text-[10px] font-bold tracking-widest text-emerald-400 uppercase mb-2 flex items-center justify-between">
+                  <span>⚡ MOST IMPROVED</span>
+                  <span className="text-[9px] font-mono text-emerald-400/80">30D</span>
+                </div>
+                <div className="font-['Playfair_Display'] text-3xl font-bold text-[#ede1c9] mb-1">
+                  <span className="text-emerald-400 font-mono text-2xl mr-1">+</span>
+                  <AnimatedNumber value={specialties.mostImproved?.netGain || 0} duration={800} />
+                  <span className="text-xs font-sans text-emerald-400/90 ml-1">Elo</span>
+                </div>
+                <div className="font-bold text-sm text-[#ede1c9] truncate">
+                  {specialties.mostImproved?.name || 'Active Gainers'}
+                </div>
+                <div className="text-[10px] text-[#ad8885] font-mono mt-0.5">
+                  {specialties.mostImproved?.playerId} • {specialties.mostImproved?.currentRating || 1000} Elo
                 </div>
               </TiltCard>
             </div>

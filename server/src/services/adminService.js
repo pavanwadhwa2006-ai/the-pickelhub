@@ -208,6 +208,184 @@ const executeAtomicMatchApproval = async ({
   }
 };
 
+/**
+ * Executes batch approval for multiple pending matches.
+ * Approves matches sequentially, each protected by an atomic transaction.
+ *
+ * @param {object} params
+ * @param {mongoose.Types.ObjectId} params.adminUserId - Authenticated Admin User ObjectId
+ * @param {Array<string|mongoose.Types.ObjectId>} [params.matchIds] - Optional specific IDs to approve
+ * @returns {Promise<object>} Summary with approvedCount, approvedMatches, and errors
+ */
+const executeBatchMatchApproval = async ({ adminUserId, matchIds = null }) => {
+  let targets = [];
+  if (Array.isArray(matchIds) && matchIds.length > 0) {
+    targets = matchIds;
+  } else {
+    const pending = await Match.find({ status: 'PENDING_APPROVAL' }).select('_id matchId');
+    targets = pending.map((m) => m._id);
+  }
+
+  const approvedMatches = [];
+  const errors = [];
+
+  for (const matchId of targets) {
+    try {
+      const approved = await executeAtomicMatchApproval({
+        matchId,
+        adminUserId,
+        actionType: 'MATCH_APPROVE',
+        isDirect: false,
+      });
+      approvedMatches.push(approved);
+    } catch (err) {
+      errors.push({ matchId, message: err.message });
+    }
+  }
+
+  return {
+    totalRequested: targets.length,
+    approvedCount: approvedMatches.length,
+    approvedMatches,
+    errors,
+  };
+};
+
+/**
+ * Executes a manual rating adjustment with mandatory audit justification.
+ * (PRD Section 13 "No Quiet Changes" & Milestone 9)
+ */
+const executeManualRatingAdjustment = async ({ adminUserId, playerId, newRating, reason }) => {
+  if (!reason || typeof reason !== 'string' || reason.trim().length < 5) {
+    const err = new Error('A valid justification reason (minimum 5 characters) is required for manual rating adjustments.');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const ratingNum = parseInt(newRating, 10);
+  if (isNaN(ratingNum) || ratingNum < 0) {
+    const err = new Error('A valid non-negative integer rating is required.');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  let player = null;
+  if (mongoose.Types.ObjectId.isValid(playerId)) {
+    player = await Player.findById(playerId);
+  } else {
+    player = await Player.findOne({ playerId: playerId.toString().toUpperCase() });
+  }
+
+  if (!player) {
+    const err = new Error(`Player '${playerId}' not found.`);
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const ratingBefore = player.currentRating;
+  const categoryBefore = player.category;
+  const delta = ratingNum - ratingBefore;
+  const categoryAfter = calculateCategory(ratingNum);
+
+  // Update Player
+  player.currentRating = ratingNum;
+  player.highestRating = Math.max(player.highestRating, ratingNum);
+  player.category = categoryAfter;
+  await player.save();
+
+  // Create RatingHistory
+  const ratingHistory = await RatingHistory.create({
+    playerId: player._id,
+    changeType: 'MANUAL_ADJUSTMENT',
+    ratingBefore,
+    ratingAfter: ratingNum,
+    delta,
+    categoryBefore,
+    categoryAfter,
+    reason: reason.trim(),
+    recordedBy: adminUserId,
+    createdAt: new Date(),
+  });
+
+  // Create AuditLog
+  await AuditLog.create({
+    action: 'MANUAL_RATING_ADJUST',
+    performedBy: adminUserId,
+    targetType: 'Player',
+    targetId: player._id,
+    metadata: {
+      playerId: player.playerId,
+      playerName: player.name,
+      previousRating: ratingBefore,
+      newRating: ratingNum,
+      delta,
+      reason: reason.trim(),
+    },
+    createdAt: new Date(),
+  });
+
+  return { player, ratingHistory };
+};
+
+/**
+ * Executes a match correction with mandatory audit reason.
+ * (PRD Section 13 & Milestone 9)
+ */
+const executeMatchCorrection = async ({ adminUserId, matchId, newScores, newWinnerTeam, reason }) => {
+  if (!reason || typeof reason !== 'string' || reason.trim().length < 5) {
+    const err = new Error('A valid justification reason (minimum 5 characters) is required to correct a match score.');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  let match = null;
+  if (mongoose.Types.ObjectId.isValid(matchId)) {
+    match = await Match.findById(matchId);
+  } else {
+    match = await Match.findOne({ matchId });
+  }
+
+  if (!match) {
+    const err = new Error(`Match '${matchId}' not found.`);
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const oldScores = match.scores;
+  const oldWinner = match.winnerTeam;
+
+  match.scores = newScores || match.scores;
+  if (newWinnerTeam) match.winnerTeam = newWinnerTeam;
+  match.isCorrected = true;
+  match.correctionReason = reason.trim();
+  match.correctedBy = adminUserId;
+  match.correctedAt = new Date();
+
+  await match.save();
+
+  // Create AuditLog
+  await AuditLog.create({
+    action: 'MATCH_CORRECT',
+    performedBy: adminUserId,
+    targetType: 'Match',
+    targetId: match._id,
+    metadata: {
+      matchId: match.matchId,
+      oldScores,
+      newScores: match.scores,
+      oldWinner,
+      newWinner: match.winnerTeam,
+      reason: reason.trim(),
+    },
+    createdAt: new Date(),
+  });
+
+  return match;
+};
+
 module.exports = {
   executeAtomicMatchApproval,
+  executeBatchMatchApproval,
+  executeManualRatingAdjustment,
+  executeMatchCorrection,
 };

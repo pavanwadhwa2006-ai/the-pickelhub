@@ -15,7 +15,7 @@ A competitive sports-tech platform for pickleball player management, Elo-style r
 ## Project Structure
 
 ```
-pickelhub/
+picklehub/
 ├── client/          # React + Vite frontend
 │   ├── src/
 │   │   ├── assets/
@@ -52,7 +52,7 @@ pickelhub/
 1. **Clone the repository**
    ```bash
    git clone <repo-url>
-   cd pickelhub
+   cd picklehub
    ```
 
 2. **Set up environment variables**

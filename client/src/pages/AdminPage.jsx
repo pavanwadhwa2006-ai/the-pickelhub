@@ -16,8 +16,9 @@ import api from '../services/api';
 import PageTransition from '../components/PageTransition';
 import TierBadge from '../components/TierBadge';
 import BracketVisualizer from '../components/BracketVisualizer';
+import InlinePlayerPicker from '../components/InlinePlayerPicker';
 
-const COURTS = ['Court 1', 'Court 2', 'Court 3', 'Court 4', 'Court 5', 'Center Court'];
+const COURTS = ['Court 1', 'Court 2'];
 const TOURNAMENT_FORMATS = ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES', 'OPEN'];
 const SKILL_DIVISIONS = ['All', 'Beginner', 'Intermediate', 'Advanced Intermediate', 'Pro'];
 
@@ -112,21 +113,6 @@ const AdminPage = () => {
   const [directError, setDirectError] = useState(null);
   const [directSuccess, setDirectSuccess] = useState(null);
 
-  // Load Pending Match Queue
-  const fetchPendingQueue = useCallback(async () => {
-    setLoadingPending(true);
-    setActionError(null);
-    try {
-      const res = await api.get('/admin/matches/pending?limit=50');
-      if (res.data.success) {
-        setPendingMatches(res.data.data);
-      }
-    } catch (err) {
-      setActionError(err.response?.data?.message || 'Failed to fetch pending matches queue.');
-    } finally {
-      setLoadingPending(false);
-    }
-  }, []);
 
   // Load Tournaments List
   const fetchTournaments = useCallback(async () => {
@@ -194,10 +180,28 @@ const AdminPage = () => {
     }
   }, []);
 
+  // Initial load of pending queue — inlined to satisfy React Compiler
   useEffect(() => {
-    fetchPendingQueue();
-  }, [fetchPendingQueue]);
+    let cancelled = false;
+    const loadQueue = async () => {
+      setLoadingPending(true);
+      setActionError(null);
+      try {
+        const res = await api.get('/admin/matches/pending?limit=50');
+        if (!cancelled && res.data.success) {
+          setPendingMatches(res.data.data);
+        }
+      } catch (err) {
+        if (!cancelled) setActionError(err.response?.data?.message || 'Failed to fetch pending matches queue.');
+      } finally {
+        if (!cancelled) setLoadingPending(false);
+      }
+    };
+    loadQueue();
+    return () => { cancelled = true; };
+  }, []);
 
+  // Tab-switching data loader — inlined to satisfy React Compiler
   useEffect(() => {
     if (activeTab === 'tournaments') {
       fetchTournaments();
@@ -206,7 +210,37 @@ const AdminPage = () => {
     } else if (activeTab === 'audit') {
       fetchAuditLogs();
     }
-  }, [activeTab, fetchTournaments, fetchRatingHistory, fetchAuditLogs, ratingHistoryPage, ratingHistoryFilterType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, ratingHistoryPage, ratingHistoryFilterType]);
+
+  // Handle Batch Approve All Pending Matches
+  const [batchLoading, setBatchLoading] = useState(false);
+
+  const handleBatchApprove = async () => {
+    if (pendingMatches.length === 0) return;
+    const confirmApprove = window.confirm(
+      `Are you sure you want to approve all ${pendingMatches.length} pending match(es)? All Elo ratings will be calculated and updated atomically.`
+    );
+    if (!confirmApprove) return;
+
+    setBatchLoading(true);
+    setActionError(null);
+    setActionSuccess(null);
+    try {
+      const matchIds = pendingMatches.map((m) => m._id);
+      const res = await api.post('/admin/matches/batch-approve', { matchIds });
+      if (res.data.success) {
+        setPendingMatches([]);
+        setActionSuccess(
+          `⚡ Batch Approval Complete! Approved ${res.data.data.approvedCount} match(es). Standings and Elo ratings updated.`
+        );
+      }
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Failed to execute batch approvals.');
+    } finally {
+      setBatchLoading(false);
+    }
+  };
 
   // Handle Approve Match
   const handleApprove = async (matchId) => {
@@ -545,6 +579,130 @@ const AdminPage = () => {
     }
   };
 
+  // ----------------------------------------------------
+  // Milestone 9: Manual Rating Adjustment & Match Correction
+  // ----------------------------------------------------
+  const [adjustPlayer, setAdjustPlayer] = useState(null);
+  const [adjustNewRating, setAdjustNewRating] = useState('');
+  const [adjustReason, setAdjustReason] = useState('');
+  const [adjustSubmitting, setAdjustSubmitting] = useState(false);
+  const [adjustSuccess, setAdjustSuccess] = useState(null);
+  const [adjustError, setAdjustError] = useState(null);
+
+  const handleManualRatingAdjustment = async (e) => {
+    e.preventDefault();
+    if (!adjustPlayer) {
+      setAdjustError('Please select a player to adjust.');
+      return;
+    }
+    const num = parseInt(adjustNewRating, 10);
+    if (isNaN(num) || num < 0) {
+      setAdjustError('Please enter a valid non-negative integer rating.');
+      return;
+    }
+    if (!adjustReason || adjustReason.trim().length < 5) {
+      setAdjustError('A valid justification reason (minimum 5 characters) is required for audit governance.');
+      return;
+    }
+
+    setAdjustSubmitting(true);
+    setAdjustError(null);
+    setAdjustSuccess(null);
+    try {
+      const res = await api.post('/admin/ratings/adjust', {
+        playerId: adjustPlayer.playerId,
+        newRating: num,
+        reason: adjustReason.trim(),
+      });
+      if (res.data.success) {
+        setAdjustSuccess(
+          `✓ Rating for ${res.data.data.player.name} (${res.data.data.player.playerId}) successfully adjusted to ${res.data.data.player.currentRating} Elo.`
+        );
+        setAdjustPlayer(null);
+        setAdjustNewRating('');
+        setAdjustReason('');
+      }
+    } catch (err) {
+      setAdjustError(err.response?.data?.message || 'Failed to adjust player rating.');
+    } finally {
+      setAdjustSubmitting(false);
+    }
+  };
+
+  // Match Correction State
+  const [correctMatchId, setCorrectMatchId] = useState('');
+  const [correctMatchData, setCorrectMatchData] = useState(null);
+  const [correctLoading, setCorrectLoading] = useState(false);
+  const [correctGame1A, setCorrectGame1A] = useState('11');
+  const [correctGame1B, setCorrectGame1B] = useState('7');
+  const [correctWinner, setCorrectWinner] = useState('A');
+  const [correctReason, setCorrectReason] = useState('');
+  const [correctSubmitting, setCorrectSubmitting] = useState(false);
+  const [correctSuccess, setCorrectSuccess] = useState(null);
+  const [correctError, setCorrectError] = useState(null);
+
+  const handleLookupMatch = async (e) => {
+    e.preventDefault();
+    if (!correctMatchId.trim()) return;
+    setCorrectLoading(true);
+    setCorrectError(null);
+    setCorrectSuccess(null);
+    try {
+      const res = await api.get(`/matches/${correctMatchId.trim()}`);
+      if (res.data.success) {
+        const m = res.data.data;
+        setCorrectMatchData(m);
+        setCorrectGame1A(m.scores?.[0]?.teamAScore?.toString() || '11');
+        setCorrectGame1B(m.scores?.[0]?.teamBScore?.toString() || '7');
+        setCorrectWinner(m.winnerTeam || 'A');
+      }
+    } catch (err) {
+      setCorrectError(err.response?.data?.message || 'Match not found.');
+      setCorrectMatchData(null);
+    } finally {
+      setCorrectLoading(false);
+    }
+  };
+
+  const handleExecuteMatchCorrection = async (e) => {
+    e.preventDefault();
+    if (!correctMatchData) return;
+    if (!correctReason || correctReason.trim().length < 5) {
+      setCorrectError('A valid justification reason (minimum 5 characters) is required to correct scores.');
+      return;
+    }
+
+    setCorrectSubmitting(true);
+    setCorrectError(null);
+    setCorrectSuccess(null);
+    try {
+      const newScores = [
+        {
+          gameNumber: 1,
+          teamAScore: parseInt(correctGame1A, 10),
+          teamBScore: parseInt(correctGame1B, 10),
+        },
+      ];
+
+      const res = await api.put(`/admin/matches/${correctMatchData._id}/correct`, {
+        scores: newScores,
+        winnerTeam: correctWinner,
+        reason: correctReason.trim(),
+      });
+
+      if (res.data.success) {
+        setCorrectSuccess(`✓ Match #${res.data.data.matchId} score successfully corrected and logged.`);
+        setCorrectMatchData(null);
+        setCorrectMatchId('');
+        setCorrectReason('');
+      }
+    } catch (err) {
+      setCorrectError(err.response?.data?.message || 'Failed to correct match score.');
+    } finally {
+      setCorrectSubmitting(false);
+    }
+  };
+
   return (
     <PageTransition className="min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] py-8 px-4 sm:px-8 md:px-12 transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto">
@@ -662,6 +820,24 @@ const AdminPage = () => {
           >
             <span>Governance Audit Trail</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('adjust')}
+            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'adjust' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+            }`}
+          >
+            <span>Manual Rating Adjust</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('correct')}
+            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'correct' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+            }`}
+          >
+            <span>Match Correction</span>
+          </button>
         </div>
 
         {/* ==================================================== */}
@@ -669,6 +845,26 @@ const AdminPage = () => {
         {/* ==================================================== */}
         {activeTab === 'queue' && (
           <div className="space-y-6">
+            {pendingMatches.length > 0 && (
+              <div className="p-4 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-xs font-bold text-[var(--color-text-primary)]">
+                    {pendingMatches.length} Match Submission{pendingMatches.length !== 1 ? 's' : ''} Awaiting Approval
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleBatchApprove}
+                  disabled={batchLoading}
+                  className="px-5 py-2.5 bg-[var(--color-accent-primary)] hover:brightness-110 text-white text-xs font-bold tracking-wider uppercase rounded-xl transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                >
+                  <span>⚡</span>
+                  <span>{batchLoading ? 'Approving All...' : `Batch Approve All (${pendingMatches.length})`}</span>
+                </button>
+              </div>
+            )}
+
             {loadingPending ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -1358,6 +1554,273 @@ const AdminPage = () => {
                   </tbody>
                 </table>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* ==================================================== */}
+        {/* TAB 6: MANUAL RATING ADJUSTMENT (MILESTONE 9)        */}
+        {/* ==================================================== */}
+        {activeTab === 'adjust' && (
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] p-6 rounded-2xl">
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[var(--color-text-primary)]">
+                  Manual Elo Rating Adjustment
+                </h2>
+              </div>
+              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                Administrative tool for provisional calibration, tournament seeding overrides, or penal adjustments per PRD Section 13 ("No Quiet Changes").
+                Every rating modification strictly requires an immutable justification reason recorded in both <code className="font-mono text-[var(--color-accent-primary)]">RatingHistory</code> and <code className="font-mono text-[var(--color-accent-primary)]">AuditLog</code>.
+              </p>
+            </div>
+
+            {adjustSuccess && (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 text-xs rounded-xl">
+                {adjustSuccess}
+              </div>
+            )}
+            {adjustError && (
+              <div className="p-4 bg-rose-500/10 border border-rose-500/40 text-rose-400 text-xs rounded-xl">
+                ⚠️ {adjustError}
+              </div>
+            )}
+
+            <form onSubmit={handleManualRatingAdjustment} className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-3xl shadow-xl space-y-6">
+              <div>
+                <InlinePlayerPicker
+                  label="Select Player to Calibrate"
+                  placeholder="Search player name or ID (PH-XXXXX)..."
+                  selectedPlayer={adjustPlayer}
+                  onSelect={(p) => {
+                    setAdjustPlayer(p);
+                    setAdjustNewRating(p.currentRating.toString());
+                  }}
+                  onClear={() => {
+                    setAdjustPlayer(null);
+                    setAdjustNewRating('');
+                  }}
+                  showQrScan={false}
+                />
+              </div>
+
+              {adjustPlayer && (
+                <div className="p-4 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-2xl flex items-center justify-between text-xs">
+                  <div>
+                    <span className="text-[10px] text-[var(--color-text-muted)] uppercase block mb-0.5">Current Standing</span>
+                    <span className="font-bold text-sm text-[var(--color-text-primary)]">{adjustPlayer.name} ({adjustPlayer.playerId})</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-[var(--color-text-muted)] uppercase block mb-0.5">Current Rating</span>
+                    <span className="font-mono font-bold text-base text-[var(--color-accent-primary)]">{adjustPlayer.currentRating} Elo</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                    New Target Elo Rating *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="3000"
+                    required
+                    value={adjustNewRating}
+                    onChange={(e) => setAdjustNewRating(e.target.value)}
+                    placeholder="e.g., 1250"
+                    className="w-full p-3.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-base font-bold text-[var(--color-text-primary)] focus:border-[var(--color-accent-primary)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                    Rating Delta Preview
+                  </label>
+                  <div className="p-3.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-base font-bold flex items-center justify-between">
+                    <span className="text-xs text-[var(--color-text-muted)]">Delta:</span>
+                    <span className={
+                      adjustPlayer && parseInt(adjustNewRating, 10) - adjustPlayer.currentRating > 0
+                        ? 'text-emerald-400'
+                        : adjustPlayer && parseInt(adjustNewRating, 10) - adjustPlayer.currentRating < 0
+                        ? 'text-rose-400'
+                        : 'text-[var(--color-text-muted)]'
+                    }>
+                      {adjustPlayer && !isNaN(parseInt(adjustNewRating, 10))
+                        ? (parseInt(adjustNewRating, 10) - adjustPlayer.currentRating > 0
+                            ? `+${parseInt(adjustNewRating, 10) - adjustPlayer.currentRating}`
+                            : `${parseInt(adjustNewRating, 10) - adjustPlayer.currentRating}`)
+                        : '0'} Elo
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                  Mandatory Audit Justification Reason * (min 5 characters)
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={adjustReason}
+                  onChange={(e) => setAdjustReason(e.target.value)}
+                  placeholder="e.g., Verified tournament placement adjustment, sanctioned seeding calibration..."
+                  className="w-full p-3.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-primary)]"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={adjustSubmitting || !adjustPlayer || !adjustReason.trim()}
+                  className="px-6 py-3 bg-[var(--color-accent-primary)] hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md disabled:opacity-50 cursor-pointer"
+                >
+                  {adjustSubmitting ? 'Adjusting Rating...' : '⚡ Execute Rating Adjustment & Record Audit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ==================================================== */}
+        {/* TAB 7: MATCH SCORE CORRECTION (MILESTONE 9)          */}
+        {/* ==================================================== */}
+        {activeTab === 'correct' && (
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] p-6 rounded-2xl">
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[var(--color-text-primary)]">
+                  Match Score Correction Tool
+                </h2>
+              </div>
+              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                Correct typographical errors in submitted game scores. All score changes flag the match as corrected and record the before/after state in the administrative audit log.
+              </p>
+            </div>
+
+            {correctSuccess && (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 text-xs rounded-xl">
+                {correctSuccess}
+              </div>
+            )}
+            {correctError && (
+              <div className="p-4 bg-rose-500/10 border border-rose-500/40 text-rose-400 text-xs rounded-xl">
+                ⚠️ {correctError}
+              </div>
+            )}
+
+            {/* Match Lookup Form */}
+            <form onSubmit={handleLookupMatch} className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-2xl shadow-sm flex items-end gap-4">
+              <div className="flex-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                  Match ID or Database ID
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={correctMatchId}
+                  onChange={(e) => setCorrectMatchId(e.target.value)}
+                  placeholder="e.g., PH-M10042 or 65f3..."
+                  className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-sm text-[var(--color-text-primary)]"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={correctLoading || !correctMatchId.trim()}
+                className="px-5 py-3 bg-[var(--color-bg-card-hover)] hover:bg-[var(--color-border-subtle)] text-[var(--color-text-primary)] font-bold text-xs uppercase tracking-wider rounded-xl border border-[var(--color-border-subtle)] transition-all cursor-pointer disabled:opacity-50"
+              >
+                {correctLoading ? 'Searching...' : 'Lookup Match'}
+              </button>
+            </form>
+
+            {/* Correction Form */}
+            {correctMatchData && (
+              <form onSubmit={handleExecuteMatchCorrection} className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-3xl shadow-xl space-y-6">
+                <div className="pb-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
+                  <div>
+                    <span className="font-mono font-bold text-sm text-[var(--color-accent-primary)]">
+                      {correctMatchData.matchId}
+                    </span>
+                    <span className="text-xs text-[var(--color-text-muted)] ml-2">
+                      ({correctMatchData.court} • {correctMatchData.matchType})
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    {correctMatchData.status}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                      Team A Score (Game 1)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={correctGame1A}
+                      onChange={(e) => setCorrectGame1A(e.target.value)}
+                      className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-lg font-bold text-center"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                      Team B Score (Game 1)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={correctGame1B}
+                      onChange={(e) => setCorrectGame1B(e.target.value)}
+                      className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-lg font-bold text-center"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                    Winner Team
+                  </label>
+                  <select
+                    value={correctWinner}
+                    onChange={(e) => setCorrectWinner(e.target.value)}
+                    className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold"
+                  >
+                    <option value="A">Team A Won</option>
+                    <option value="B">Team B Won</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                    Mandatory Correction Justification * (min 5 characters)
+                  </label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={correctReason}
+                    onChange={(e) => setCorrectReason(e.target.value)}
+                    placeholder="e.g., Official referee score sheet correction, scorekeeper typo in game 1..."
+                    className="w-full p-3.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={correctSubmitting || !correctReason.trim()}
+                    className="px-6 py-3 bg-[var(--color-accent-primary)] hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md disabled:opacity-50 cursor-pointer"
+                  >
+                    {correctSubmitting ? 'Correcting Score...' : 'Apply Correction & Record Audit'}
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         )}

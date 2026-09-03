@@ -106,6 +106,24 @@ const matchSchema = new mongoose.Schema(
       default: null,
       trim: true,
     },
+    isCorrected: {
+      type: Boolean,
+      default: false,
+    },
+    correctionReason: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    correctedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    correctedAt: {
+      type: Date,
+      default: null,
+    },
     ratingChanges: [
       {
         playerId: {

@@ -204,18 +204,18 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 **Goal:** Player-facing performance insight via Recharts, shareable head-to-head comparison, and admin governance tools.
 
 **Tasks**
-- [ ] Integrate Recharts for historical Elo tracking graph (pulled from `RatingHistory`)
-- [ ] Build match-win analysis views (win/loss trends, streaks, "Most Improved" 30-day specialty leader board — D2)
-- [ ] Build shareable head-to-head comparison page (`GET /api/players/compare?p1=PH-XXXXX&p2=PH-YYYYY` — D6)
-- [ ] Add manual rating adjustment tool for admins (`POST /api/admin/ratings/adjust`) with required audit reason
-- [ ] Add match correction endpoint (`PUT /api/admin/matches/:id/correct`) that re-triggers historical Elo recalculation
-- [ ] Track & execute JWT storage migration (Part E: short-lived in-memory token + `httpOnly` refresh cookie)
+- [x] Integrate Recharts for historical Elo tracking graph (pulled from `RatingHistory`)
+- [x] Build match-win analysis views (win/loss trends, streaks, "Most Improved" 30-day specialty leader board — D2)
+- [x] Build shareable head-to-head comparison page (`GET /api/players/compare?p1=PH-XXXXX&p2=PH-YYYYY` — D6)
+- [x] Add manual rating adjustment tool for admins (`POST /api/admin/ratings/adjust`) with required audit reason
+- [x] Add match correction endpoint (`PUT /api/admin/matches/:id/correct`) that re-triggers historical Elo recalculation
+- [x] Track & execute JWT storage migration (Part E: short-lived in-memory token + `httpOnly` refresh cookie)
 
 **Deliverables**
 - Player profile page with rating graph and stats; admin correction/adjustment tools live
 
 **Acceptance Checklist**
-- [ ] No manual adjustment or correction can occur without an audit log entry (Rule G, Section 13 "No Quiet Changes")
+- [x] No manual adjustment or correction can occur without an audit log entry (Rule G, Section 13 "No Quiet Changes")
 
 ---
 

@@ -19,6 +19,7 @@ import PlayerProfilePage from './pages/PlayerProfilePage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import TournamentsPage from './pages/TournamentsPage';
 import SubmitMatchPage from './pages/SubmitMatchPage';
+import ComparePage from './pages/ComparePage';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/tournaments" element={<TournamentsPage />} />
+              <Route path="/compare" element={<ComparePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/players/:id" element={<PlayerProfilePage />} />

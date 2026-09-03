@@ -2,10 +2,16 @@
  * Auth Context
  *
  * Provides reactive authentication state, login, register, and logout methods.
+ *
+ * Dual-Token Architecture:
+ * - Access token stored in-memory only (via api.js setAccessToken) — XSS-safe
+ * - Refresh token stored in httpOnly cookie (handled by browser automatically)
+ * - User/player data kept in localStorage for instant UI hydration (no secrets)
+ * - On mount: attempts silent refresh to restore session from cookie
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import api from '../services/api';
+import api, { setAccessToken, clearAccessToken } from '../services/api';
 import AuthContext from './authContextDef';
 
 export const AuthProvider = ({ children }) => {
@@ -17,15 +23,13 @@ export const AuthProvider = ({ children }) => {
     const savedPlayer = localStorage.getItem('picklehub_player');
     return savedPlayer ? JSON.parse(savedPlayer) : null;
   });
-  const [token, setToken] = useState(() => localStorage.getItem('picklehub_token'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const clearAuth = useCallback(() => {
     setUser(null);
     setPlayer(null);
-    setToken(null);
-    localStorage.removeItem('picklehub_token');
+    clearAccessToken();
     localStorage.removeItem('picklehub_user');
     localStorage.removeItem('picklehub_player');
   }, []);
@@ -40,42 +44,49 @@ export const AuthProvider = ({ children }) => {
     }
   }, [clearAuth]);
 
-  // Validate stored token and fetch fresh user profile on mount
+  // Listen for auth expiry events dispatched by api.js interceptor
   useEffect(() => {
-    const checkAuth = async () => {
-      const storedToken = localStorage.getItem('picklehub_token');
-      if (storedToken) {
-        try {
-          const response = await api.get('/auth/me');
-          if (response.data.success) {
-            setUser(response.data.user);
-            setPlayer(response.data.player || null);
-            localStorage.setItem('picklehub_user', JSON.stringify(response.data.user));
-            if (response.data.player) {
-              localStorage.setItem('picklehub_player', JSON.stringify(response.data.player));
-            }
+    const handleAuthExpired = () => {
+      clearAuth();
+    };
+    window.addEventListener('picklehub:auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('picklehub:auth-expired', handleAuthExpired);
+  }, [clearAuth]);
+
+  // On mount: attempt silent refresh to restore session from httpOnly cookie
+  useEffect(() => {
+    const silentRefresh = async () => {
+      try {
+        const response = await api.post('/auth/refresh');
+        if (response.data.success && response.data.token) {
+          setAccessToken(response.data.token);
+          setUser(response.data.user);
+          setPlayer(response.data.player || null);
+          localStorage.setItem('picklehub_user', JSON.stringify(response.data.user));
+          if (response.data.player) {
+            localStorage.setItem('picklehub_player', JSON.stringify(response.data.player));
           }
-        } catch {
-          // Token invalid or expired
-          clearAuth();
         }
+      } catch {
+        // No valid refresh token — user needs to log in
+        clearAuth();
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    checkAuth();
+    silentRefresh();
   }, [clearAuth]);
 
   const login = async (email, password) => {
     setError(null);
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { token: newToken, user: userData, player: playerData } = response.data;
+      const { token: accessTokenValue, user: userData, player: playerData } = response.data;
 
-      setToken(newToken);
+      setAccessToken(accessTokenValue);
       setUser(userData);
       setPlayer(playerData || null);
-      localStorage.setItem('picklehub_token', newToken);
       localStorage.setItem('picklehub_user', JSON.stringify(userData));
       if (playerData) {
         localStorage.setItem('picklehub_player', JSON.stringify(playerData));
@@ -94,12 +105,11 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await api.post('/auth/register', { email, password, role, name });
-      const { token: newToken, user: userData, player: playerData } = response.data;
+      const { token: accessTokenValue, user: userData, player: playerData } = response.data;
 
-      setToken(newToken);
+      setAccessToken(accessTokenValue);
       setUser(userData);
       setPlayer(playerData || null);
-      localStorage.setItem('picklehub_token', newToken);
       localStorage.setItem('picklehub_user', JSON.stringify(userData));
       if (playerData) {
         localStorage.setItem('picklehub_player', JSON.stringify(playerData));
@@ -118,12 +128,11 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await api.post('/auth/google', { credential });
-      const { token: newToken, user: userData, player: playerData } = response.data;
+      const { token: accessTokenValue, user: userData, player: playerData } = response.data;
 
-      setToken(newToken);
+      setAccessToken(accessTokenValue);
       setUser(userData);
       setPlayer(playerData || null);
-      localStorage.setItem('picklehub_token', newToken);
       localStorage.setItem('picklehub_user', JSON.stringify(userData));
       if (playerData) {
         localStorage.setItem('picklehub_player', JSON.stringify(playerData));
@@ -155,7 +164,6 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     player,
-    token,
     loading,
     error,
     isAuthenticated: !!user,

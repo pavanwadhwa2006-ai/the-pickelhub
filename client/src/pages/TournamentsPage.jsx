@@ -6,7 +6,7 @@
  * view live seeded brackets, and celebrate tournament champions.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/useAuth';
 import api from '../services/api';
@@ -31,24 +31,51 @@ const TournamentsPage = () => {
   const [registerSuccess, setRegisterSuccess] = useState(null);
   const [registerError, setRegisterError] = useState(null);
 
-  // Load All Tournaments
-  const fetchTournaments = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  // Ref to track whether we've auto-selected a tournament on first load
+  const hasAutoSelected = useRef(false);
+
+  // Tick state for countdown timer (avoids impure Date.now() during render)
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 30_000); // update every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  // Load All Tournaments — inline in effect to satisfy React Compiler
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get('/tournaments');
+        if (!cancelled && res.data.success) {
+          setTournaments(res.data.data);
+          if (res.data.data.length > 0 && !hasAutoSelected.current) {
+            hasAutoSelected.current = true;
+            setSelectedTournament(res.data.data[0]);
+          }
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.response?.data?.message || 'Failed to load club tournaments.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []); // runs once on mount
+
+  // Refetch tournaments list (used after register/withdraw actions)
+  const refetchTournaments = useCallback(async () => {
     try {
       const res = await api.get('/tournaments');
       if (res.data.success) {
         setTournaments(res.data.data);
-        if (res.data.data.length > 0 && !selectedTournament) {
-          setSelectedTournament(res.data.data[0]);
-        }
       }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load club tournaments.');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedTournament]);
+    } catch { /* swallow — primary fetch handles errors */ }
+  }, []);
 
   // Load Detailed Tournament View
   const fetchTournamentDetails = useCallback(async (id) => {
@@ -65,10 +92,6 @@ const TournamentsPage = () => {
       setLoadingDetails(false);
     }
   }, []);
-
-  useEffect(() => {
-    fetchTournaments();
-  }, [fetchTournaments]);
 
   // Check if current user is registered for a tournament
   const isUserRegistered = (tournament) => {
@@ -94,7 +117,7 @@ const TournamentsPage = () => {
       if (res.data.success) {
         setRegisterSuccess('Application confirmed! You are officially registered for this competition.');
         fetchTournamentDetails(tournamentId);
-        fetchTournaments();
+        refetchTournaments();
       }
     } catch (err) {
       setRegisterError(err.response?.data?.message || 'Failed to register for tournament.');
@@ -116,7 +139,7 @@ const TournamentsPage = () => {
       if (res.data.success) {
         setRegisterSuccess('You have withdrawn from this tournament.');
         fetchTournamentDetails(tournamentId);
-        fetchTournaments();
+        refetchTournaments();
       }
     } catch (err) {
       setRegisterError(err.response?.data?.message || 'Failed to withdraw from tournament.');
@@ -133,9 +156,9 @@ const TournamentsPage = () => {
     return true;
   });
 
-  // Countdown Helper
+  // Countdown Helper — uses `now` state (effect-driven) to avoid impure Date.now() in render
   const getDeadlineText = (deadlineStr) => {
-    const diff = new Date(deadlineStr).getTime() - Date.now();
+    const diff = new Date(deadlineStr).getTime() - now;
     if (diff <= 0) return 'Registration Closed';
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

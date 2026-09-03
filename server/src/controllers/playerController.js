@@ -8,6 +8,7 @@
 const mongoose = require('mongoose');
 const Player = require('../models/Player');
 const Match = require('../models/Match');
+const RatingHistory = require('../models/RatingHistory');
 const { getOrCreatePlayerProfile } = require('../services/playerService');
 const { calculateExpectedScore } = require('../services/ratingService');
 
@@ -136,6 +137,39 @@ const getLeaderboardSpecialties = async (req, res, next) => {
         .sort({ winningStreak: -1, currentRating: -1 }),
     ]);
 
+    // 5. Most Improved Player (Largest net Elo gain over the past 30 days — Deliverable D2)
+    let mostImproved = null;
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const mostImprovedAgg = await RatingHistory.aggregate([
+      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+      { $group: { _id: '$playerId', netGain: { $sum: '$delta' } } },
+      { $sort: { netGain: -1 } },
+      { $limit: 1 },
+    ]);
+
+    if (mostImprovedAgg.length > 0 && mostImprovedAgg[0].netGain > 0) {
+      const topImprovedPlayer = await Player.findById(mostImprovedAgg[0]._id).select(PUBLIC_PLAYER_FIELDS);
+      if (topImprovedPlayer && topImprovedPlayer.accountStatus === 'ACTIVE') {
+        mostImproved = {
+          ...topImprovedPlayer.toObject(),
+          netGain: mostImprovedAgg[0].netGain,
+        };
+      }
+    }
+
+    // Fallback if no 30-day gains: highest overall career gain above 1000
+    if (!mostImproved) {
+      const careerGainPlayer = await Player.findOne({ ...activeCondition, currentRating: { $gt: 1000 } })
+        .select(PUBLIC_PLAYER_FIELDS)
+        .sort({ currentRating: -1 });
+      if (careerGainPlayer) {
+        mostImproved = {
+          ...careerGainPlayer.toObject(),
+          netGain: careerGainPlayer.currentRating - 1000,
+        };
+      }
+    }
+
     res.status(200).json({
       success: true,
       data: {
@@ -143,6 +177,7 @@ const getLeaderboardSpecialties = async (req, res, next) => {
         mostWins: mostWins || null,
         highestWinRate: highestWinRate || null,
         longestStreak: longestStreak || null,
+        mostImproved: mostImproved || null,
       },
     });
   } catch (error) {
@@ -332,31 +367,28 @@ const searchPlayers = async (req, res, next) => {
   try {
     const query = req.query.q || req.query.query;
 
-    if (!query || query.trim().length === 0) {
-      return res.status(200).json({
-        success: true,
-        data: [],
-      });
+    let searchCondition = { accountStatus: 'ACTIVE' };
+
+    if (query && query.trim().length > 0) {
+      const cleanQuery = query.trim();
+      const isPlayerIdSearch = /^PH-\d{1,5}$/i.test(cleanQuery);
+
+      const filterCondition = isPlayerIdSearch
+        ? { playerId: { $regex: cleanQuery, $options: 'i' } }
+        : {
+            $or: [
+              { name: { $regex: cleanQuery, $options: 'i' } },
+              { playerId: { $regex: cleanQuery, $options: 'i' } },
+              { email: { $regex: cleanQuery, $options: 'i' } },
+            ],
+          };
+
+      searchCondition = { ...searchCondition, ...filterCondition };
     }
 
-    const cleanQuery = query.trim();
-    const isPlayerIdSearch = /^PH-\d{1,5}$/i.test(cleanQuery);
-
-    const searchCondition = isPlayerIdSearch
-      ? { playerId: { $regex: cleanQuery, $options: 'i' } }
-      : {
-          $or: [
-            { name: { $regex: cleanQuery, $options: 'i' } },
-            { playerId: { $regex: cleanQuery, $options: 'i' } },
-            { email: { $regex: cleanQuery, $options: 'i' } },
-          ],
-        };
-
-    const players = await Player.find({
-      ...searchCondition,
-      accountStatus: 'ACTIVE', // Suspended players excluded (PRD Section 8.3)
-    })
+    const players = await Player.find(searchCondition)
       .select('playerId name profilePhoto currentRating category') // Sanitized projection, no email (Point #6)
+      .sort({ currentRating: -1 })
       .limit(15);
 
     res.status(200).json({
@@ -369,11 +401,72 @@ const searchPlayers = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Get historical rating trajectory for a player (PRD Section 8.1 & Deliverable D1)
+ * @route   GET /api/players/:id/rating-history
+ * @access  Public
+ */
+const getPlayerRatingHistory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const player = await resolvePlayer(id);
+
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        message: `Player '${id}' not found.`,
+      });
+    }
+
+    const history = await RatingHistory.find({ playerId: player._id })
+      .populate('matchId', 'matchId court matchType winnerTeam scores')
+      .sort({ createdAt: 1 })
+      .limit(200);
+
+    // Initial baseline point (1000 Elo when player registered)
+    const dataPoints = [
+      {
+        date: player.createdAt || new Date(),
+        rating: 1000,
+        delta: 0,
+        changeType: 'INITIAL_REGISTRATION',
+        reason: 'Baseline Club Starting Rating',
+        category: 'Intermediate',
+      },
+    ];
+
+    history.forEach((h) => {
+      dataPoints.push({
+        id: h._id,
+        date: h.createdAt,
+        rating: h.ratingAfter,
+        ratingBefore: h.ratingBefore,
+        delta: h.delta,
+        changeType: h.changeType,
+        reason: h.reason,
+        category: h.categoryAfter,
+        matchId: h.matchId?.matchId || null,
+      });
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        player,
+        history: dataPoints,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPlayers,
   getLeaderboardSpecialties,
   comparePlayers,
   getPlayerById,
+  getPlayerRatingHistory,
   getMyPlayerProfile,
   updateMyProfile,
   searchPlayers,

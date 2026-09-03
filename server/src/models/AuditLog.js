@@ -17,6 +17,7 @@ const auditLogSchema = new mongoose.Schema(
           'MATCH_REJECT',
           'DIRECT_MATCH_CREATE',
           'MANUAL_RATING_ADJUST',
+          'MATCH_CORRECT',
           'USER_ROLE_PROMOTE',
           'TOURNAMENT_CREATE',
           'TOURNAMENT_UPDATE',

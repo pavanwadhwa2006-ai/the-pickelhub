@@ -9,10 +9,13 @@ const express = require('express');
 const {
   getPendingMatches,
   approveMatch,
+  batchApproveMatches,
   rejectMatch,
   createDirectMatch,
   getAuditLogs,
   promoteUser,
+  adjustRating,
+  correctMatch,
 } = require('../controllers/adminController');
 const {
   createTournament,
@@ -32,9 +35,12 @@ router.use(protect, authorize('ADMIN'));
 
 // Match approval queue & governance
 router.get('/matches/pending', getPendingMatches);
+router.post('/matches/batch-approve', batchApproveMatches);
 router.post('/matches/:id/approve', approveMatch);
 router.post('/matches/:id/reject', rejectMatch);
+router.put('/matches/:id/correct', correctMatch);
 router.post('/matches/direct', createDirectMatch);
+router.post('/ratings/adjust', adjustRating);
 router.get('/audit-logs', getAuditLogs);
 router.post('/users/:id/promote', promoteUser);
 
