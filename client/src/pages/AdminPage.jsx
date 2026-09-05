@@ -10,6 +10,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/useAuth';
 import api from '../services/api';
@@ -23,14 +24,15 @@ const TOURNAMENT_FORMATS = ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES', 'OPEN'];
 const SKILL_DIVISIONS = ['All', 'Beginner', 'Intermediate', 'Advanced Intermediate', 'Pro'];
 
 const AdminPage = () => {
-  const { user, isAdmin, adminViewMode, toggleAdminViewMode } = useAuth();
+  const { user, adminViewMode } = useAuth();
+  const navigate = useNavigate();
 
-  // Ensure entering the Admin portal automatically activates Admin Mode
+  // If viewing as an Athlete, smoothly redirect to the player dashboard
   useEffect(() => {
-    if (isAdmin && adminViewMode !== 'ADMIN') {
-      toggleAdminViewMode('ADMIN');
+    if (adminViewMode === 'PLAYER') {
+      navigate('/dashboard', { replace: true });
     }
-  }, [isAdmin, adminViewMode, toggleAdminViewMode]);
+  }, [adminViewMode, navigate]);
 
   // Active Tab: 'queue' | 'tournaments' | 'direct' | 'rating-history' | 'audit'
   const [activeTab, setActiveTab] = useState('queue');
@@ -709,6 +711,11 @@ const AdminPage = () => {
       setCorrectSubmitting(false);
     }
   };
+
+  // If viewing as an Athlete, redirect to player dashboard
+  if (adminViewMode === 'PLAYER') {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <PageTransition className="min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] py-8 px-4 sm:px-8 md:px-12 transition-colors duration-300">

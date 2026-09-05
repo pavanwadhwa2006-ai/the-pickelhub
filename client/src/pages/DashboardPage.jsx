@@ -22,7 +22,7 @@ import DigitalClubPassModal from '../components/DigitalClubPassModal';
 import RatingHistoryChart from '../components/RatingHistoryChart';
 
 const DashboardPage = () => {
-  const { user, player, isAdmin, refreshProfile } = useAuth();
+  const { user, player, isAdminMode, refreshProfile } = useAuth();
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(player?.name || '');
   const [saving, setSaving] = useState(false);
@@ -235,7 +235,7 @@ const DashboardPage = () => {
                 PUBLIC PROFILE →
               </Link>
             )}
-            {isAdmin && (
+            {isAdminMode && (
               <Link
                 to="/admin"
                 className="px-4 py-2 bg-[#201b0c] hover:bg-[#3f3927] border border-[#ff3b3f] text-[#ffb3ad] text-xs font-bold tracking-[0.15em] uppercase transition-all"

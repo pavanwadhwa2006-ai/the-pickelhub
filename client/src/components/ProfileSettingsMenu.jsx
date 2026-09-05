@@ -122,6 +122,19 @@ const ProfileSettingsMenu = () => {
     setIsOpen(false);
   };
 
+  const handleSelectAdminMode = () => {
+    toggleAdminViewMode('ADMIN');
+    setIsOpen(false);
+  };
+
+  const handleSelectAthleteView = () => {
+    toggleAdminViewMode('PLAYER');
+    setIsOpen(false);
+    if (window.location.pathname.startsWith('/admin')) {
+      navigate('/dashboard');
+    }
+  };
+
   const currentPhoto = previewUrl || player?.profilePhoto;
 
   return (
@@ -250,7 +263,7 @@ const ProfileSettingsMenu = () => {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => toggleAdminViewMode('ADMIN')}
+                  onClick={handleSelectAdminMode}
                   className={`p-2.5 border rounded-xl text-xs font-bold uppercase transition-all flex flex-col items-center gap-1 cursor-pointer ${
                     isAdminMode
                       ? 'bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-sm'
@@ -262,7 +275,7 @@ const ProfileSettingsMenu = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => toggleAdminViewMode('PLAYER')}
+                  onClick={handleSelectAthleteView}
                   className={`p-2.5 border rounded-xl text-xs font-bold uppercase transition-all flex flex-col items-center gap-1 cursor-pointer ${
                     !isAdminMode
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
@@ -331,14 +344,18 @@ const ProfileSettingsMenu = () => {
 
           {/* Quick Actions & Logout */}
           <div className="pt-4 space-y-2">
-            {isAdminMode && (
-              <Link
-                to="/admin"
-                onClick={() => setIsOpen(false)}
-                className="w-full py-2.5 px-3 bg-[var(--color-accent-primary)] hover:brightness-110 text-white text-xs font-bold uppercase tracking-wider block text-center rounded-xl transition-all shadow-sm"
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => {
+                  toggleAdminViewMode('ADMIN');
+                  setIsOpen(false);
+                  navigate('/admin');
+                }}
+                className="w-full py-2.5 px-3 bg-[var(--color-accent-primary)] hover:brightness-110 text-white text-xs font-bold uppercase tracking-wider block text-center rounded-xl transition-all shadow-sm cursor-pointer"
               >
                 ADMIN PORTAL 👑
-              </Link>
+              </button>
             )}
 
             <Link
