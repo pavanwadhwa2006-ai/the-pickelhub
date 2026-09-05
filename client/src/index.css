@@ -119,6 +119,21 @@
   --strip-badge-bg: rgba(255, 59, 63, 0.15);
   --strip-badge-border: rgba(255, 59, 63, 0.4);
   --strip-badge-text: #ffb3ad;
+
+  /* Component Token Aliases */
+  --color-bg-base: var(--bg-page);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-hover: var(--bg-card-alt);
+  --color-bg-subtle: var(--bg-card-subtle);
+  --color-border-subtle: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-primary-hover: var(--accent-primary-hover);
+  --color-accent-secondary: var(--accent-secondary);
 }
 
 :root[data-theme="garden-light"] {
@@ -172,6 +187,21 @@
   --strip-badge-bg: #1D3461;      /* Deep sapphire for Club Beta badge */
   --strip-badge-border: #B08D57;  /* Brass border */
   --strip-badge-text: #FBF8ED;    /* Cream text */
+
+  /* Component Token Aliases */
+  --color-bg-base: var(--bg-page);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-hover: var(--bg-card-alt);
+  --color-bg-subtle: var(--bg-card-subtle);
+  --color-border-subtle: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-primary-hover: var(--accent-primary-hover);
+  --color-accent-secondary: var(--accent-secondary);
 }
 
 /* ── Base Reset ── */
