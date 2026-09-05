@@ -18,7 +18,7 @@ const EmptyState = ({
   className = '',
 }) => {
   return (
-    <div className={`p-8 sm:p-12 bg-[#201b0c] border border-[#3b3423] text-center flex flex-col items-center justify-center relative overflow-hidden ${className}`}>
+    <div className={`p-8 sm:p-12 bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] text-center flex flex-col items-center justify-center relative overflow-hidden ${className}`}>
       {/* Subtle background glow */}
       <div
         aria-hidden="true"
@@ -26,13 +26,13 @@ const EmptyState = ({
       />
 
       {badgeText && (
-        <span className="text-[9px] font-bold tracking-[0.25em] text-[#ffb3ad] uppercase px-2.5 py-1 bg-[#181305] border border-[#3b3423] mb-4">
+        <span className="text-[9px] font-bold tracking-[0.25em] text-[#ffb3ad] uppercase px-2.5 py-1 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] mb-4">
           {badgeText}
         </span>
       )}
 
       {/* Decorative Icon */}
-      <div className="w-12 h-12 rounded-full bg-[#181305] border border-[#5d3f3d] flex items-center justify-center text-[#ff3b3f] mb-4 shadow-inner">
+      <div className="w-12 h-12 rounded-full bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-strong,#5d3f3d)] flex items-center justify-center text-[#ff3b3f] mb-4 shadow-inner">
         {icon === 'paddle' && (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -46,11 +46,11 @@ const EmptyState = ({
         )}
       </div>
 
-      <h3 className="font-['Playfair_Display'] text-xl sm:text-2xl font-bold text-[#ede1c9] mb-2 max-w-md">
+      <h3 className="font-['Playfair_Display'] text-xl sm:text-2xl font-bold text-[var(--color-text-primary,#ede1c9)] mb-2 max-w-md">
         {title}
       </h3>
 
-      <p className="text-xs sm:text-sm text-[#d8cdb5] font-light max-w-lg leading-relaxed mb-6">
+      <p className="text-xs sm:text-sm text-[var(--color-text-muted,#d8cdb5)] font-light max-w-lg leading-relaxed mb-6">
         {description}
       </p>
 

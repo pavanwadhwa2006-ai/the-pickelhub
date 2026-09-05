@@ -23,8 +23,19 @@ export const AuthProvider = ({ children }) => {
     const savedPlayer = localStorage.getItem('picklehub_player');
     return savedPlayer ? JSON.parse(savedPlayer) : null;
   });
+  const [adminViewMode, setAdminViewMode] = useState(() => {
+    return localStorage.getItem('picklehub_admin_view_mode') || 'ADMIN';
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const toggleAdminViewMode = useCallback((targetMode) => {
+    setAdminViewMode((prev) => {
+      const next = targetMode || (prev === 'ADMIN' ? 'PLAYER' : 'ADMIN');
+      localStorage.setItem('picklehub_admin_view_mode', next);
+      return next;
+    });
+  }, []);
 
   const clearAuth = useCallback(() => {
     setUser(null);
@@ -32,6 +43,8 @@ export const AuthProvider = ({ children }) => {
     clearAccessToken();
     localStorage.removeItem('picklehub_user');
     localStorage.removeItem('picklehub_player');
+    localStorage.removeItem('picklehub_admin_view_mode');
+    setAdminViewMode('ADMIN');
   }, []);
 
   const logout = useCallback(async () => {
@@ -161,13 +174,19 @@ export const AuthProvider = ({ children }) => {
 
   const clearError = () => setError(null);
 
+  const isAdmin = user?.role === 'ADMIN';
+  const isAdminMode = isAdmin && adminViewMode === 'ADMIN';
+
   const value = {
     user,
     player,
     loading,
     error,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'ADMIN',
+    isAdmin,
+    isAdminMode,
+    adminViewMode,
+    toggleAdminViewMode,
     login,
     register,
     googleLogin,

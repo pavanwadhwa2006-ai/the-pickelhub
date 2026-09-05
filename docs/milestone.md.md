@@ -234,7 +234,34 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 
 ---
 
-## Milestone 11 — Deep Testing & Security Pen-Test (Sprint 11)
+## Milestone 11 — Admin Perspective Switcher, Performance Optimization & Experiential UX Polish (Sprint 11)
+**Goal:** Dual Identity Mode for Admins ("Athlete View" vs "Admin Mode"), sub-millisecond route transitions and SWR caching, complete theme token contrast harmony, and live administrative notifications.
+
+**Tasks**
+- [x] **Dual Identity Mode (Perspective Switcher)**:
+  - Add `adminViewMode` (`'ADMIN'` | `'PLAYER'`), `isAdminMode`, and `toggleAdminViewMode()` to `AuthContext`, persisted in `localStorage`.
+  - Add Navbar quick-toggle pill (`👑 Admin Mode` vs `🏓 Athlete View`) exclusively for admin users.
+  - Add Profile Settings perspective switcher radio/button controls.
+  - Implement ambient Athlete View banner indicating active preview mode with instant one-click return to Admin Mode.
+  - Conceal admin navigation entries when viewing as an Athlete to provide an authentic player experience.
+  - Add dedicated Admin Portal guard: entering `/admin` automatically activates Admin Mode.
+- [x] **Live Administrative Awareness**:
+  - Add live pending match verification queue counter (`/api/admin/matches/pending`) on the Admin Panel navbar link with polling and pulse indicator.
+- [x] **Zero-Latency Performance Hardening**:
+  - Implement high-throughput in-memory sliding window for Express `globalApiLimiter` to eliminate remote Atlas DB latency on high-frequency reads.
+  - Eliminate 200ms debounce on initial mount in `LeaderboardPage`.
+  - Add client-side SWR in-memory caching for `/players` and `/tournaments` for instantaneous re-renders.
+  - Implement dynamic route chunk prefetching on `onMouseEnter` / `onTouchStart` in Navbar links, plus background idle prefetch for core routes.
+- [x] **Complete Color & Contrast Token Harmony**:
+  - Replace all hardcoded `#181305` and `#ede1c9` instances across `App.jsx`, `HomePage`, `LeaderboardPage`, `DashboardPage`, `ComparePage`, `RegisterPage`, `PlayerProfilePage`, `GoogleAuthButton`, and `EmptyState` with CSS variables (`var(--color-bg-base)`, `var(--color-text-primary)`, etc.).
+  - Fix light theme dark background flash during page navigation.
+
+**Deliverables**
+- Smooth dual identity switching between Player and Admin perspectives; instant page navigation with zero perceptible delay; flawless contrast across both Classic Dark and Garden Light themes.
+
+---
+
+## Milestone 12 — Deep Testing & Security Pen-Test (Sprint 12)
 **Goal:** Full adversarial security audit, concurrency stress testing, and mobile UX validation.
 
 **Tasks**
@@ -249,7 +276,7 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 
 ---
 
-## Milestone 12 — Deployment (Sprint 12)
+## Milestone 13 — Deployment (Sprint 13)
 **Goal:** Live, production-ready platform on Vercel and MongoDB Atlas.
 
 **Tasks**

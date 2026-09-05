@@ -23,7 +23,14 @@ const TOURNAMENT_FORMATS = ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES', 'OPEN'];
 const SKILL_DIVISIONS = ['All', 'Beginner', 'Intermediate', 'Advanced Intermediate', 'Pro'];
 
 const AdminPage = () => {
-  const { user } = useAuth();
+  const { user, isAdmin, adminViewMode, toggleAdminViewMode } = useAuth();
+
+  // Ensure entering the Admin portal automatically activates Admin Mode
+  useEffect(() => {
+    if (isAdmin && adminViewMode !== 'ADMIN') {
+      toggleAdminViewMode('ADMIN');
+    }
+  }, [isAdmin, adminViewMode, toggleAdminViewMode]);
 
   // Active Tab: 'queue' | 'tournaments' | 'direct' | 'rating-history' | 'audit'
   const [activeTab, setActiveTab] = useState('queue');

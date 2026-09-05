@@ -14,11 +14,15 @@ import TiltCard from '../components/TiltCard';
 import AnimatedNumber from '../components/AnimatedNumber';
 import TierBadge from '../components/TierBadge';
 
+// Module-level in-memory cache for instant route navigation
+const clientLeaderboardCache = new Map();
+let clientSpecialtiesCache = null;
+
 const LeaderboardPage = () => {
   // Leaderboard Data State
   const [players, setPlayers] = useState([]);
-  const [specialties, setSpecialties] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [specialties, setSpecialties] = useState(() => clientSpecialtiesCache);
+  const [loading, setLoading] = useState(() => !clientLeaderboardCache.has('ALL_rating_'));
   const [totalCount, setTotalCount] = useState(0);
 
   // Filters & Sorting
@@ -39,6 +43,7 @@ const LeaderboardPage = () => {
       try {
         const res = await api.get('/players/leaders');
         if (isMounted && res.data.success) {
+          clientSpecialtiesCache = res.data.data;
           setSpecialties(res.data.data);
         }
       } catch {
@@ -51,10 +56,20 @@ const LeaderboardPage = () => {
     };
   }, []);
 
-  // Fetch Leaderboard Standings
+  // Fetch Leaderboard Standings with In-Memory Cache
   const fetchLeaderboard = useCallback(async () => {
-    try {
+    const cacheKey = `${category}_${sort}_${search.trim()}`;
+    const cached = clientLeaderboardCache.get(cacheKey);
+
+    if (cached && Date.now() - cached.timestamp < 60_000) {
+      setPlayers(cached.players);
+      setTotalCount(cached.total);
+      setLoading(false);
+    } else {
       setLoading(true);
+    }
+
+    try {
       const params = new URLSearchParams();
       if (category && category !== 'ALL') params.append('category', category);
       if (sort) params.append('sort', sort);
@@ -63,22 +78,31 @@ const LeaderboardPage = () => {
 
       const res = await api.get(`/players?${params.toString()}`);
       if (res.data.success) {
-        setPlayers(res.data.data || []);
-        setTotalCount(res.data.total || 0);
+        const data = res.data.data || [];
+        const total = res.data.total || 0;
+        setPlayers(data);
+        setTotalCount(total);
+        clientLeaderboardCache.set(cacheKey, { players: data, total, timestamp: Date.now() });
       }
     } catch {
-      setPlayers([]);
+      if (!cached) setPlayers([]);
     } finally {
       setLoading(false);
     }
   }, [category, sort, search]);
 
   useEffect(() => {
+    // If no search query, execute immediately with zero timeout delay
+    if (!search.trim()) {
+      fetchLeaderboard();
+      return;
+    }
+    // Only debounce when actively typing search strings
     const timer = setTimeout(() => {
       fetchLeaderboard();
-    }, 200);
+    }, 250);
     return () => clearTimeout(timer);
-  }, [fetchLeaderboard]);
+  }, [fetchLeaderboard, search]);
 
   // Execute Head-to-Head Comparison
   const handleOpenCompare = async (p1, p2 = null) => {
@@ -129,28 +153,27 @@ const LeaderboardPage = () => {
   ];
 
   return (
-    <PageTransition className="min-h-screen bg-[#181305] text-[#ede1c9] py-12 px-6 sm:px-10 md:px-20">
+    <PageTransition className="min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] py-12 px-6 sm:px-10 md:px-20 transition-colors duration-200">
       <div className="max-w-[1440px] mx-auto">
         {/* Header */}
-        <div className="pb-8 border-b border-[#3b3423] mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-fade-in">
+        <div className="pb-8 border-b border-[var(--color-border-subtle)] mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-fade-in">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-[10px] font-bold tracking-[0.25em] text-[#ff3b3f] uppercase">
+              <span className="text-[10px] font-bold tracking-[0.25em] text-[var(--color-accent-primary)] uppercase">
                 LIVE STANDINGS & RATINGS
               </span>
-              <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#251f10] border border-[#ff3b3f]/40 text-[#ffb3ad] text-[10px] font-bold tracking-wider uppercase font-mono">
+              <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[var(--color-bg-card)] border border-[var(--color-accent-primary)]/40 text-[var(--color-accent-primary)] text-[10px] font-bold tracking-wider uppercase font-mono">
                 <span className="w-1.5 h-1.5 bg-[#4ade80] rounded-full animate-live-pulse" />
                 {totalCount} ACTIVE PLAYERS
               </span>
             </div>
-            <h1 className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[#ede1c9]">
+            <h1 className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[var(--color-text-primary)]">
               Official Club Leaderboard
             </h1>
-            <p className="text-xs sm:text-sm text-[#9a8e7a] mt-2 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-2 max-w-2xl leading-relaxed">
               Real-time club standings calculated using verified match results and our weighted Elo engine. Select any player to view head-to-head win probabilities.
             </p>
           </div>
-
           <Link
             to="/matches/submit"
             className="px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] self-start md:self-auto"
@@ -250,14 +273,14 @@ const LeaderboardPage = () => {
                 </div>
                 <div className="font-['Playfair_Display'] text-3xl font-bold text-[#ede1c9] mb-1">
                   <span className="text-emerald-400 font-mono text-2xl mr-1">+</span>
-                  <AnimatedNumber value={specialties.mostImproved?.netGain || 0} duration={800} />
-                  <span className="text-xs font-sans text-emerald-400/90 ml-1">Elo</span>
+                  <AnimatedNumber value={specialties.mostImproved?.netGain || specialties.mostImproved?.ratingGain || 0} duration={800} />
+                  <span className="text-xs font-sans text-[#9a8e7a] ml-1">Pts</span>
                 </div>
                 <div className="font-bold text-sm text-[#ede1c9] truncate">
-                  {specialties.mostImproved?.name || 'Active Gainers'}
+                  {specialties.mostImproved?.name || 'Unclaimed'}
                 </div>
                 <div className="text-[10px] text-[#ad8885] font-mono mt-0.5">
-                  {specialties.mostImproved?.playerId} • {specialties.mostImproved?.currentRating || 1000} Elo
+                  {specialties.mostImproved?.playerId} • Past 30 Days
                 </div>
               </TiltCard>
             </div>
@@ -265,7 +288,7 @@ const LeaderboardPage = () => {
         )}
 
         {/* Filters, Search & Sort Control Bar */}
-        <div className="p-6 bg-[#201b0c] border border-[#3b3423] mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           {/* Category Tabs with Jewel-Tone Styling */}
           <div className="flex flex-wrap items-center gap-2">
             {categories.map((cat) => {
@@ -278,8 +301,8 @@ const LeaderboardPage = () => {
                   onClick={() => setCategory(cat.value)}
                   className={`px-3.5 py-1.5 text-xs font-bold tracking-wider uppercase border transition-all cursor-pointer ${pillClass} ${
                     isActive
-                      ? 'active bg-[#ff3b3f] text-white border-[#ff3b3f] shadow-[0_0_12px_rgba(255,59,63,0.3)]'
-                      : 'bg-[#181305] text-[#9a8e7a] border-[#3b3423] hover:border-[#ad8885] hover:text-[#ede1c9]'
+                      ? 'active bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-sm'
+                      : 'bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] hover:text-[var(--color-text-primary)]'
                   }`}
                 >
                   {cat.label}
@@ -296,16 +319,16 @@ const LeaderboardPage = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or PH-ID..."
               aria-label="Search players by name or Player ID"
-              className="px-3.5 py-2 bg-[#181305] border border-[#3b3423] focus:border-[#ff3b3f] text-xs text-[#ede1c9] focus:outline-none w-full sm:w-56"
+              className="px-3.5 py-2 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] focus:border-[var(--color-accent-primary)] text-xs text-[var(--color-text-primary)] focus:outline-none w-full sm:w-56"
             />
 
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-[#ad8885] uppercase font-mono">Sort:</span>
+              <span className="text-[11px] text-[var(--color-text-muted)] uppercase font-mono">Sort:</span>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
                 aria-label="Sort leaderboard by"
-                className="px-3 py-2 bg-[#181305] border border-[#3b3423] text-xs text-[#ede1c9] focus:outline-none cursor-pointer min-h-[44px]"
+                className="px-3 py-2 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] text-xs text-[var(--color-text-primary)] focus:outline-none cursor-pointer min-h-[44px]"
               >
                 <option value="rating">Rating (Highest)</option>
                 <option value="wins">Total Wins</option>
@@ -318,10 +341,10 @@ const LeaderboardPage = () => {
         </div>
 
         {/* Standings Table */}
-        <div className="bg-[#201b0c] border border-[#3b3423] overflow-x-auto shadow-2xl mb-12">
+        <div className="bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] overflow-x-auto shadow-2xl mb-12">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#3b3423] bg-[#181305] text-[10px] font-bold font-mono tracking-[0.2em] text-[#ad8885] uppercase">
+              <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-base)] text-[10px] font-bold font-mono tracking-[0.2em] text-[var(--color-text-muted)] uppercase">
                 <th className="py-4 px-6">RANK</th>
                 <th className="py-4 px-6">ATHLETE</th>
                 <th className="py-4 px-6">TIER DIVISION</th>
@@ -331,12 +354,11 @@ const LeaderboardPage = () => {
                 <th className="py-4 px-6 text-right">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#2f2919]">
+            <tbody className="divide-y divide-[var(--color-border-subtle)]">
               {loading ? (
                 // Shimmer Skeleton Loader
                 Array.from({ length: 6 }).map((_, idx) => (
                   <tr key={idx} className="animate-pulse">
-                    <td className="py-5 px-6"><div className="w-6 h-4 bg-[#251f10] rounded" /></td>
                     <td className="py-5 px-6"><div className="w-36 h-4 bg-[#251f10] rounded" /></td>
                     <td className="py-5 px-6"><div className="w-24 h-4 bg-[#251f10] rounded" /></td>
                     <td className="py-5 px-6"><div className="w-16 h-4 bg-[#251f10] rounded ml-auto" /></td>
@@ -428,13 +450,13 @@ const LeaderboardPage = () => {
                             type="button"
                             onClick={() => handleOpenCompare(p)}
                             aria-label={`Compare ${p.name} with another player`}
-                            className="px-2.5 py-1.5 bg-[#181305] hover:bg-[#3b3423] border border-[#5d3f3d] hover:border-[#ff3b3f] text-[10px] font-bold text-[#ffb3ad] uppercase transition-colors cursor-pointer min-h-[44px] min-w-[44px]"
+                            className="px-2.5 py-1.5 bg-[var(--color-bg-base,#181305)] hover:bg-[var(--color-bg-card-hover,#3b3423)] border border-[var(--color-border-subtle,#5d3f3d)] hover:border-[#ff3b3f] text-[10px] font-bold text-[#ffb3ad] uppercase transition-colors cursor-pointer min-h-[44px] min-w-[44px]"
                           >
                             COMPARE ⚔️
                           </button>
                           <Link
                             to={`/players/${p.playerId}`}
-                            className="px-2.5 py-1 bg-[#251f10] hover:bg-[#ff3b3f] text-[#ede1c9] hover:text-white border border-[#3b3423] text-[10px] font-bold uppercase transition-colors"
+                            className="px-2.5 py-1 bg-[var(--color-bg-card,#251f10)] hover:bg-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] hover:text-white border border-[var(--color-border-subtle,#3b3423)] text-[10px] font-bold uppercase transition-colors"
                           >
                             PROFILE →
                           </Link>
@@ -445,7 +467,7 @@ const LeaderboardPage = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-xs text-[#9a8e7a]">
+                  <td colSpan={7} className="py-12 text-center text-xs text-[var(--color-text-muted,#9a8e7a)]">
                     No players found matching the selected division or search query.
                   </td>
                 </tr>
@@ -464,13 +486,13 @@ const LeaderboardPage = () => {
             onClick={(e) => { if (e.target === e.currentTarget) { setCompareModalOpen(false); setCompareData(null); } }}
             onKeyDown={(e) => { if (e.key === 'Escape') { setCompareModalOpen(false); setCompareData(null); } }}
           >
-            <div className="w-full max-w-2xl bg-[#1f190a] border-2 border-[#ff3b3f] p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="w-full max-w-2xl bg-[var(--color-bg-card,#1f190a)] border-2 border-[#ff3b3f] p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <span className="text-[10px] font-bold tracking-[0.25em] text-[#ff3b3f] uppercase block mb-1">
                     HEAD-TO-HEAD MATCHUP ENGINE
                   </span>
-                  <h3 className="font-['Playfair_Display'] text-2xl font-bold text-[#ede1c9]">
+                  <h3 className="font-['Playfair_Display'] text-2xl font-bold text-[var(--color-text-primary,#ede1c9)]">
                     Head-to-Head Comparison
                   </h3>
                 </div>
@@ -489,17 +511,17 @@ const LeaderboardPage = () => {
 
               {/* Player 1 Selection Header */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="p-4 bg-[#181305] border border-[#ff3b3f]/60">
+                <div className="p-4 bg-[var(--color-bg-base,#181305)] border border-[#ff3b3f]/60">
                   <span className="text-[9px] font-bold text-[#ffb3ad] uppercase block mb-1">
                     PLAYER 1
                   </span>
-                  <div className="font-bold text-sm text-[#ede1c9] truncate">{compareP1.name}</div>
+                  <div className="font-bold text-sm text-[var(--color-text-primary,#ede1c9)] truncate">{compareP1.name}</div>
                   <div className="text-xs font-mono text-[#ff3b3f] font-bold mt-1">
                     {compareP1.currentRating} Elo
                   </div>
                 </div>
 
-                <div className="p-4 bg-[#181305] border border-[#3b3423]">
+                <div className="p-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)]">
                   <span className="text-[9px] font-bold text-[#ad8885] uppercase block mb-1">
                     PLAYER 2
                   </span>
@@ -558,7 +580,7 @@ const LeaderboardPage = () => {
               {compareData && (
                 <div className="space-y-6 animate-fade-in">
                   {/* Algorithmic Win Probability Gauge */}
-                  <div className="p-4 bg-[#181305] border border-[#3b3423]">
+                  <div className="p-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)]">
                     <div className="flex justify-between items-center text-xs font-bold mb-2">
                       <span className="text-[#ffb3ad]">
                         {compareData.player1.name}: {compareData.analytics.player1WinProbability}%
@@ -566,13 +588,13 @@ const LeaderboardPage = () => {
                       <span className="text-[10px] text-[#ad8885] uppercase font-mono">
                         ALGORITHMIC WIN PROBABILITY
                       </span>
-                      <span className="text-[#ede1c9]">
+                      <span className="text-[var(--color-text-primary,#ede1c9)]">
                         {compareData.player2.name}: {compareData.analytics.player2WinProbability}%
                       </span>
                     </div>
 
                     {/* Visual Probability Bar */}
-                    <div className="w-full h-3 bg-[#251f10] rounded-full overflow-hidden flex">
+                    <div className="w-full h-3 bg-[var(--color-bg-card,#251f10)] rounded-full overflow-hidden flex">
                       <div
                         style={{ width: `${compareData.analytics.player1WinProbability}%` }}
                         className="bg-[#ff3b3f] h-full transition-all duration-500"
@@ -583,37 +605,37 @@ const LeaderboardPage = () => {
                       />
                     </div>
 
-                    <div className="text-[10px] text-[#9a8e7a] text-center mt-2">
-                      Rating Difference: <span className="font-bold text-[#ede1c9]">{Math.abs(compareData.analytics.ratingGap)} points</span> • Favored:{' '}
+                    <div className="text-[10px] text-[var(--color-text-muted,#9a8e7a)] text-center mt-2">
+                      Rating Difference: <span className="font-bold text-[var(--color-text-primary,#ede1c9)]">{Math.abs(compareData.analytics.ratingGap)} points</span> • Favored:{' '}
                       <span className="text-[#4ade80] font-bold">{compareData.analytics.higherRatedPlayer}</span>
                     </div>
                   </div>
 
                   {/* Side-by-Side Metric Grid */}
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs border border-[#3b3423] p-4 bg-[#181305]">
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs border border-[var(--color-border-subtle,#3b3423)] p-4 bg-[var(--color-bg-base,#181305)]">
                     <div className="font-mono font-bold text-[#ffb3ad]">{compareData.player1.wins}</div>
-                    <div className="text-[10px] text-[#9a8e7a] uppercase">Career Wins</div>
-                    <div className="font-mono font-bold text-[#ede1c9]">{compareData.player2.wins}</div>
+                    <div className="text-[10px] text-[var(--color-text-muted,#9a8e7a)] uppercase">Career Wins</div>
+                    <div className="font-mono font-bold text-[var(--color-text-primary,#ede1c9)]">{compareData.player2.wins}</div>
 
                     <div className="font-mono font-bold text-[#ffb3ad]">{compareData.player1.winPercentage}%</div>
-                    <div className="text-[10px] text-[#9a8e7a] uppercase">Win Rate</div>
-                    <div className="font-mono font-bold text-[#ede1c9]">{compareData.player2.winPercentage}%</div>
+                    <div className="text-[10px] text-[var(--color-text-muted,#9a8e7a)] uppercase">Win Rate</div>
+                    <div className="font-mono font-bold text-[var(--color-text-primary,#ede1c9)]">{compareData.player2.winPercentage}%</div>
 
                     <div className="font-mono font-bold text-[#ffb3ad]">{compareData.player1.winningStreak}W</div>
-                    <div className="text-[10px] text-[#9a8e7a] uppercase">Current Streak</div>
-                    <div className="font-mono font-bold text-[#ede1c9]">{compareData.player2.winningStreak}W</div>
+                    <div className="text-[10px] text-[var(--color-text-muted,#9a8e7a)] uppercase">Current Streak</div>
+                    <div className="font-mono font-bold text-[var(--color-text-primary,#ede1c9)]">{compareData.player2.winningStreak}W</div>
 
                     <div className="font-mono font-bold text-[#ffb3ad]">{compareData.player1.tournamentWins}</div>
-                    <div className="text-[10px] text-[#9a8e7a] uppercase">Tournament Titles</div>
-                    <div className="font-mono font-bold text-[#ede1c9]">{compareData.player2.tournamentWins}</div>
+                    <div className="text-[10px] text-[var(--color-text-muted,#9a8e7a)] uppercase">Tournament Titles</div>
+                    <div className="font-mono font-bold text-[var(--color-text-primary,#ede1c9)]">{compareData.player2.tournamentWins}</div>
                   </div>
 
                   {/* Direct Head-to-Head Encounters */}
-                  <div className="p-4 bg-[#181305] border border-[#3b3423]">
+                  <div className="p-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)]">
                     <div className="text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
                       HISTORICAL MATCHUPS ({compareData.headToHead.totalMatches})
                     </div>
-                    <div className="text-xs text-[#ede1c9]">
+                    <div className="text-xs text-[var(--color-text-primary,#ede1c9)]">
                       Direct Record:{' '}
                       <span className="font-bold text-[#ffb3ad] font-mono">
                         {compareData.player1.name} ({compareData.headToHead.player1Wins}) — (

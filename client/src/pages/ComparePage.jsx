@@ -128,7 +128,7 @@ const ComparePage = () => {
   const headToHead = comparisonData?.headToHead;
 
   return (
-    <PageTransition className="min-h-screen bg-[#181305] text-[#ede1c9] py-12 px-6 sm:px-10 md:px-20 transition-colors duration-300">
+    <PageTransition className="min-h-screen bg-[var(--color-bg-base,#181305)] text-[var(--color-text-primary,#ede1c9)] py-12 px-6 sm:px-10 md:px-20 transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto">
         {/* Header Title & Share Action */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-[var(--color-border-subtle,#3b3423)]">
@@ -212,7 +212,7 @@ const ComparePage = () => {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono font-bold text-[#ffb3ad] px-1.5 py-0.5 bg-[#181305] border border-[#3b3423] rounded">
+                        <span className="text-[10px] font-mono font-bold text-[#ffb3ad] px-1.5 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
                           {player1.playerId}
                         </span>
                         <TierBadge category={player1.category} />
@@ -224,7 +224,7 @@ const ComparePage = () => {
                   </div>
 
                   {/* Quick Metric Bar */}
-                  <div className="grid grid-cols-3 gap-3 p-4 bg-[#181305] border border-[#3b3423] rounded-2xl text-center">
+                  <div className="grid grid-cols-3 gap-3 p-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded-2xl text-center">
                     <div>
                       <span className="text-[9px] font-bold text-[#ad8885] uppercase block">Rating</span>
                       <span className="font-mono font-bold text-xl text-[var(--color-text-primary,#ede1c9)]">
@@ -262,7 +262,7 @@ const ComparePage = () => {
                 </Link>
                 <Link
                   to={`/matches/submit?opponent=${player1.playerId}`}
-                  className="px-3 py-1.5 bg-[#181305] hover:bg-[#ff3b3f] text-[#ede1c9] hover:text-white border border-[#3b3423] rounded-lg font-bold text-[10px] tracking-wider uppercase transition-all"
+                  className="px-3 py-1.5 bg-[var(--color-bg-base,#181305)] hover:bg-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] hover:text-white border border-[var(--color-border-subtle,#3b3423)] rounded-lg font-bold text-[10px] tracking-wider uppercase transition-all"
                 >
                   Challenge
                 </Link>
@@ -300,7 +300,7 @@ const ComparePage = () => {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono font-bold text-[#ffb3ad] px-1.5 py-0.5 bg-[#181305] border border-[#3b3423] rounded">
+                        <span className="text-[10px] font-mono font-bold text-[#ffb3ad] px-1.5 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
                           {player2.playerId}
                         </span>
                         <TierBadge category={player2.category} />
@@ -312,7 +312,7 @@ const ComparePage = () => {
                   </div>
 
                   {/* Quick Metric Bar */}
-                  <div className="grid grid-cols-3 gap-3 p-4 bg-[#181305] border border-[#3b3423] rounded-2xl text-center">
+                  <div className="grid grid-cols-3 gap-3 p-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded-2xl text-center">
                     <div>
                       <span className="text-[9px] font-bold text-[#ad8885] uppercase block">Rating</span>
                       <span className="font-mono font-bold text-xl text-[var(--color-text-primary,#ede1c9)]">
@@ -350,7 +350,7 @@ const ComparePage = () => {
                 </Link>
                 <Link
                   to={`/matches/submit?opponent=${player2.playerId}`}
-                  className="px-3 py-1.5 bg-[#181305] hover:bg-[#ff3b3f] text-[#ede1c9] hover:text-white border border-[#3b3423] rounded-lg font-bold text-[10px] tracking-wider uppercase transition-all"
+                  className="px-3 py-1.5 bg-[var(--color-bg-base,#181305)] hover:bg-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] hover:text-white border border-[var(--color-border-subtle,#3b3423)] rounded-lg font-bold text-[10px] tracking-wider uppercase transition-all"
                 >
                   Challenge
                 </Link>
@@ -395,7 +395,7 @@ const ComparePage = () => {
                       aria-valuemin="0"
                       aria-valuemax="100"
                       aria-label={`${player1.name} win probability: ${p1Prob.toFixed(0)}%`}
-                      className="w-full h-4 bg-[#181305] rounded-full overflow-hidden border border-[#3b3423] flex"
+                      className="w-full h-4 bg-[var(--color-bg-base,#181305)] rounded-full overflow-hidden border border-[var(--color-border-subtle,#3b3423)] flex"
                     >
                       <div
                         className="bg-[#ff3b3f] h-full transition-all duration-700"
@@ -412,19 +412,19 @@ const ComparePage = () => {
 
             {/* Gap Breakdown */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[var(--color-border-subtle,#2f2919)] text-center text-xs">
-              <div className="p-3 bg-[#181305] border border-[#3b3423] rounded-xl">
+              <div className="p-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl">
                 <span className="text-[9px] font-bold text-[#ad8885] uppercase block mb-1">Rating Delta</span>
                 <span className="font-mono font-bold text-base text-[var(--color-text-primary,#ede1c9)]">
                   {analytics.ratingGap > 0 ? `+${analytics.ratingGap}` : analytics.ratingGap} Elo
                 </span>
               </div>
-              <div className="p-3 bg-[#181305] border border-[#3b3423] rounded-xl">
+              <div className="p-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl">
                 <span className="text-[9px] font-bold text-[#ad8885] uppercase block mb-1">Favored Athlete</span>
                 <span className="font-bold text-sm text-[#4ade80]">
                   {analytics.higherRatedPlayer ? analytics.higherRatedPlayer.name : 'Evenly Matched'}
                 </span>
               </div>
-              <div className="p-3 bg-[#181305] border border-[#3b3423] rounded-xl">
+              <div className="p-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl">
                 <span className="text-[9px] font-bold text-[#ad8885] uppercase block mb-1">Direct Encounters</span>
                 <span className="font-mono font-bold text-base text-[var(--color-text-primary,#ede1c9)]">
                   {headToHead?.totalMatches || 0} Matches
@@ -459,7 +459,7 @@ const ComparePage = () => {
                 {headToHead.matches.map((m) => (
                   <div
                     key={m._id}
-                    className="p-4 bg-[#181305] border border-[#3b3423] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                    className="p-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] font-mono font-bold text-[#ad8885] px-2 py-0.5 bg-[#201b0c] border border-[#3b3423] rounded">

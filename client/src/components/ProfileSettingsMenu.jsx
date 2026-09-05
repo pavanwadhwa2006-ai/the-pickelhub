@@ -15,7 +15,7 @@ import { THEMES } from '../context/themeConstants';
 import api from '../services/api';
 
 const ProfileSettingsMenu = () => {
-  const { user, player, logout, refreshProfile } = useAuth();
+  const { user, player, logout, refreshProfile, isAdmin, isAdminMode, toggleAdminViewMode } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -162,14 +162,14 @@ const ProfileSettingsMenu = () => {
 
       {/* Dropdown Menu Modal */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 bg-[#1f190a] border-2 border-[#3b3423] shadow-2xl p-6 z-50 animate-fade-in divide-y divide-[#2f2919]">
+        <div className="absolute right-0 mt-3 w-80 bg-[var(--color-bg-card)] border-2 border-[var(--color-border-subtle)] text-[var(--color-text-primary)] shadow-2xl p-6 z-50 animate-fade-in divide-y divide-[var(--color-border-subtle)] rounded-2xl">
           {/* Header Profile Section with Avatar & Upload */}
           <div className="pb-5 flex flex-col items-center text-center">
             {/* Avatar Circle with Camera Overlay */}
             <div className="relative mb-3 group">
               <div
-                className={`w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-2xl shadow-xl relative ${
-                  uploading ? 'ring-4 ring-[#ff3b3f] ring-offset-2 animate-pulse' : ''
+                className={`w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-[var(--color-accent-primary)] text-white font-['Playfair_Display'] font-bold text-2xl shadow-xl relative ${
+                  uploading ? 'ring-4 ring-[var(--color-accent-primary)] ring-offset-2 animate-pulse' : ''
                 }`}
               >
                 {currentPhoto ? (
@@ -189,7 +189,7 @@ const ProfileSettingsMenu = () => {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
                 title="Change profile picture"
-                className="absolute bottom-0 right-0 w-7 h-7 bg-[#181305] border border-[#ff3b3f] hover:bg-[#ff3b3f] text-white rounded-full flex items-center justify-center transition-colors shadow-md cursor-pointer disabled:opacity-50"
+                className="absolute bottom-0 right-0 w-7 h-7 bg-[var(--color-bg-base)] border border-[var(--color-accent-primary)] hover:bg-[var(--color-accent-primary)] text-white rounded-full flex items-center justify-center transition-colors shadow-md cursor-pointer disabled:opacity-50"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -211,7 +211,7 @@ const ProfileSettingsMenu = () => {
               <button
                 type="button"
                 onClick={handleRemovePhoto}
-                className="text-[10px] text-[#ff5451] hover:text-white font-bold uppercase underline cursor-pointer mb-2"
+                className="text-[10px] text-[var(--color-accent-primary)] hover:underline font-bold uppercase cursor-pointer mb-2"
               >
                 Remove photo
               </button>
@@ -230,28 +230,68 @@ const ProfileSettingsMenu = () => {
             )}
 
             {/* Identity Info */}
-            <h4 className="font-['Playfair_Display'] text-lg font-bold text-[#ede1c9]">
+            <h4 className="font-['Playfair_Display'] text-lg font-bold text-[var(--color-text-primary)]">
               {player?.name || user?.email?.split('@')[0]}
             </h4>
-            <div className="text-[10px] text-[#ad8885] font-mono mt-0.5">
+            <div className="text-[10px] text-[var(--color-accent-primary)] font-mono mt-0.5">
               {player?.playerId} • {player?.currentRating || 1000} Elo
             </div>
-            <span className="text-[10px] text-[#9a8e7a] truncate max-w-full block mt-0.5">
+            <span className="text-[10px] text-[var(--color-text-muted)] truncate max-w-full block mt-0.5 font-mono">
               {user?.email}
             </span>
           </div>
 
-          {/* Theme Selector (Radio List per Instructions) */}
+          {/* Perspective Switcher (Visible only for Administrators) */}
+          {isAdmin && (
+            <div className="py-4">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase block mb-2.5">
+                PERSPECTIVE SWITCHER
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleAdminViewMode('ADMIN')}
+                  className={`p-2.5 border rounded-xl text-xs font-bold uppercase transition-all flex flex-col items-center gap-1 cursor-pointer ${
+                    isAdminMode
+                      ? 'bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-sm'
+                      : 'bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border-[var(--color-border-subtle)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <span className="text-base">👑</span>
+                  <span className="text-[10px] tracking-wider">Admin Mode</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleAdminViewMode('PLAYER')}
+                  className={`p-2.5 border rounded-xl text-xs font-bold uppercase transition-all flex flex-col items-center gap-1 cursor-pointer ${
+                    !isAdminMode
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                      : 'bg-[var(--color-bg-base)] text-[var(--color-text-muted)] border-[var(--color-border-subtle)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <span className="text-base">🏓</span>
+                  <span className="text-[10px] tracking-wider">Athlete View</span>
+                </button>
+              </div>
+              <p className="text-[10px] text-[var(--color-text-muted)] mt-2 leading-relaxed">
+                {isAdminMode
+                  ? 'Active admin privileges, match approvals, and tournament settings.'
+                  : 'Previewing experience as an authentic club athlete.'}
+              </p>
+            </div>
+          )}
+
+          {/* Theme Selector */}
           <div className="py-4">
-            <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase block mb-3">
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted)] uppercase block mb-3">
               THEME SELECTION
             </span>
             <div className="space-y-2">
               <label
-                className={`flex items-center justify-between p-2.5 border text-xs font-bold uppercase cursor-pointer transition-all ${
+                className={`flex items-center justify-between p-2.5 border rounded-xl text-xs font-bold uppercase cursor-pointer transition-all ${
                   theme === THEMES.CLASSIC_DARK
-                    ? 'bg-[#181305] border-[#ff3b3f] text-[#ffdad6] shadow-[0_0_10px_rgba(255,59,63,0.2)]'
-                    : 'bg-[#140f02] border-[#3b3423] text-[#9a8e7a] hover:border-[#ad8885]'
+                    ? 'bg-[var(--color-bg-base)] border-[var(--color-accent-primary)] text-[var(--color-text-primary)] shadow-sm'
+                    : 'bg-[var(--color-bg-base)] border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-[var(--color-accent-primary)]'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -260,18 +300,18 @@ const ProfileSettingsMenu = () => {
                     name="theme"
                     checked={theme === THEMES.CLASSIC_DARK}
                     onChange={() => setTheme(THEMES.CLASSIC_DARK)}
-                    className="accent-[#ff3b3f] cursor-pointer"
+                    className="accent-[var(--color-accent-primary)] cursor-pointer"
                   />
                   <span>Classic dark</span>
                 </div>
-                <span className="text-[9px] text-[#ad8885] font-mono">MAROON</span>
+                <span className="text-[9px] text-[var(--color-accent-primary)] font-mono">MAROON</span>
               </label>
 
               <label
-                className={`flex items-center justify-between p-2.5 border text-xs font-bold uppercase cursor-pointer transition-all ${
+                className={`flex items-center justify-between p-2.5 border rounded-xl text-xs font-bold uppercase cursor-pointer transition-all ${
                   theme === THEMES.GARDEN_LIGHT
-                    ? 'bg-[#181305] border-[#ff3b3f] text-[#ffdad6] shadow-[0_0_10px_rgba(255,59,63,0.2)]'
-                    : 'bg-[#140f02] border-[#3b3423] text-[#9a8e7a] hover:border-[#ad8885]'
+                    ? 'bg-[var(--color-bg-base)] border-[var(--color-accent-primary)] text-[var(--color-text-primary)] shadow-sm'
+                    : 'bg-[var(--color-bg-base)] border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-[var(--color-accent-primary)]'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -280,21 +320,31 @@ const ProfileSettingsMenu = () => {
                     name="theme"
                     checked={theme === THEMES.GARDEN_LIGHT}
                     onChange={() => setTheme(THEMES.GARDEN_LIGHT)}
-                    className="accent-[#ff3b3f] cursor-pointer"
+                    className="accent-[var(--color-accent-primary)] cursor-pointer"
                   />
                   <span>Garden light</span>
                 </div>
-                <span className="text-[9px] text-[#839958] font-mono">BOTANICAL</span>
+                <span className="text-[9px] text-[var(--color-accent-primary)] font-mono">BOTANICAL</span>
               </label>
             </div>
           </div>
 
           {/* Quick Actions & Logout */}
           <div className="pt-4 space-y-2">
+            {isAdminMode && (
+              <Link
+                to="/admin"
+                onClick={() => setIsOpen(false)}
+                className="w-full py-2.5 px-3 bg-[var(--color-accent-primary)] hover:brightness-110 text-white text-xs font-bold uppercase tracking-wider block text-center rounded-xl transition-all shadow-sm"
+              >
+                ADMIN PORTAL 👑
+              </Link>
+            )}
+
             <Link
               to="/dashboard"
               onClick={() => setIsOpen(false)}
-              className="w-full py-2 px-3 bg-[#181305] hover:bg-[#251f10] border border-[#3b3423] hover:border-[#ad8885] text-xs font-bold text-[#ede1c9] uppercase tracking-wider block text-center transition-colors"
+              className="w-full py-2.5 px-3 bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] text-xs font-bold text-[var(--color-text-primary)] uppercase tracking-wider block text-center rounded-xl transition-colors"
             >
               DASHBOARD
             </Link>
@@ -303,7 +353,7 @@ const ProfileSettingsMenu = () => {
               <Link
                 to={`/players/${player.playerId}`}
                 onClick={() => setIsOpen(false)}
-                className="w-full py-2 px-3 bg-[#181305] hover:bg-[#251f10] border border-[#3b3423] hover:border-[#ad8885] text-xs font-bold text-[#ede1c9] uppercase tracking-wider block text-center transition-colors"
+                className="w-full py-2.5 px-3 bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] text-xs font-bold text-[var(--color-text-primary)] uppercase tracking-wider block text-center rounded-xl transition-colors"
               >
                 VIEW PUBLIC PROFILE
               </Link>
@@ -312,7 +362,7 @@ const ProfileSettingsMenu = () => {
             <button
               type="button"
               onClick={handleLogout}
-              className="w-full py-2 px-3 bg-[#251f10] hover:bg-[#93000a]/40 border border-[#5d3f3d] hover:border-[#ff5451] text-xs font-bold text-[#ffdad6] uppercase tracking-wider block text-center transition-colors cursor-pointer"
+              className="w-full py-2.5 px-3 bg-[var(--color-bg-base)] hover:bg-rose-900/30 border border-rose-800/40 hover:border-rose-600 text-xs font-bold text-rose-400 uppercase tracking-wider block text-center rounded-xl transition-colors cursor-pointer"
             >
               SIGN OUT
             </button>

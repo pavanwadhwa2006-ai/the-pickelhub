@@ -105,7 +105,7 @@ const DashboardPage = () => {
   const hasPlayedMatches = (player?.matchesPlayed || 0) > 0;
 
   return (
-    <PageTransition className="min-h-screen bg-[#181305] text-[#ede1c9] py-12 px-6 sm:px-10 md:px-20">
+    <PageTransition className="min-h-screen bg-[var(--color-bg-base,#181305)] text-[var(--color-text-primary,#ede1c9)] py-12 px-6 sm:px-10 md:px-20 transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto">
         {/* Update Notification */}
         {updateMsg && (
@@ -363,9 +363,9 @@ const DashboardPage = () => {
                   </div>
 
                   {/* Match Participants & Score Summary */}
-                  <div className="p-3 bg-[#181305] border border-[#3b3423] mb-3">
+                  <div className="p-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] mb-3">
                     <div className="flex justify-between items-center text-xs mb-1.5">
-                      <span className="font-bold text-[#ede1c9]">
+                      <span className="font-bold text-[var(--color-text-primary,#ede1c9)]">
                         Team A: {match.teamA?.map((p) => p.name || p.playerId).join(' & ')}
                       </span>
                       <span className="font-mono text-[#ffb3ad]">
@@ -373,7 +373,7 @@ const DashboardPage = () => {
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-[#ede1c9]">
+                      <span className="font-bold text-[var(--color-text-primary,#ede1c9)]">
                         Team B: {match.teamB?.map((p) => p.name || p.playerId).join(' & ')}
                       </span>
                       <span className="font-mono text-[#ffb3ad]">
@@ -382,11 +382,11 @@ const DashboardPage = () => {
                     </div>
                   </div>
 
-                  <div className="text-[11px] text-[#9a8e7a] flex items-center justify-between">
+                  <div className="text-[11px] text-[var(--color-text-muted,#9a8e7a)] flex items-center justify-between">
                     <span>
                       Declared Winner: <strong className="text-[#4ade80]">Team {match.winnerTeam}</strong>
                     </span>
-                    <span className="text-[10px] text-[#ad8885]">
+                    <span className="text-[10px] text-[var(--color-text-muted,#ad8885)]">
                       Submitted by {match.submittedBy?.name || 'Player'}
                     </span>
                   </div>
@@ -411,20 +411,20 @@ const DashboardPage = () => {
         ) : null}
 
         {/* Verified Fair-Play Governance Banner */}
-        <div className="p-8 bg-[#201b0c] border border-[#3b3423] mb-12 hover:border-[#5d3f3d] transition-colors">
+        <div className="p-8 bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] mb-12 hover:border-[var(--color-border-strong,#5d3f3d)] transition-colors">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <span className="text-[10px] font-bold tracking-[0.2em] text-[#ff3b3f] uppercase block mb-1">
                 INDEPENDENT RATING GOVERNANCE
               </span>
-              <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#ede1c9]">
+              <h2 className="font-['Playfair_Display'] text-xl font-bold text-[var(--color-text-primary,#ede1c9)]">
                 Verified Match Score Pipeline
               </h2>
-              <p className="text-xs sm:text-sm text-[#d8cdb5] mt-1 max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-[var(--color-text-muted,#d8cdb5)] mt-1 max-w-2xl leading-relaxed">
                 Every match score submitted from the court is reviewed and verified by a club administrator before ratings and leaderboard standings are adjusted.
               </p>
             </div>
-            <div className="px-4 py-2 bg-[#181305] border border-[#3b3423] text-xs font-bold font-mono text-[#ffb3ad] shrink-0 flex items-center gap-2">
+            <div className="px-4 py-2 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] text-xs font-bold font-mono text-[#ffb3ad] shrink-0 flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-[#4ade80] rounded-full animate-live-pulse" />
               STATUS: {pendingMatches.length} PENDING IN QUEUE
             </div>

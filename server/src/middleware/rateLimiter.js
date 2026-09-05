@@ -10,14 +10,29 @@
 
 const RateLimit = require('../models/RateLimit');
 
+const inMemoryStores = new Map();
+
+// Periodic cleanup of expired in-memory rate limit entries (every 5 mins)
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, record] of inMemoryStores.entries()) {
+      if (record.expiresAt <= now) {
+        inMemoryStores.delete(key);
+      }
+    }
+  }, 5 * 60 * 1000).unref();
+}
+
 /**
- * Factory creating rate-limiting middleware with atomic MongoDB counters.
+ * Factory creating rate-limiting middleware with atomic MongoDB or in-memory counters.
  *
  * @param {object} options
  * @param {number} options.windowMs - Rate window in milliseconds (e.g. 15 * 60 * 1000)
  * @param {number} options.max      - Max allowed requests within window
  * @param {string} options.prefix   - Namespace prefix for the limiter key
  * @param {string} [options.message] - Custom user-facing message on rate limit exceeded
+ * @param {boolean} [options.inMemory] - If true, uses ultra-fast in-memory sliding window
  * @returns {import('express').RequestHandler}
  */
 const createRateLimiter = ({
@@ -25,6 +40,7 @@ const createRateLimiter = ({
   max = 5,
   prefix = 'rl',
   message = 'Too many requests. Please try again later.',
+  inMemory = false,
 }) => {
   return async (req, res, next) => {
     // In test environment without active MongoDB connection or when disabled
@@ -41,17 +57,30 @@ const createRateLimiter = ({
 
       const key = `${prefix}:${clientIp}`;
       const now = Date.now();
-      const expiresAt = new Date(now + windowMs);
+      let record;
 
-      // Atomic findOneAndUpdate with $inc and $setOnInsert to eliminate race conditions
-      const record = await RateLimit.findOneAndUpdate(
-        { key },
-        {
-          $inc: { count: 1 },
-          $setOnInsert: { expiresAt },
-        },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-      );
+      if (inMemory) {
+        // Ultra-fast in-memory counter (sub-millisecond, zero database overhead)
+        let mem = inMemoryStores.get(key);
+        if (!mem || mem.expiresAt <= now) {
+          mem = { count: 1, expiresAt: now + windowMs };
+        } else {
+          mem.count++;
+        }
+        inMemoryStores.set(key, mem);
+        record = mem;
+      } else {
+        // Atomic findOneAndUpdate with $inc and $setOnInsert to eliminate race conditions
+        const expiresAt = new Date(now + windowMs);
+        record = await RateLimit.findOneAndUpdate(
+          { key },
+          {
+            $inc: { count: 1 },
+            $setOnInsert: { expiresAt },
+          },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+      }
 
       const resetTimeSec = Math.ceil(new Date(record.expiresAt).getTime() / 1000);
       const remainingSec = Math.max(1, Math.ceil((new Date(record.expiresAt).getTime() - now) / 1000));
@@ -103,13 +132,13 @@ const matchSubmitLimiter = createRateLimiter({
 });
 
 // 3. Global API Limiter: 200 requests per 15 minutes (Milestone 10 — Traffic Resilience)
-// Safety net for all public endpoints (leaderboard, search, compare, tournaments)
-// that previously had zero rate limiting. Stricter per-route limiters override this.
+// In-memory sliding window for sub-millisecond throughput on public endpoints
 const globalApiLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 200,
   prefix: 'global_api',
   message: 'Too many requests from this IP. Please slow down.',
+  inMemory: true,
 });
 
 module.exports = {

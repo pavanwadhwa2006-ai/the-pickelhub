@@ -77,8 +77,8 @@ const GoogleAuthButton = ({ text = 'signin_with', onSuccessCustom, onErrorCustom
       )}
 
       {loading ? (
-        <div className="w-full py-3 px-4 bg-[#181305] border border-[#3b3423] text-xs font-bold tracking-wider text-[#ffb3ad] flex items-center justify-center gap-3">
-          <div className="w-4 h-4 border-2 border-[#3b3423] border-t-[#ff3b3f] animate-spin rounded-full" />
+        <div className="w-full py-3 px-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] text-xs font-bold tracking-wider text-[#ffb3ad] flex items-center justify-center gap-3">
+          <div className="w-4 h-4 border-2 border-[var(--color-border-subtle,#3b3423)] border-t-[#ff3b3f] animate-spin rounded-full" />
           VERIFYING GOOGLE CREDENTIALS...
         </div>
       ) : isConfigured ? (
@@ -97,7 +97,7 @@ const GoogleAuthButton = ({ text = 'signin_with', onSuccessCustom, onErrorCustom
         <button
           type="button"
           onClick={handleUnconfiguredClick}
-          className="w-full py-3 px-4 bg-[#181305] hover:bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] text-[#ede1c9] hover:text-white text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm group"
+          className="w-full py-3 px-4 bg-[var(--color-bg-base,#181305)] hover:bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] hover:border-[var(--color-border-strong,#ad8885)] text-[var(--color-text-primary,#ede1c9)] hover:text-white text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm group"
         >
           {/* Google G Logo SVG */}
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">

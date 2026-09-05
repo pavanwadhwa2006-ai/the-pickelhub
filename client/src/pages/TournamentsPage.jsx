@@ -14,16 +14,21 @@ import PageTransition from '../components/PageTransition';
 import TierBadge from '../components/TierBadge';
 import BracketVisualizer from '../components/BracketVisualizer';
 
+// Module-level in-memory cache for instant route navigation
+let clientTournamentsCache = null;
+
 const TournamentsPage = () => {
   const { user } = useAuth();
 
-  const [tournaments, setTournaments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [tournaments, setTournaments] = useState(() => clientTournamentsCache || []);
+  const [loading, setLoading] = useState(() => !clientTournamentsCache);
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Selected tournament for detailed bracket view
-  const [selectedTournament, setSelectedTournament] = useState(null);
+  const [selectedTournament, setSelectedTournament] = useState(() => {
+    return clientTournamentsCache && clientTournamentsCache.length > 0 ? clientTournamentsCache[0] : null;
+  });
   const [loadingDetails, setLoadingDetails] = useState(false);
 
   // Application/Registration State
@@ -32,7 +37,7 @@ const TournamentsPage = () => {
   const [registerError, setRegisterError] = useState(null);
 
   // Ref to track whether we've auto-selected a tournament on first load
-  const hasAutoSelected = useRef(false);
+  const hasAutoSelected = useRef(Boolean(clientTournamentsCache && clientTournamentsCache.length > 0));
 
   // Tick state for countdown timer (avoids impure Date.now() during render)
   const [now, setNow] = useState(() => Date.now());
@@ -46,11 +51,12 @@ const TournamentsPage = () => {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      setLoading(true);
+      if (!clientTournamentsCache) setLoading(true);
       setError(null);
       try {
         const res = await api.get('/tournaments');
         if (!cancelled && res.data.success) {
+          clientTournamentsCache = res.data.data;
           setTournaments(res.data.data);
           if (res.data.data.length > 0 && !hasAutoSelected.current) {
             hasAutoSelected.current = true;
@@ -58,7 +64,9 @@ const TournamentsPage = () => {
           }
         }
       } catch (err) {
-        if (!cancelled) setError(err.response?.data?.message || 'Failed to load club tournaments.');
+        if (!cancelled && !clientTournamentsCache) {
+          setError(err.response?.data?.message || 'Failed to load club tournaments.');
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

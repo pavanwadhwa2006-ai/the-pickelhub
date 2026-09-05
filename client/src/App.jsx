@@ -8,7 +8,7 @@
  * bundle size (Milestone 10 — Traffic Resilience).
  */
 
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -29,11 +29,21 @@ const SubmitMatchPage = lazy(() => import('./pages/SubmitMatchPage'));
 const ComparePage = lazy(() => import('./pages/ComparePage'));
 
 function App() {
+  useEffect(() => {
+    // Idle background prefetching for core routes
+    const timer = setTimeout(() => {
+      import('./pages/LeaderboardPage');
+      import('./pages/TournamentsPage');
+      import('./pages/ComparePage');
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
         <ScrollProgressBar />
-        <div className="min-h-screen flex flex-col bg-[#181305] text-[#ede1c9]">
+        <div className="min-h-screen flex flex-col bg-[var(--color-bg-base)] text-[var(--color-text-primary)] transition-colors duration-200">
           <Navbar />
           <main className="flex-1">
             <Suspense fallback={<PageLoadingSkeleton />}>

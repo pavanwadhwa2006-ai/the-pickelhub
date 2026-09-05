@@ -106,13 +106,13 @@ const PlayerProfilePage = () => {
   }
 
   return (
-    <PageTransition className="min-h-screen bg-[#181305] text-[#ede1c9] py-12 px-6 sm:px-10 md:px-20 transition-colors duration-300">
+    <PageTransition className="min-h-screen bg-[var(--color-bg-base,#181305)] text-[var(--color-text-primary,#ede1c9)] py-12 px-6 sm:px-10 md:px-20 transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto">
         {/* Navigation Breadcrumb & Actions */}
         <div className="flex items-center justify-between gap-4 mb-8">
           <Link
             to="/leaderboard"
-            className="text-xs font-bold tracking-wider text-[#ad8885] hover:text-[#ede1c9] uppercase underline underline-offset-4 min-h-[44px] flex items-center"
+            className="text-xs font-bold tracking-wider text-[#ad8885] hover:text-[var(--color-text-primary,#ede1c9)] uppercase underline underline-offset-4 min-h-[44px] flex items-center"
           >
             ← LEADERBOARD DIRECTORY
           </Link>
@@ -128,11 +128,11 @@ const PlayerProfilePage = () => {
         </div>
 
         {/* Player Header Banner */}
-        <div className="p-8 sm:p-12 bg-[#251f10] border border-[#3b3423] mb-12 relative overflow-hidden rounded-3xl shadow-xl">
+        <div className="p-8 sm:p-12 bg-[var(--color-bg-card,#251f10)] border border-[var(--color-border-subtle,#3b3423)] mb-12 relative overflow-hidden rounded-3xl shadow-xl">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative z-10">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               {/* Profile Avatar / Photo */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-4xl flex items-center justify-center shrink-0 border-2 border-[#3b3423] shadow-lg">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-4xl flex items-center justify-center shrink-0 border-2 border-[var(--color-border-subtle,#3b3423)] shadow-lg">
                 {player.profilePhoto ? (
                   <img
                     src={player.profilePhoto}
@@ -146,18 +146,18 @@ const PlayerProfilePage = () => {
 
               <div>
                 <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#ffb3ad] uppercase font-mono px-2 py-0.5 bg-[#181305] border border-[#3b3423] rounded">
+                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#ffb3ad] uppercase font-mono px-2 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
                     {player.playerId}
                   </span>
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-[#4ade80] uppercase px-2 py-0.5 bg-[#181305] border border-[#3b3423] rounded">
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-[#4ade80] uppercase px-2 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse" />
                     {player.accountStatus}
                   </span>
                 </div>
-                <h1 className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[#ede1c9]">
+                <h1 className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[var(--color-text-primary,#ede1c9)]">
                   {player.name}
                 </h1>
-                <p className="text-xs text-[#9a8e7a] mt-1 font-mono">
+                <p className="text-xs text-[var(--color-text-muted,#9a8e7a)] mt-1 font-mono">
                   Official Member since {new Date(player.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </p>
               </div>
