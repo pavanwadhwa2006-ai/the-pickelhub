@@ -152,9 +152,10 @@ const ComparePage = () => {
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="px-4 py-2.5 bg-[var(--color-bg-card,#201b0c)] hover:bg-[var(--color-bg-card-hover,#2f2814)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl text-xs font-bold tracking-wider text-[var(--color-text-primary,#ede1c9)] uppercase transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+                aria-label="Share matchup comparison link"
+                className="px-4 py-2.5 min-h-[44px] bg-[var(--color-bg-card,#201b0c)] hover:bg-[var(--color-bg-card-hover,#2f2814)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl text-xs font-bold tracking-wider text-[var(--color-text-primary,#ede1c9)] uppercase transition-all flex items-center gap-2 cursor-pointer shadow-sm"
               >
-                <span>{copied ? '✓' : '🔗'}</span>
+                <span aria-hidden="true">{copied ? '✓' : '🔗'}</span>
                 <span>{copied ? 'Link Copied!' : 'Share Matchup'}</span>
               </button>
             )}
@@ -163,17 +164,18 @@ const ComparePage = () => {
               type="button"
               onClick={handleSwap}
               disabled={!player1 || !player2}
-              className="px-4 py-2.5 bg-[var(--color-bg-card,#201b0c)] hover:bg-[var(--color-bg-card-hover,#2f2814)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl text-xs font-bold tracking-wider text-[var(--color-text-muted,#9a8e7a)] hover:text-white uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+              aria-label="Swap athlete positions"
+              className="px-4 py-2.5 min-h-[44px] bg-[var(--color-bg-card,#201b0c)] hover:bg-[var(--color-bg-card-hover,#2f2814)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl text-xs font-bold tracking-wider text-[var(--color-text-muted,#9a8e7a)] hover:text-white uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
               title="Swap Athlete Positions"
             >
-              <span>⇄</span>
+              <span aria-hidden="true">⇄</span>
               <span className="hidden sm:inline">Swap</span>
             </button>
           </div>
         </div>
 
         {(samePlayerError || error) && (
-          <div className="p-4 mb-8 bg-rose-500/10 border border-rose-500/40 text-rose-400 text-xs rounded-xl">
+          <div role="alert" className="p-4 mb-8 bg-rose-500/10 border border-rose-500/40 text-rose-400 text-xs rounded-xl">
             ⚠️ {samePlayerError || error}
           </div>
         )}
@@ -387,16 +389,23 @@ const ComparePage = () => {
                     </span>
                   </div>
 
-                  <div className="w-full h-4 bg-[#181305] rounded-full overflow-hidden border border-[#3b3423] flex">
                     <div
-                      className="bg-[#ff3b3f] h-full transition-all duration-700"
-                      style={{ width: `${p1Prob}%` }}
-                    />
-                    <div
-                      className="bg-[#10586B] h-full transition-all duration-700"
-                      style={{ width: `${p2Prob}%` }}
-                    />
-                  </div>
+                      role="progressbar"
+                      aria-valuenow={Math.round(p1Prob)}
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      aria-label={`${player1.name} win probability: ${p1Prob.toFixed(0)}%`}
+                      className="w-full h-4 bg-[#181305] rounded-full overflow-hidden border border-[#3b3423] flex"
+                    >
+                      <div
+                        className="bg-[#ff3b3f] h-full transition-all duration-700"
+                        style={{ width: `${p1Prob}%` }}
+                      />
+                      <div
+                        className="bg-[#10586B] h-full transition-all duration-700"
+                        style={{ width: `${p2Prob}%` }}
+                      />
+                    </div>
                 </div>
               );
             })()}

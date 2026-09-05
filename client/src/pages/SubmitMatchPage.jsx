@@ -251,15 +251,16 @@ const SubmitMatchPage = () => {
 
         {/* Notifications */}
         {errorMessage && (
-          <div className="mb-6 p-4 bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-center justify-between rounded-xl animate-fade-in shadow-lg">
+          <div role="alert" className="mb-6 p-4 bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-center justify-between rounded-xl animate-fade-in shadow-lg">
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-rose-500" />
+              <span className="w-2 h-2 rounded-full bg-rose-500" aria-hidden="true" />
               {errorMessage}
             </span>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="text-rose-300 font-bold hover:text-white"
+              aria-label="Dismiss error notification"
+              className="text-rose-300 font-bold hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
             >
               ✕
             </button>
@@ -267,8 +268,8 @@ const SubmitMatchPage = () => {
         )}
 
         {successMessage && (
-          <div className="mb-6 p-4 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs flex items-center gap-2 rounded-xl animate-fade-in shadow-[0_0_15px_rgba(74,222,128,0.2)]">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <div role="status" className="mb-6 p-4 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs flex items-center gap-2 rounded-xl animate-fade-in shadow-[0_0_15px_rgba(74,222,128,0.2)]">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
             {successMessage}
           </div>
         )}
@@ -529,28 +530,32 @@ const SubmitMatchPage = () => {
 
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-[var(--color-text-muted,#9a8e7a)] uppercase font-mono">Team A:</span>
+                        <label htmlFor={`game-${idx}-team-a`} className="text-xs text-[var(--color-text-muted,#9a8e7a)] uppercase font-mono">Team A:</label>
                         <input
+                          id={`game-${idx}-team-a`}
                           type="number"
                           min="0"
                           required
                           value={g.teamAScore}
                           onChange={(e) => handleScoreChange(idx, 'teamAScore', e.target.value)}
-                          className="w-16 px-2.5 py-1.5 bg-[var(--color-bg-card,#251f10)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[var(--color-accent-primary,#ff3b3f)] rounded-lg text-center font-mono font-bold text-sm text-[var(--color-text-primary,#ede1c9)] focus:outline-none"
+                          aria-label={`Game ${idx + 1} Team A Score`}
+                          className="w-16 px-2.5 py-2 min-h-[44px] bg-[var(--color-bg-card,#251f10)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[var(--color-accent-primary,#ff3b3f)] rounded-lg text-center font-mono font-bold text-sm text-[var(--color-text-primary,#ede1c9)] focus:outline-none"
                         />
                       </div>
 
-                      <span className="text-[var(--color-border-strong,#5d3f3d)] font-bold">—</span>
+                      <span className="text-[var(--color-border-strong,#5d3f3d)] font-bold" aria-hidden="true">—</span>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-[var(--color-text-muted,#9a8e7a)] uppercase font-mono">Team B:</span>
+                        <label htmlFor={`game-${idx}-team-b`} className="text-xs text-[var(--color-text-muted,#9a8e7a)] uppercase font-mono">Team B:</label>
                         <input
+                          id={`game-${idx}-team-b`}
                           type="number"
                           min="0"
                           required
                           value={g.teamBScore}
                           onChange={(e) => handleScoreChange(idx, 'teamBScore', e.target.value)}
-                          className="w-16 px-2.5 py-1.5 bg-[var(--color-bg-card,#251f10)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[var(--color-accent-primary,#ff3b3f)] rounded-lg text-center font-mono font-bold text-sm text-[var(--color-text-primary,#ede1c9)] focus:outline-none"
+                          aria-label={`Game ${idx + 1} Team B Score`}
+                          className="w-16 px-2.5 py-2 min-h-[44px] bg-[var(--color-bg-card,#251f10)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[var(--color-accent-primary,#ff3b3f)] rounded-lg text-center font-mono font-bold text-sm text-[var(--color-text-primary,#ede1c9)] focus:outline-none"
                         />
                       </div>
 
@@ -558,7 +563,8 @@ const SubmitMatchPage = () => {
                         <button
                           type="button"
                           onClick={() => removeGame(idx)}
-                          className="text-xs text-rose-400 hover:text-white font-bold px-2 py-1 transition-colors cursor-pointer"
+                          aria-label={`Remove Game ${idx + 1}`}
+                          className="text-xs text-rose-400 hover:text-white font-bold p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer"
                         >
                           ✕
                         </button>

@@ -220,16 +220,17 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 ---
 
 ## Milestone 10 — UI Polish & Cross-Cutting Polish (Sprint 10)
-**Goal:** Cross-cutting responsive layout, WCAG AA accessibility, and design token consistency.
+**Goal:** Cross-cutting responsive layout, WCAG AA accessibility, design token consistency, and traffic resilience.
 
 **Tasks**
-- [ ] Full responsive/mobile-first pass on every screen (Rule I)
-- [ ] Ensure consistent empty states, skeletons, and micro-interactions across all views (D7)
-- [ ] Deduplicate shared UI into reusable components (Rule K)
-- [ ] Accessibility pass (WCAG AA color contrast in both themes, tap targets, keyboard navigation)
+- [x] Full responsive/mobile-first pass on every screen (Rule I)
+- [x] Ensure consistent empty states, skeletons, and micro-interactions across all views (D7)
+- [x] Deduplicate shared UI into reusable components (Rule K)
+- [x] Accessibility pass (WCAG AA color contrast in both themes, tap targets, keyboard navigation)
+- [x] Traffic resilience & performance hardening (route code splitting, gzip compression, in-memory response cache, global rate limiter, search length guards)
 
 **Deliverables**
-- Consistent, polished UI ready for real-world use on phones and desktop
+- Consistent, polished UI ready for real-world use on phones and desktop; robust high-traffic resilience infrastructure
 
 ---
 

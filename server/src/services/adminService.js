@@ -14,6 +14,7 @@ const RatingHistory = require('../models/RatingHistory');
 const AuditLog = require('../models/AuditLog');
 const { calculateMatchRatingChanges } = require('./ratingService');
 const { calculateCategory } = require('./playerService');
+const { invalidateCache } = require('../middleware/responseCache');
 
 /**
  * Executes atomic rating updates and audit logging for an approved or direct match
@@ -195,6 +196,9 @@ const executeAtomicMatchApproval = async ({
       .populate('submittedBy', 'playerId name')
       .populate('approvedBy', 'email role');
 
+    // Bust response cache so leaderboard/leaders reflect updated ratings immediately
+    invalidateCache();
+
     return populatedMatch;
   } catch (error) {
     if (isOwnerSession && session.inTransaction()) {
@@ -323,6 +327,9 @@ const executeManualRatingAdjustment = async ({ adminUserId, playerId, newRating,
     },
     createdAt: new Date(),
   });
+
+  // Bust response cache so leaderboard reflects updated ratings
+  invalidateCache();
 
   return { player, ratingHistory };
 };

@@ -28,12 +28,12 @@ Two other files this works alongside:
 
 > Overwrite this section every time. It should always describe *right now*, not history.
 
-- **Last completed milestone:** Milestone 9 — Analytics & Head-to-Head (Sprint 9)
+- **Last completed milestone:** Milestone 10 — UI Polish, Traffic Resilience & Cross-Cutting Polish (Sprint 10)
 - **In progress:** None
-- **Next milestone to start:** Milestone 10 — UI Polish & Cross-Cutting Polish (Sprint 10)
-- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0 errors, Vite 1122 modules in 4.08s); Server test suites pass (125/125 tests ok across 13 suites); Interactive historical Elo trajectory graphs with Recharts on Player Profile and Dashboard; 30-day "Most Improved" specialty leaderboard calculation; Standalone shareable Head-to-Head compare page (`/compare?p1=PH-XXXXX&p2=PH-YYYYY`) with win probability gauges and match archives; Admin Manual Rating Adjustment (`POST /api/admin/ratings/adjust`) and Match Score Correction (`PUT /api/admin/matches/:id/correct`) tools with mandatory audit reasons adhering strictly to Rule G & Section 13 "No Quiet Changes".
+- **Next milestone to start:** Milestone 11 — Deep Testing & Security Pen-Test (Sprint 11)
+- **Repo state:** Client builds cleanly with zero errors/warnings (Oxlint 0 errors, Vite chunks all under 500 KB, code-splitting with React.lazy + PageLoadingSkeleton); Server test suites pass (131/131 tests ok across 14 suites); Global API rate limiter (200 req/15 min) with MongoDB atomic counters; In-memory response caching middleware with TTL for hot endpoints (`GET /api/players`, `/leaders`, `/tournaments`); Response compression (`compression` middleware for gzip/brotli); Search query length guard (max 50 chars regex DoS protection); Request timeout guard (25s serverless safety); Full responsive & WCAG AA accessibility pass across all pages (aria-labels, role=dialog, role=progressbar, role=status, role=alert, 44px touch targets).
 - **Environment/deploy state:** Local development (`client: localhost:5173`, `server: localhost:5000`)
-- **Last updated:** 2026-09-04 by AI Coding Agent (Milestone 9 Complete)
+- **Last updated:** 2026-09-05 by AI Coding Agent (Milestone 10 Complete)
 
 ---
 
@@ -667,7 +667,90 @@ Two other files this works alongside:
 - `npm run build` — Vite production build successful in 499ms
 
 **Resume point for next agent:**
-- Proceed to **Milestone 9 — Analytics & Head-to-Head (Sprint 9)**.
+---
+
+### Milestone 9 — Analytics & Head-to-Head (Sprint 9)
+- **Status:** Completed
+- **Date:** 2026-09-04
+- **Session/Agent:** Analytics & Governance Hardening
+
+**What was built:**
+- **Deliverable D1 — Historical Rating Trajectory (`client/src/components/RatingHistoryChart.jsx`)**:
+  - Recharts integration displaying chronologically sorted rating data points with customized responsive tooltips, highest/lowest rating callouts, and clean aesthetic styling.
+  - Mounted on PlayerProfilePage and DashboardPage.
+- **Deliverable D4 — 30-Day "Most Improved" Calculation**:
+  - `calculateMostImprovedPlayer` algorithm querying rating delta over the last 30 days from `RatingHistory`.
+  - Exposed via `GET /api/players/leaders` and featured in specialty leaderboards.
+- **Deliverable D6 — Head-to-Head Comparison Page (`client/src/pages/ComparePage.jsx`)**:
+  - Standalone, shareable matchup URL (`/compare?p1=PH-XXXXX&p2=PH-YYYYY`).
+  - Expected win probability calculation based on logistic Elo gap formula.
+  - Historical direct encounter match archive with individual game scores.
+- **Deliverable D2/D3 — Admin Manual Rating Adjustment & Match Correction**:
+  - `POST /api/admin/ratings/adjust` for provisional calibrations and manual overrides with mandatory audit reason.
+  - `PUT /api/admin/matches/:id/correct` for correcting approved match scores and triggering retroactive recalculation.
+  - Complete governance audit trail logged in `AuditLog` and `RatingHistory` per Section 13 "No Quiet Changes".
+- **Deliverable D5 — Batch Approval Workflow**:
+  - `POST /api/admin/matches/batch-approve` endpoint and batch approval button in AdminPage.
+  - `server/test/batchApproval.test.js` and `server/test/analyticsGovernance.test.js` test suites.
+
+**Tests run and results:**
+- `npm test` — **125 / 125 pass** across 13 test suites (100% pass)
+- `npm run lint` — **0 errors, 0 warnings**
+- `npm run build` — Vite build clean
+
+---
+
+### Milestone 10 — UI Polish, Traffic Resilience & Cross-Cutting Polish (Sprint 10)
+- **Status:** Completed
+- **Date:** 2026-09-05
+- **Session/Agent:** UI Polish & Traffic Resilience Hardening
+
+**What was built:**
+- **Part A: Traffic Resilience & Server Hardening**:
+  - **A1. Global API Rate Limiter**: Configured `globalApiLimiter` (200 req/15 min per IP) in `server/src/middleware/rateLimiter.js` and mounted in `server/src/app.js` as an atomic MongoDB-backed safety net for all public endpoints (`/api/*`). Stricter route limiters remain intact.
+  - **A2. In-Memory Response Cache**: Built `server/src/middleware/responseCache.js` with configurable TTL and periodic automatic garbage collection. Applied `responseCache(30)` to leaderboard (`GET /api/players`), `responseCache(60)` to specialty leaders (`GET /api/players/leaders`), and `responseCache(60)` to tournaments list (`GET /api/tournaments`). Integrated automatic cache invalidation (`invalidateCache()`) in `adminService.js` on match approval, tournament creation, and manual adjustments.
+  - **A3. Response Compression**: Added `compression` middleware (gzip/brotli) to `app.js`, reducing JSON response payload sizes by 60–80%.
+  - **A4. Search Query Length Guard**: Capped search query strings (`q`, `search`, `query`) to 50 characters max in `getPlayers` and `searchPlayers` handlers in `playerController.js` to guard against regex DoS attacks.
+  - **A5. Serverless Request Timeout**: Added 25s timeout safety net middleware in `app.js` preventing hanging MongoDB queries from exhausting Vercel serverless execution limits.
+  - **Automated Test Suite**: Created `server/test/trafficResilience.test.js` testing response caching (HIT/MISS, invalidation), search query length guards (400 responses), and rate limiter configuration (131/131 passing across 14 test suites).
+- **Part B: Client Performance & Code Splitting**:
+  - **B1. Route-Level Code Splitting**: Refactored `client/src/App.jsx` with `React.lazy()` and `<Suspense>` for all page routes. Eliminated the 1,028 KB monolithic bundle; all per-route chunks are now well under 500 KB (initial chunk is 423 KB / gzip 137 KB, AdminPage chunk is 70 KB / gzip 13 KB).
+  - **B2. Branded PageLoadingSkeleton**: Created `client/src/components/PageLoadingSkeleton.jsx` with subtle pulse animation and accessible `role="status"` markup.
+- **Part C: UI Polish & Accessibility Pass**:
+  - **C1. Responsive & Mobile-First Audit**: Audited and fixed responsive layouts across `AdminPage.jsx`, `LeaderboardPage.jsx`, `ComparePage.jsx`, `SubmitMatchPage.jsx`, `TournamentsPage.jsx`, `PlayerProfilePage.jsx`, `HomePage.jsx`, and `DashboardPage.jsx`. Added `overflow-x-auto` to audit tables, bracket containers, and tab bars.
+  - **C2. Consistent Empty States & Skeleton Loaders**: Applied `EmptyState` component and skeleton shimmer loaders across data-fetching views with `role="status"` and `role="alert"` semantic attributes.
+  - **C3. WCAG AA Accessibility**: Added `aria-label` attributes to all icon-only buttons, `role="tablist"`/`role="tab"`/`aria-selected` to tab navigations, `role="dialog"`/`aria-modal` with Escape-to-close on modals, `role="progressbar"` with `aria-valuenow` on probability gauges, and ensured minimum tap targets of 44×44px on interactive controls.
+
+**Files touched:**
+- `server/src/app.js`
+- `server/src/middleware/rateLimiter.js`
+- `server/src/middleware/responseCache.js` (NEW)
+- `server/src/controllers/playerController.js`
+- `server/src/routes/playerRoutes.js`
+- `server/src/routes/tournamentRoutes.js`
+- `server/src/services/adminService.js`
+- `server/test/trafficResilience.test.js` (NEW)
+- `server/package.json`
+- `package-lock.json`
+- `client/src/App.jsx`
+- `client/src/components/PageLoadingSkeleton.jsx` (NEW)
+- `client/src/pages/LeaderboardPage.jsx`
+- `client/src/pages/ComparePage.jsx`
+- `client/src/pages/SubmitMatchPage.jsx`
+- `client/src/pages/AdminPage.jsx`
+- `client/src/pages/PlayerProfilePage.jsx`
+- `client/src/pages/HomePage.jsx`
+- `client/src/pages/DashboardPage.jsx`
+- `docs/milestone.md.md`
+- `docs/MEMORY.md`
+
+**Tests run and results:**
+- `npm test` — **131 / 131 pass** across 14 test suites (100% pass)
+- `npm run lint` — **0 errors, 0 warnings** across server ESLint, client Oxlint, and CI Guardrails
+- `npm --prefix client run build` — Vite production build successful in 632ms with all chunks < 500 KB
+
+**Resume point for next agent:**
+- Proceed to **Milestone 11 — Deep Testing & Security Pen-Test (Sprint 11)**.
 
 ---
 

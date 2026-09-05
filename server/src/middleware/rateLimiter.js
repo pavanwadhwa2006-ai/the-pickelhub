@@ -102,8 +102,19 @@ const matchSubmitLimiter = createRateLimiter({
   message: 'Match submission rate limit exceeded from this IP.',
 });
 
+// 3. Global API Limiter: 200 requests per 15 minutes (Milestone 10 — Traffic Resilience)
+// Safety net for all public endpoints (leaderboard, search, compare, tournaments)
+// that previously had zero rate limiting. Stricter per-route limiters override this.
+const globalApiLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  prefix: 'global_api',
+  message: 'Too many requests from this IP. Please slow down.',
+});
+
 module.exports = {
   createRateLimiter,
   authLimiter,
   matchSubmitLimiter,
+  globalApiLimiter,
 };

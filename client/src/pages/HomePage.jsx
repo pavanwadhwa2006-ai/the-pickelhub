@@ -86,7 +86,7 @@ const HomePage = () => {
                   </MagneticButton>
                   <Link
                     to="/login"
-                    className="text-xs font-bold tracking-[0.15em] text-[#ad8885] hover:text-[#ede1c9] uppercase underline underline-offset-4 transition-colors"
+                    className="text-xs font-bold tracking-[0.15em] text-[#ad8885] hover:text-[#ede1c9] uppercase underline underline-offset-4 transition-colors min-h-[44px] flex items-center"
                   >
                     MEMBER SIGN IN
                   </Link>

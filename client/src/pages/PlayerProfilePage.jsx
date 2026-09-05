@@ -60,7 +60,7 @@ const PlayerProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-[75vh] max-w-[1440px] mx-auto py-12 px-6 sm:px-10 md:px-20 animate-fade-in">
+      <div role="status" aria-label="Loading player profile" className="min-h-[75vh] max-w-[1440px] mx-auto py-12 px-6 sm:px-10 md:px-20 animate-fade-in">
         {/* Skeleton shimmer header */}
         <div className="p-8 sm:p-12 bg-[#251f10] border border-[#3b3423] mb-12 relative overflow-hidden rounded-2xl">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -87,8 +87,8 @@ const PlayerProfilePage = () => {
 
   if (error || !player) {
     return (
-      <div className="min-h-[75vh] max-w-[1440px] mx-auto py-24 px-6 text-center animate-fade-in">
-        <div className="text-4xl mb-4">🏓</div>
+      <div role="alert" className="min-h-[75vh] max-w-[1440px] mx-auto py-24 px-6 text-center animate-fade-in">
+        <div className="text-4xl mb-4" aria-hidden="true">🏓</div>
         <h2 className="font-['Playfair_Display'] text-3xl font-bold text-[#ede1c9] mb-2">
           Player Profile Not Found
         </h2>
@@ -97,9 +97,9 @@ const PlayerProfilePage = () => {
         </p>
         <Link
           to="/leaderboard"
-          className="inline-block px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-widest uppercase transition-all rounded-xl shadow-lg"
+          className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-widest uppercase transition-all rounded-xl shadow-lg"
         >
-          RETURN TO LEADERBOARD
+          Return to Leaderboard
         </Link>
       </div>
     );
@@ -112,16 +112,17 @@ const PlayerProfilePage = () => {
         <div className="flex items-center justify-between gap-4 mb-8">
           <Link
             to="/leaderboard"
-            className="text-xs font-bold tracking-wider text-[#ad8885] hover:text-[#ede1c9] uppercase underline underline-offset-4"
+            className="text-xs font-bold tracking-wider text-[#ad8885] hover:text-[#ede1c9] uppercase underline underline-offset-4 min-h-[44px] flex items-center"
           >
             ← LEADERBOARD DIRECTORY
           </Link>
 
           <Link
             to={`/compare?p2=${player.playerId}`}
-            className="px-4 py-2 bg-[var(--color-bg-card,#251f10)] hover:bg-[var(--color-bg-card-hover,#352c16)] border border-[var(--color-accent-primary,#ff3b3f)]/50 text-[var(--color-text-primary,#ede1c9)] text-xs font-bold tracking-wider uppercase rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+            aria-label={`Compare ${player.name} head-to-head`}
+            className="px-4 py-2 min-h-[44px] bg-[var(--color-bg-card,#251f10)] hover:bg-[var(--color-bg-card-hover,#352c16)] border border-[var(--color-accent-primary,#ff3b3f)]/50 text-[var(--color-text-primary,#ede1c9)] text-xs font-bold tracking-wider uppercase rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
           >
-            <span>⚔️</span>
+            <span aria-hidden="true">⚔️</span>
             <span>Head-to-Head Compare</span>
           </Link>
         </div>

@@ -769,10 +769,12 @@ const AdminPage = () => {
         {/* ==================================================== */}
         {/* Navigation Tabs                                     */}
         {/* ==================================================== */}
-        <div className="flex items-center gap-2 border-b border-[var(--color-border-subtle)] mb-8 overflow-x-auto pb-px">
+        <div role="tablist" aria-label="Admin Navigation Tabs" className="flex items-center gap-2 border-b border-[var(--color-border-subtle)] mb-8 overflow-x-auto pb-px">
           <button
+            role="tab"
+            aria-selected={activeTab === 'queue'}
             onClick={() => setActiveTab('queue')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'queue' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
@@ -783,8 +785,10 @@ const AdminPage = () => {
           </button>
 
           <button
+            role="tab"
+            aria-selected={activeTab === 'tournaments'}
             onClick={() => setActiveTab('tournaments')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'tournaments' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
@@ -795,8 +799,10 @@ const AdminPage = () => {
           </button>
 
           <button
+            role="tab"
+            aria-selected={activeTab === 'direct'}
             onClick={() => setActiveTab('direct')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'direct' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
@@ -804,8 +810,10 @@ const AdminPage = () => {
           </button>
 
           <button
+            role="tab"
+            aria-selected={activeTab === 'rating-history'}
             onClick={() => setActiveTab('rating-history')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'rating-history' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
@@ -813,8 +821,10 @@ const AdminPage = () => {
           </button>
 
           <button
+            role="tab"
+            aria-selected={activeTab === 'audit'}
             onClick={() => setActiveTab('audit')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'audit' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
@@ -822,8 +832,10 @@ const AdminPage = () => {
           </button>
 
           <button
+            role="tab"
+            aria-selected={activeTab === 'adjust'}
             onClick={() => setActiveTab('adjust')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'adjust' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
@@ -831,8 +843,10 @@ const AdminPage = () => {
           </button>
 
           <button
+            role="tab"
+            aria-selected={activeTab === 'correct'}
             onClick={() => setActiveTab('correct')}
-            className={`px-5 py-3 text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap ${
+            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'correct' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
@@ -918,14 +932,16 @@ const AdminPage = () => {
                       <button
                         onClick={() => openRejectModal(m)}
                         disabled={actionLoadingId === m._id}
-                        className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-bold rounded-xl border border-rose-500/30 transition-all"
+                        aria-label={`Reject match #${m.matchId}`}
+                        className="px-4 py-2 min-h-[44px] bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-bold rounded-xl border border-rose-500/30 transition-all cursor-pointer flex items-center justify-center"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => handleApprove(m._id)}
                         disabled={actionLoadingId === m._id}
-                        className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                        aria-label={`Approve match #${m.matchId}`}
+                        className="px-5 py-2 min-h-[44px] bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         {actionLoadingId === m._id ? 'Processing...' : 'Approve Match ✓'}
                       </button>
@@ -1521,38 +1537,40 @@ const AdminPage = () => {
               </div>
             ) : (
               <div className="bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-2xl overflow-hidden shadow-sm">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[var(--color-bg-card-hover)] text-[var(--color-text-muted)] uppercase tracking-wider font-bold border-b border-[var(--color-border-subtle)]">
-                    <tr>
-                      <th className="py-3.5 px-4">Action</th>
-                      <th className="py-3.5 px-4">Admin</th>
-                      <th className="py-3.5 px-4">Target</th>
-                      <th className="py-3.5 px-4">Details</th>
-                      <th className="py-3.5 px-4">Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--color-border-subtle)]">
-                    {auditLogs.map((log) => (
-                      <tr key={log._id} className="hover:bg-[var(--color-bg-card-hover)]/50 transition-colors">
-                        <td className="py-3 px-4 font-mono font-bold text-[var(--color-accent-primary)]">
-                          {log.action}
-                        </td>
-                        <td className="py-3 px-4 text-[var(--color-text-primary)]">
-                          {log.performedBy?.email || 'Administrator'}
-                        </td>
-                        <td className="py-3 px-4 text-[var(--color-text-muted)] font-mono">
-                          {log.targetType || 'Resource'}: {log.targetId ? log.targetId.slice(-6) : '-'}
-                        </td>
-                        <td className="py-3 px-4 text-[var(--color-text-muted)] max-w-xs truncate">
-                          {JSON.stringify(log.metadata || {})}
-                        </td>
-                        <td className="py-3 px-4 text-[var(--color-text-muted)] font-mono whitespace-nowrap">
-                          {new Date(log.createdAt).toLocaleString()}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[var(--color-bg-card-hover)] text-[var(--color-text-muted)] uppercase tracking-wider font-bold border-b border-[var(--color-border-subtle)]">
+                      <tr>
+                        <th className="py-3.5 px-4">Action</th>
+                        <th className="py-3.5 px-4">Admin</th>
+                        <th className="py-3.5 px-4">Target</th>
+                        <th className="py-3.5 px-4">Details</th>
+                        <th className="py-3.5 px-4">Timestamp</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--color-border-subtle)]">
+                      {auditLogs.map((log) => (
+                        <tr key={log._id} className="hover:bg-[var(--color-bg-card-hover)]/50 transition-colors">
+                          <td className="py-3 px-4 font-mono font-bold text-[var(--color-accent-primary)]">
+                            {log.action}
+                          </td>
+                          <td className="py-3 px-4 text-[var(--color-text-primary)]">
+                            {log.performedBy?.email || 'Administrator'}
+                          </td>
+                          <td className="py-3 px-4 text-[var(--color-text-muted)] font-mono">
+                            {log.targetType || 'Resource'}: {log.targetId ? log.targetId.slice(-6) : '-'}
+                          </td>
+                          <td className="py-3 px-4 text-[var(--color-text-muted)] max-w-xs truncate">
+                            {JSON.stringify(log.metadata || {})}
+                          </td>
+                          <td className="py-3 px-4 text-[var(--color-text-muted)] font-mono whitespace-nowrap">
+                            {new Date(log.createdAt).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

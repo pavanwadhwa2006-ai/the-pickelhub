@@ -295,7 +295,8 @@ const LeaderboardPage = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or PH-ID..."
-              className="px-3.5 py-1.5 bg-[#181305] border border-[#3b3423] focus:border-[#ff3b3f] text-xs text-[#ede1c9] focus:outline-none w-56"
+              aria-label="Search players by name or Player ID"
+              className="px-3.5 py-2 bg-[#181305] border border-[#3b3423] focus:border-[#ff3b3f] text-xs text-[#ede1c9] focus:outline-none w-full sm:w-56"
             />
 
             <div className="flex items-center gap-2">
@@ -303,7 +304,8 @@ const LeaderboardPage = () => {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="px-3 py-1.5 bg-[#181305] border border-[#3b3423] text-xs text-[#ede1c9] focus:outline-none cursor-pointer"
+                aria-label="Sort leaderboard by"
+                className="px-3 py-2 bg-[#181305] border border-[#3b3423] text-xs text-[#ede1c9] focus:outline-none cursor-pointer min-h-[44px]"
               >
                 <option value="rating">Rating (Highest)</option>
                 <option value="wins">Total Wins</option>
@@ -425,7 +427,8 @@ const LeaderboardPage = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenCompare(p)}
-                            className="px-2.5 py-1 bg-[#181305] hover:bg-[#3b3423] border border-[#5d3f3d] hover:border-[#ff3b3f] text-[10px] font-bold text-[#ffb3ad] uppercase transition-colors cursor-pointer"
+                            aria-label={`Compare ${p.name} with another player`}
+                            className="px-2.5 py-1.5 bg-[#181305] hover:bg-[#3b3423] border border-[#5d3f3d] hover:border-[#ff3b3f] text-[10px] font-bold text-[#ffb3ad] uppercase transition-colors cursor-pointer min-h-[44px] min-w-[44px]"
                           >
                             COMPARE ⚔️
                           </button>
@@ -453,7 +456,14 @@ const LeaderboardPage = () => {
 
         {/* Head-to-Head Comparison Drawer / Modal (PRD Section 11.2) */}
         {compareModalOpen && compareP1 && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Head-to-head player comparison"
+            onClick={(e) => { if (e.target === e.currentTarget) { setCompareModalOpen(false); setCompareData(null); } }}
+            onKeyDown={(e) => { if (e.key === 'Escape') { setCompareModalOpen(false); setCompareData(null); } }}
+          >
             <div className="w-full max-w-2xl bg-[#1f190a] border-2 border-[#ff3b3f] p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-start mb-6">
                 <div>
@@ -470,7 +480,8 @@ const LeaderboardPage = () => {
                     setCompareModalOpen(false);
                     setCompareData(null);
                   }}
-                  className="text-xs text-[#ad8885] hover:text-white font-bold p-1 cursor-pointer"
+                  aria-label="Close comparison modal"
+                  className="text-xs text-[#ad8885] hover:text-white font-bold p-2 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   ✕ CLOSE
                 </button>
@@ -538,7 +549,7 @@ const LeaderboardPage = () => {
 
               {/* Loading Comparison */}
               {loadingCompare && (
-                <div className="py-8 text-center text-xs text-[#9a8e7a] animate-pulse">
+                <div className="py-8 text-center text-xs text-[#9a8e7a] animate-pulse" role="status">
                   Computing expected probabilities & match records...
                 </div>
               )}

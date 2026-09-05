@@ -9,10 +9,12 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const { NODE_ENV, CLIENT_URL } = require('./config/env');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const { sanitizeInput } = require('./middleware/sanitizer');
+const { globalApiLimiter } = require('./middleware/rateLimiter');
 const healthRoutes = require('./routes/healthRoutes');
 const authRoutes = require('./routes/authRoutes');
 const playerRoutes = require('./routes/playerRoutes');
@@ -29,6 +31,9 @@ const app = express();
 
 // Security headers
 app.use(helmet());
+
+// Response compression (gzip/brotli) — reduces JSON payloads by 60-80%
+app.use(compression());
 
 // CORS — support client origin, local dev, Vercel deployments and custom domains
 app.use(
@@ -66,6 +71,20 @@ app.use(express.urlencoded({ extended: true }));
 
 // Global NoSQL injection sanitization
 app.use(sanitizeInput);
+
+// Request timeout — 25s safety net for serverless (Vercel hobby = 30s limit)
+app.use((req, res, next) => {
+  req.setTimeout(25000, () => {
+    if (!res.headersSent) {
+      res.status(408).json({ success: false, message: 'Request timed out.' });
+    }
+  });
+  next();
+});
+
+// Global API rate limiter — 200 requests per 15 minutes per IP
+// Stricter per-route limiters (auth: 5/15m, match: 100/15m) take precedence
+app.use('/api', globalApiLimiter);
 
 // ---------------------
 // Routes

@@ -109,15 +109,16 @@ const DashboardPage = () => {
       <div className="max-w-[1440px] mx-auto">
         {/* Update Notification */}
         {updateMsg && (
-          <div className="mb-6 p-4 bg-[#251f10] border border-[#ff3b3f] text-[#ede1c9] text-xs flex items-center justify-between animate-fade-in shadow-[0_0_15px_rgba(255,59,63,0.2)]">
+          <div role="status" className="mb-6 p-4 bg-[#251f10] border border-[#ff3b3f] text-[#ede1c9] text-xs flex items-center justify-between animate-fade-in shadow-[0_0_15px_rgba(255,59,63,0.2)]">
             <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-[#4ade80] rounded-full" />
+              <span className="w-1.5 h-1.5 bg-[#4ade80] rounded-full" aria-hidden="true" />
               {updateMsg}
             </span>
             <button
               type="button"
               onClick={() => setUpdateMsg(null)}
-              className="text-[#ad8885] hover:text-white text-xs font-bold"
+              aria-label="Dismiss notification"
+              className="text-[#ad8885] hover:text-white text-xs font-bold p-2 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
             >
               ✕
             </button>

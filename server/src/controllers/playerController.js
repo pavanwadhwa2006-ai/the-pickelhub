@@ -56,6 +56,13 @@ const getPlayers = async (req, res, next) => {
     const searchTerm = q || search;
     if (searchTerm && searchTerm.trim().length > 0) {
       const cleanSearch = searchTerm.trim();
+      // Guard against regex DoS — cap search length (Milestone 10 Traffic Resilience)
+      if (cleanSearch.length > 50) {
+        return res.status(400).json({
+          success: false,
+          message: 'Search query too long. Maximum 50 characters.',
+        });
+      }
       query.$or = [
         { name: { $regex: cleanSearch, $options: 'i' } },
         { playerId: { $regex: cleanSearch, $options: 'i' } },
@@ -371,6 +378,13 @@ const searchPlayers = async (req, res, next) => {
 
     if (query && query.trim().length > 0) {
       const cleanQuery = query.trim();
+      // Guard against regex DoS — cap search length (Milestone 10 Traffic Resilience)
+      if (cleanQuery.length > 50) {
+        return res.status(400).json({
+          success: false,
+          message: 'Search query too long. Maximum 50 characters.',
+        });
+      }
       const isPlayerIdSearch = /^PH-\d{1,5}$/i.test(cleanQuery);
 
       const filterCondition = isPlayerIdSearch

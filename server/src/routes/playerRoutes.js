@@ -17,17 +17,19 @@ const {
   getPlayerRatingHistory,
 } = require('../controllers/playerController');
 const { protect } = require('../middleware/authMiddleware');
+const { responseCache } = require('../middleware/responseCache');
 
 const router = express.Router();
 
 // Specific routes before parameterized routes
 router.get('/search', searchPlayers);
-router.get('/leaders', getLeaderboardSpecialties);
+router.get('/leaders', responseCache(60), getLeaderboardSpecialties);
 router.get('/compare', comparePlayers);
 router.get('/me', protect, getMyPlayerProfile);
 router.put('/me', protect, updateMyProfile);
-router.get('/', getPlayers);
+router.get('/', responseCache(30), getPlayers);
 router.get('/:id/rating-history', getPlayerRatingHistory);
 router.get('/:id', getPlayerById);
 
 module.exports = router;
+
