@@ -720,6 +720,7 @@ Two other files this works alongside:
   - **C1. Responsive & Mobile-First Audit**: Audited and fixed responsive layouts across `AdminPage.jsx`, `LeaderboardPage.jsx`, `ComparePage.jsx`, `SubmitMatchPage.jsx`, `TournamentsPage.jsx`, `PlayerProfilePage.jsx`, `HomePage.jsx`, and `DashboardPage.jsx`. Added `overflow-x-auto` to audit tables, bracket containers, and tab bars.
   - **C2. Consistent Empty States & Skeleton Loaders**: Applied `EmptyState` component and skeleton shimmer loaders across data-fetching views with `role="status"` and `role="alert"` semantic attributes.
   - **C3. WCAG AA Accessibility**: Added `aria-label` attributes to all icon-only buttons, `role="tablist"`/`role="tab"`/`aria-selected` to tab navigations, `role="dialog"`/`aria-modal` with Escape-to-close on modals, `role="progressbar"` with `aria-valuenow` on probability gauges, and ensured minimum tap targets of 44×44px on interactive controls.
+  - **C4. Garden Light Contrast Fix**: Mapped `--color-*` token aliases (`--color-bg-base`, `--color-bg-card`, `--color-text-primary`, `--color-text-muted`, `--color-border-subtle`, `--color-accent-primary`) directly to the active dual-theme engine variables (`--text-primary`, `--bg-page`, etc.) in `client/src/index.css`, guaranteeing high-contrast dark green typography on cream backgrounds in Garden Light theme. Verified with visual screenshot testing in the browser.
 
 **Files touched:**
 - `server/src/app.js`
@@ -733,6 +734,7 @@ Two other files this works alongside:
 - `server/package.json`
 - `package-lock.json`
 - `client/src/App.jsx`
+- `client/src/index.css`
 - `client/src/components/PageLoadingSkeleton.jsx` (NEW)
 - `client/src/pages/LeaderboardPage.jsx`
 - `client/src/pages/ComparePage.jsx`
@@ -747,7 +749,8 @@ Two other files this works alongside:
 **Tests run and results:**
 - `npm test` — **131 / 131 pass** across 14 test suites (100% pass)
 - `npm run lint` — **0 errors, 0 warnings** across server ESLint, client Oxlint, and CI Guardrails
-- `npm --prefix client run build` — Vite production build successful in 632ms with all chunks < 500 KB
+- `npm --prefix client run build` — Vite production build successful in 3.69s with all chunks < 500 KB
+- End-to-end browser inspection — Desktop & Mobile responsive validation, zero contrast defects in Garden Light or Classic Dark
 
 **Resume point for next agent:**
 - Proceed to **Milestone 11 — Deep Testing & Security Pen-Test (Sprint 11)**.
