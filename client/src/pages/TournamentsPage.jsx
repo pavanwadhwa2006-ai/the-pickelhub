@@ -18,7 +18,7 @@ import BracketVisualizer from '../components/BracketVisualizer';
 let clientTournamentsCache = null;
 
 const TournamentsPage = () => {
-  const { user } = useAuth();
+  const { user, player } = useAuth();
 
   const [tournaments, setTournaments] = useState(() => clientTournamentsCache || []);
   const [loading, setLoading] = useState(() => !clientTournamentsCache);
@@ -103,12 +103,31 @@ const TournamentsPage = () => {
 
   // Check if current user is registered for a tournament
   const isUserRegistered = (tournament) => {
-    if (!user || !tournament || !tournament.participants) return false;
-    return tournament.participants.some(
-      (p) =>
-        (p.player?.userId && p.player.userId.toString() === user._id.toString()) ||
-        (p.appliedBy && p.appliedBy.toString() === user._id.toString())
-    );
+    if (!tournament || !Array.isArray(tournament.participants)) return false;
+    const currentUserId = user?.id || user?._id;
+    const currentPlayerId = player?.playerId || player?._id;
+
+    if (!currentUserId && !currentPlayerId) return false;
+
+    return tournament.participants.some((p) => {
+      if (!p) return false;
+      const participantUserId = p.player?.userId?._id || p.player?.userId;
+      const participantPlayerId = p.player?.playerId || p.player?._id || (typeof p.player === 'string' ? p.player : null);
+      const participantAppliedBy = p.appliedBy?._id || p.appliedBy;
+
+      if (currentUserId) {
+        const uidStr = String(currentUserId);
+        if (participantUserId && String(participantUserId) === uidStr) return true;
+        if (participantAppliedBy && String(participantAppliedBy) === uidStr) return true;
+      }
+
+      if (currentPlayerId) {
+        const pidStr = String(currentPlayerId);
+        if (participantPlayerId && String(participantPlayerId) === pidStr) return true;
+      }
+
+      return false;
+    });
   };
 
   // One-Click Apply / Register Handler
