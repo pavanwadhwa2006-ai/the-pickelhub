@@ -175,9 +175,28 @@ const ProfileSettingsMenu = () => {
 
       {/* Dropdown Menu Modal */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 bg-[var(--color-bg-card)] border-2 border-[var(--color-border-subtle)] text-[var(--color-text-primary)] shadow-2xl p-6 z-50 animate-fade-in divide-y divide-[var(--color-border-subtle)] rounded-2xl">
+        <div className="absolute right-0 mt-3 w-80 max-h-[calc(100vh-100px)] overflow-y-auto bg-[var(--color-bg-card)] border-2 border-[var(--color-border-subtle)] text-[var(--color-text-primary)] shadow-2xl p-6 z-50 animate-fade-in divide-y divide-[var(--color-border-subtle)] rounded-2xl">
+          {/* Header Action Bar with Quick Logout */}
+          <div className="flex items-center justify-between pb-3 mb-2">
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted)] uppercase">
+              ACCOUNT & SETTINGS
+            </span>
+            <button
+              type="button"
+              id="top-quick-logout-btn"
+              onClick={handleLogout}
+              className="text-[11px] font-bold tracking-wider uppercase text-rose-400 hover:text-rose-200 flex items-center gap-1.5 cursor-pointer transition-colors px-2 py-1 rounded-md bg-rose-950/20 hover:bg-rose-900/30 border border-rose-900/40"
+              title="Log out of your account"
+            >
+              <span>LOGOUT</span>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
+
           {/* Header Profile Section with Avatar & Upload */}
-          <div className="pb-5 flex flex-col items-center text-center">
+          <div className="pt-4 pb-5 flex flex-col items-center text-center">
             {/* Avatar Circle with Camera Overlay */}
             <div className="relative mb-3 group">
               <div
@@ -378,10 +397,14 @@ const ProfileSettingsMenu = () => {
 
             <button
               type="button"
+              id="profile-logout-btn"
               onClick={handleLogout}
-              className="w-full py-2.5 px-3 bg-[var(--color-bg-base)] hover:bg-rose-900/30 border border-rose-800/40 hover:border-rose-600 text-xs font-bold text-rose-400 uppercase tracking-wider block text-center rounded-xl transition-colors cursor-pointer"
+              className="w-full py-2.5 px-3 bg-rose-950/30 hover:bg-rose-600 border border-rose-800/60 hover:border-rose-600 text-xs font-bold text-rose-300 hover:text-white uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer shadow-sm"
             >
-              SIGN OUT
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>LOGOUT</span>
             </button>
           </div>
         </div>
