@@ -81,10 +81,8 @@ const LoginPage = () => {
 
         {/* Google OAuth Quick Sign-In */}
         <GoogleAuthButton
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
           disabled={submitting}
-          text="Sign in with Google"
+          text="signin_with"
         />
 
         <div className="flex items-center gap-4 my-6">
