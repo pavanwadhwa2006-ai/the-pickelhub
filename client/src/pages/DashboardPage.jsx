@@ -25,9 +25,6 @@ import RatingHistoryChart from '../components/RatingHistoryChart';
 
 const DashboardPage = () => {
   const { user, player, isAdminMode, refreshProfile } = useAuth();
-  const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState(player?.name || '');
-  const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [updateMsg, setUpdateMsg] = useState(null);
   const [showClubPass, setShowClubPass] = useState(false);
@@ -82,27 +79,6 @@ const DashboardPage = () => {
       navigator.clipboard.writeText(player.playerId);
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
-    }
-  };
-
-  const handleUpdateName = async (e) => {
-    e.preventDefault();
-    if (!nameInput.trim()) return;
-
-    setSaving(true);
-    setUpdateMsg(null);
-    try {
-      const res = await api.put('/players/me', { name: nameInput.trim() });
-      if (res.data.success) {
-        await refreshProfile();
-        setEditingName(false);
-        setUpdateMsg('Profile name updated successfully.');
-        setTimeout(() => setUpdateMsg(null), 3000);
-      }
-    } catch (err) {
-      setUpdateMsg(err.response?.data?.message || 'Failed to update name.');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -176,7 +152,7 @@ const DashboardPage = () => {
                 </span>
               </div>
 
-              {/* Player Name (Clickable to view public profile) + Minimal Edit Button */}
+              {/* Player Name (Clickable to view public profile) */}
               <div className="flex items-center gap-3">
                 <Link
                   to={player?.playerId ? `/players/${player.playerId}` : '#'}
@@ -185,39 +161,7 @@ const DashboardPage = () => {
                 >
                   {player?.name || user?.email?.split('@')[0]}
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNameInput(player?.name || '');
-                    setEditingName(!editingName);
-                  }}
-                  title="Edit display name"
-                  className="px-2.5 py-1 text-[10px] font-bold tracking-wider text-[#ad8885] hover:text-[#ff3b3f] bg-[#251f10] hover:bg-[#352c16] border border-[#3b3423] hover:border-[#ff3b3f]/50 uppercase rounded cursor-pointer transition-all flex items-center gap-1"
-                >
-                  <span>✎</span>
-                  <span>{editingName ? 'Cancel' : 'Edit'}</span>
-                </button>
               </div>
-
-              {editingName && (
-                <form onSubmit={handleUpdateName} className="mt-3 flex items-center gap-3 animate-fade-in">
-                  <input
-                    type="text"
-                    required
-                    value={nameInput}
-                    onChange={(e) => setNameInput(e.target.value)}
-                    placeholder="Enter new display name"
-                    className="px-3 py-1.5 bg-[#251f10] border border-[#ff3b3f] text-[#ede1c9] text-xs focus:outline-none rounded"
-                  />
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="px-4 py-1.5 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold uppercase disabled:opacity-50 transition-colors cursor-pointer rounded"
-                  >
-                    {saving ? 'SAVING...' : 'SAVE'}
-                  </button>
-                </form>
-              )}
 
               <div className="flex items-center gap-3 text-xs text-[#9a8e7a] mt-2">
                 <span>{user?.email}</span>
@@ -227,22 +171,13 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Right: Clean Action Buttons (Only Primary Submit + Digital Pass) */}
+          {/* Right: Primary Action Button */}
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => setShowClubPass(true)}
-              className="px-4 py-2.5 bg-[var(--color-bg-card,#251f10)] hover:bg-[var(--color-bg-card-hover,#352c16)] border border-[var(--color-accent-primary,#ff3b3f)]/50 hover:border-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] text-xs font-bold tracking-[0.12em] uppercase transition-all rounded-xl flex items-center gap-2 cursor-pointer shadow-sm"
-              title="Open Digital Club Pass with QR Code"
-            >
-              <span>🪪</span>
-              <span>View Club Pass</span>
-            </button>
             <Link
               to="/matches/submit"
-              className="px-5 py-2.5 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] rounded-xl flex items-center gap-1.5"
+              className="px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] rounded-xl flex items-center gap-2"
             >
-              <span className="text-sm leading-none">+</span>
+              <span className="text-base leading-none font-bold">+</span>
               <span>Submit Match Scores</span>
             </Link>
           </div>
