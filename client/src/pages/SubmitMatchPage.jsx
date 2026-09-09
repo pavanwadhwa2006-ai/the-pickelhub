@@ -319,22 +319,40 @@ const SubmitMatchPage = () => {
                 <label className="text-xs font-bold text-[var(--color-text-primary,#d8cdb5)] uppercase block mb-2">
                   Facility Court
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {COURTS.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setCourt(c)}
-                      className={`py-2 px-3 text-xs font-bold rounded-xl border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                        court === c
-                          ? 'bg-[var(--color-accent-primary,#ff3b3f)]/15 border-[var(--color-accent-primary,#ff3b3f)] text-[var(--color-text-primary,#ede1c9)] font-mono'
-                          : 'bg-[var(--color-bg-base,#1a1508)] border-[var(--color-border-subtle,#3b3423)] text-[var(--color-text-muted,#9a8e7a)] hover:text-[var(--color-text-primary,#ede1c9)]'
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span>{c}</span>
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 gap-3">
+                  {COURTS.map((c) => {
+                    const isSelected = court === c;
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setCourt(c)}
+                        className={`relative py-2.5 px-3 text-xs font-bold rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between overflow-visible ${
+                          isSelected
+                            ? 'bg-[var(--color-bg-card,#1a1508)] border-[#ff3b3f] ring-4 ring-[#ff3b3f]/25 shadow-[0_0_18px_rgba(255,59,63,0.35)] text-white'
+                            : 'bg-[var(--color-bg-base,#1a1508)] border-[var(--color-border-subtle,#3b3423)] text-[var(--color-text-muted,#9a8e7a)] hover:border-[#5a4d35]'
+                        }`}
+                      >
+                        {isSelected && (
+                          <>
+                            <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#ff3b3f] rounded-tl-sm pointer-events-none" />
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#ff3b3f] rounded-tr-sm pointer-events-none" />
+                            <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#ff3b3f] rounded-bl-sm pointer-events-none" />
+                            <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#ff3b3f] rounded-br-sm pointer-events-none" />
+                          </>
+                        )}
+                        <span className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-[#ff3b3f] animate-pulse' : 'bg-emerald-500'}`} />
+                          <span className="tracking-wider">{c}</span>
+                        </span>
+                        {isSelected && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#ff3b3f] text-white font-mono font-bold">
+                            FRAMED
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

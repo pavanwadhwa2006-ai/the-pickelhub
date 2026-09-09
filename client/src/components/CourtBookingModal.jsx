@@ -203,32 +203,83 @@ const CourtBookingModal = ({ isOpen, onClose, user, player }) => {
 
         {/* Court Selection Tabs with Dynamic Outer Frame */}
         <div className="mb-2.5 shrink-0">
-          <div className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted,#9a8e7a)] uppercase mb-1.5 px-1 flex items-center justify-between">
+          <div className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted,#9a8e7a)] uppercase mb-2 px-1 flex items-center justify-between">
             <span>SELECT FACILITY COURT</span>
-            <span className="text-[#ff3b3f] font-mono font-bold">ACTIVE: {selectedCourt.toUpperCase()}</span>
+            <span className="text-[#ff3b3f] font-mono font-bold flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff3b3f] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff3b3f]" />
+              </span>
+              ACTIVE: {selectedCourt.toUpperCase()}
+            </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-[var(--color-bg-base,#140f02)] border border-[var(--color-border-subtle,#3b3423)] rounded-2xl">
+          <div className="grid grid-cols-2 gap-3 mb-1">
             {COURTS.map((court) => {
               const isSelected = selectedCourt === court;
+              const slots = scheduleData?.[court] || [];
+              const openCount = slots.filter((s) => !s.isBooked).length;
+
               return (
                 <button
                   key={court}
                   type="button"
                   onClick={() => setSelectedCourt(court)}
-                  className={`relative py-2.5 px-4 rounded-xl text-xs font-bold uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
+                  className={`relative p-3 rounded-2xl text-left transition-all duration-200 cursor-pointer overflow-visible flex flex-col justify-between min-h-[82px] ${
                     isSelected
-                      ? 'bg-[var(--color-bg-card,#1a1508)] text-white border-2 border-[#ff3b3f] ring-4 ring-[#ff3b3f]/25 shadow-[0_0_18px_rgba(255,59,63,0.35)] scale-[1.01]'
-                      : 'bg-transparent text-[var(--color-text-muted,#9a8e7a)] border-2 border-transparent hover:border-[#3b3423] hover:text-white'
+                      ? 'bg-[var(--color-bg-card,#1a1508)] text-white border-2 border-[#ff3b3f] ring-4 ring-[#ff3b3f]/30 ring-offset-2 ring-offset-[var(--color-bg-base,#140f02)] shadow-[0_0_24px_rgba(255,59,63,0.35)] scale-[1.01]'
+                      : 'bg-[var(--color-bg-base,#140f02)] text-[var(--color-text-muted,#9a8e7a)] border-2 border-[var(--color-border-subtle,#3b3423)] hover:border-[#5a4d35] hover:text-white'
                   }`}
                 >
-                  <span className={`w-2 h-2 rounded-full transition-colors ${isSelected ? 'bg-[#ff3b3f] animate-pulse' : 'bg-[#3b3423]'}`} />
-                  <span className="tracking-wider">{court}</span>
+                  {/* Outer Frame Corner Brackets on the outer side */}
                   {isSelected && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#ff3b3f] text-white font-mono font-bold ml-1">
-                      SELECTED
-                    </span>
+                    <>
+                      <span className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-[#ff3b3f] rounded-tl-sm pointer-events-none" />
+                      <span className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-[#ff3b3f] rounded-tr-sm pointer-events-none" />
+                      <span className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-[#ff3b3f] rounded-bl-sm pointer-events-none" />
+                      <span className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-[#ff3b3f] rounded-br-sm pointer-events-none" />
+                    </>
                   )}
+
+                  {/* Court Header Row */}
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-2.5 h-2.5 rounded-full transition-colors ${isSelected ? 'bg-[#ff3b3f] shadow-[0_0_8px_#ff3b3f] animate-pulse' : 'bg-[#3b3423]'}`} />
+                      <span className="font-bold text-xs sm:text-sm uppercase tracking-wider text-[var(--color-text-primary,#ede1c9)]">
+                        {court}
+                      </span>
+                    </div>
+                    {isSelected ? (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#ff3b3f] text-white font-mono font-bold tracking-wider shrink-0 shadow-sm">
+                        FRAMED
+                      </span>
+                    ) : (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#1f190a] text-[var(--color-text-muted,#9a8e7a)] font-mono shrink-0">
+                        TAP TO FRAME
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stylized Pickleball Court Line Graphic */}
+                  <div className={`w-full h-5 rounded border ${isSelected ? 'border-[#ff3b3f]/50 bg-[#ff3b3f]/10 text-white' : 'border-[#3b3423]/50 bg-black/20 text-[var(--color-text-muted,#9a8e7a)]'} relative flex items-center justify-between px-2 my-1 overflow-hidden transition-colors`}>
+                    {/* Non-Volley Zone / Kitchen Center Lines */}
+                    <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1/3 border-x border-dashed border-current opacity-40" />
+                    {/* Net Line in Center */}
+                    <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1.5px] bg-current opacity-70" />
+                    <span className="text-[7px] font-mono opacity-70 z-10 uppercase">Base</span>
+                    <span className="text-[7px] font-mono opacity-50 z-10 uppercase tracking-tighter">Kitchen</span>
+                    <span className="text-[7px] font-mono opacity-70 z-10 uppercase">Base</span>
+                  </div>
+
+                  {/* Court Subtitle & Status */}
+                  <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted,#9a8e7a)] mt-0.5">
+                    <span className="truncate">
+                      {court === 'Court 1' ? 'Indoor Hardcourt' : 'Championship Court'}
+                    </span>
+                    <span className="font-mono text-[9px] font-bold text-emerald-400">
+                      {slots.length > 0 ? `${openCount} open` : ''}
+                    </span>
+                  </div>
                 </button>
               );
             })}
@@ -271,12 +322,21 @@ const CourtBookingModal = ({ isOpen, onClose, user, player }) => {
         </div>
 
         {/* Outer Court Frame Boundary for Selected Court */}
-        <div className="border-2 border-[#ff3b3f]/40 rounded-2xl p-2.5 bg-[var(--color-bg-base,#140f02)]/50 relative flex flex-col flex-1 overflow-hidden shadow-inner mb-2">
+        <div className="border-2 border-[#ff3b3f]/70 rounded-2xl p-2.5 bg-[var(--color-bg-base,#140f02)]/70 relative flex flex-col flex-1 overflow-hidden shadow-[0_0_20px_rgba(255,59,63,0.15)] mb-2">
+          {/* Outer Frame Corner Brackets for Arena */}
+          <span className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-[#ff3b3f] rounded-tl-sm pointer-events-none" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-[#ff3b3f] rounded-tr-sm pointer-events-none" />
+          <span className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-[#ff3b3f] rounded-bl-sm pointer-events-none" />
+          <span className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-[#ff3b3f] rounded-br-sm pointer-events-none" />
+
           {/* Schedule Subtitle Header */}
-          <div className="flex items-center justify-between text-[11px] font-bold tracking-wider text-[var(--color-text-muted)] uppercase mb-2 px-1 shrink-0">
+          <div className="flex items-center justify-between text-[11px] font-bold tracking-wider text-[var(--color-text-muted)] uppercase mb-2 px-1 shrink-0 pb-1.5 border-b border-[#3b3423]/60">
             <span className="flex items-center gap-1.5 text-[#ff3b3f]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#ff3b3f]" />
-              <span>{selectedCourt} Boundary ({new Date(`${selectedDate}T00:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })})</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff3b3f] shadow-[0_0_6px_#ff3b3f]" />
+              <span className="font-mono">{selectedCourt.toUpperCase()} ARENA BOUNDARY</span>
+              <span className="text-[10px] text-[var(--color-text-muted)] lowercase font-normal">
+                ({new Date(`${selectedDate}T00:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })})
+              </span>
             </span>
             <span className="text-emerald-400 font-mono">
               {courtSlots.filter((s) => !s.isBooked).length} Available

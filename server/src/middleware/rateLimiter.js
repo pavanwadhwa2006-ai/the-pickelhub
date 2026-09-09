@@ -55,6 +55,18 @@ const createRateLimiter = ({
         req.socket.remoteAddress ||
         '127.0.0.1';
 
+      // Bypass rate limit for localhost in local development to avoid blocking dev testing
+      if (process.env.NODE_ENV !== 'production' && !process.env.TEST_RATE_LIMIT) {
+        const isLocalhost =
+          clientIp === '127.0.0.1' ||
+          clientIp === '::1' ||
+          clientIp === '::ffff:127.0.0.1' ||
+          clientIp === 'localhost';
+        if (isLocalhost) {
+          return next();
+        }
+      }
+
       const key = `${prefix}:${clientIp}`;
       const now = Date.now();
       let record;
