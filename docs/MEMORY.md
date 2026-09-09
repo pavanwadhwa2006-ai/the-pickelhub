@@ -28,12 +28,12 @@ Two other files this works alongside:
 
 > Overwrite this section every time. It should always describe *right now*, not history.
 
-- **Last completed milestone:** Milestone 12 — Deep Testing & Security Pen-Test (Sprint 12)
-- **In progress:** None
-- **Next milestone to start:** Milestone 13 — Deployment (Sprint 13)
-- **Repo state:** Comprehensive penetration testing & concurrency stress test suite operational (18/18 pen tests passing); prototype pollution & NoSQL injection defense hardened; password credential leaks prevention verified; double-approval & double-bonus race conditions blocked; tournament capacity atomic limit verified; atomic non-colliding sequential Player ID generation verified; rating engine edge invariant regressions passing (Rule M); CI guardrails clean with zero mock data and zero dead buttons across 41 UI files; All 149 tests passing across 15 test suites; clean production build.
-- **Environment/deploy state:** Local development (`client: localhost:5173`, `server: localhost:5000`) ready for Vercel production deployment
-- **Last updated:** 2026-09-09 by AI Coding Agent (Milestone 12 Complete)
+- **Last completed milestone:** Milestone 13 — Deployment (Sprint 13) [100% Roadmap Completed — Milestones 0 through 13]
+- **In progress:** None (All planned roadmap features, security audits, tests, and deployment verified)
+- **Next milestone to start:** Operations, Monitoring & Post-Launch Support
+- **Repo state:** Production-ready & fully deployed. Live health verified (`db: connected`), client bundle optimized (< 500 KB per route), 149/149 test suites passing (100%), CI guardrails verified with zero mock data and zero dead buttons across 41 UI files, MongoDB Atlas indexes synchronized, rate limiting operational, adversarial penetration and concurrency defenses hardened.
+- **Environment/deploy state:** Live in production on Vercel (`https://the-pickelhub.vercel.app`) backed by MongoDB Atlas M0 cluster.
+- **Last updated:** 2026-09-09 by AI Coding Agent (Milestone 13 Complete — Production Live)
 
 ---
 
@@ -854,8 +854,38 @@ Two other files this works alongside:
 - `npm --prefix client run build` — Clean Vite production build in ~5.3s
 - CI Guardrails: Scanned 41 UI files; verified 0 mock data and 0 dead interactive buttons.
 
+---
+
+### Milestone 13 — Deployment & Production Verification (Sprint 13)
+- **Status:** Completed
+- **Date:** 2026-09-09
+- **Session/Agent:** Deployment & Final Production Verification Sprint
+
+**What was built & verified:**
+- **Live Production Deployment on Vercel**:
+  - Pushed codebase to `main` branch (`https://github.com/pavanwadhwa2006-ai/the-pickelhub`).
+  - Vercel automated serverless deployment active at `https://the-pickelhub.vercel.app`.
+  - Configured rewrite rules in `vercel.json` routing `/api/*` to serverless function handler (`api/index.js`) and all other routes to React client `index.html`.
+- **Database Index Synchronization**:
+  - Verified and synchronized all MongoDB Atlas collection indexes (`User.email`, `Player.playerId`, `Player.userId`, `Match.matchId`, `RatingHistory`, `AuditLog`, `RateLimit.expiresAt` TTL index).
+- **Live Production Verification Matrix**:
+  - `GET /api/health` returns `200 OK`, `db: 'connected'`.
+  - `POST /api/auth/login` authenticated admin and generated valid JWT.
+  - `POST /api/auth/register` successfully created new player profile with starting rating `1000 Elo`.
+  - Atomic rate limiting on authentication verified (`429 Too Many Requests` returned with `Retry-After`).
+  - `GET /api/players` and `GET /api/tournaments` returning live data from MongoDB Atlas.
+  - Single-page application assets and client-side routes (`/leaderboard`, `/tournaments`, `/admin`, etc.) serving properly with OpenGraph social metadata.
+- **Project Completion**:
+  - All 14 project milestones (Milestones 0 through 13) fully complete, tested, and live.
+
+**Tests run and results:**
+- `npm test` — **149 / 149 pass** across 15 test suites (100% pass)
+- `npm run lint` — **0 errors, 0 warnings** across server ESLint, client Oxlint, and CI Guardrails
+- `npm --prefix client run build` — Clean Vite production build
+- Live Vercel Production Smoke Tests — **100% Operational**
+
 **Resume point for next agent:**
-- Proceed to **Milestone 13 — Deployment (Sprint 13)**.
+- Platform is 100% complete and deployed in production. Any future work is post-launch enhancements or operational maintenance.
 
 ---
 

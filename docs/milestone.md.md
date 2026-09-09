@@ -280,38 +280,38 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 **Goal:** Live, production-ready platform on Vercel and MongoDB Atlas.
 
 **Tasks**
-- [ ] Configure production environment variables on Vercel (JWT secret, Mongo URI, etc.) — never in source (Rule H)
-- [ ] Deploy frontend + serverless backend API to Vercel
-- [ ] Confirm MongoDB Atlas production cluster access and indexes (per schema `index: true` fields)
-- [ ] Run live end-to-end test: register → submit match → admin approve → leaderboard updates
-- [ ] Run end-to-end test on mobile screens
-- [ ] Final documentation update if any architecture changed since PRD (Rule J)
-- [ ] Handover / project wrap-up notes
+- [x] Configure production environment variables on Vercel (JWT secret, Mongo URI, etc.) — never in source (Rule H)
+- [x] Deploy frontend + serverless backend API to Vercel
+- [x] Confirm MongoDB Atlas production cluster access and indexes (per schema `index: true` fields)
+- [x] Run live end-to-end test: register → submit match → admin approve → leaderboard updates
+- [x] Run end-to-end test on mobile screens
+- [x] Final documentation update if any architecture changed since PRD (Rule J)
+- [x] Handover / project wrap-up notes
 
 **Acceptance Checklist (Final Definition of Done — Section 16)**
-- [ ] Users register with starting rating `1000`
-- [ ] Player match submission enters `PENDING_APPROVAL`
-- [ ] Pending matches are hidden from Elo/leaderboard
-- [ ] Admin can view/approve/reject from an admin-only route
-- [ ] Approval atomically updates ratings, categories, stats, leaderboard, rating history
-- [ ] Rejection preserves record, reason, and blocks rating updates
-- [ ] Full audit trails exist for manual adjustments/corrections
-- [ ] App deployed to Vercel + MongoDB Atlas and passes end-to-end mobile testing
+- [x] Users register with starting rating `1000`
+- [x] Player match submission enters `PENDING_APPROVAL`
+- [x] Pending matches are hidden from Elo/leaderboard
+- [x] Admin can view/approve/reject from an admin-only route
+- [x] Approval atomically updates ratings, categories, stats, leaderboard, rating history
+- [x] Rejection preserves record, reason, and blocks rating updates
+- [x] Full audit trails exist for manual adjustments/corrections
+- [x] App deployed to Vercel + MongoDB Atlas and passes end-to-end mobile testing
 
 ---
 
 ## Cross-Cutting Rules (apply to every milestone)
 Pulled from PRD Section 15 — check these at every PR/merge, not just at the end:
-- [ ] Rule A — Understand existing code before changing it
-- [ ] Rule B — Don't break existing features
-- [ ] Rule C — No fake/non-functional UI
-- [ ] Rule D — No mock data in production flows
-- [ ] Rule E — Elo logic lives only in the backend rating service
-- [ ] Rule F — Validate all inputs
-- [ ] Rule G — Never silently alter ratings/results
-- [ ] Rule H — No secrets in source code
-- [ ] Rule I — Mobile-first on every screen
-- [ ] Rule J — Update docs on architecture changes
-- [ ] Rule K — Reuse components, no duplicated UI logic
-- [ ] Rule L — Meaningful naming everywhere
-- [ ] Rule M — Test every change to rating logic
+- [x] Rule A — Understand existing code before changing it
+- [x] Rule B — Don't break existing features
+- [x] Rule C — No fake/non-functional UI
+- [x] Rule D — No mock data in production flows
+- [x] Rule E — Elo logic lives only in the backend rating service
+- [x] Rule F — Validate all inputs
+- [x] Rule G — Never silently alter ratings/results
+- [x] Rule H — No secrets in source code
+- [x] Rule I — Mobile-first on every screen
+- [x] Rule J — Update docs on architecture changes
+- [x] Rule K — Reuse components, no duplicated UI logic
+- [x] Rule L — Meaningful naming everywhere
+- [x] Rule M — Test every change to rating logic
