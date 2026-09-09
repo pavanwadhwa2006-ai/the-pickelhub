@@ -92,15 +92,11 @@ const LeaderboardPage = () => {
   }, [category, sort, search]);
 
   useEffect(() => {
-    // If no search query, execute immediately with zero timeout delay
-    if (!search.trim()) {
-      fetchLeaderboard();
-      return;
-    }
-    // Only debounce when actively typing search strings
+    // If no search query, execute with 0ms timer to avoid synchronous setState inside effect
+    const delay = search.trim() ? 250 : 0;
     const timer = setTimeout(() => {
       fetchLeaderboard();
-    }, 250);
+    }, delay);
     return () => clearTimeout(timer);
   }, [fetchLeaderboard, search]);
 

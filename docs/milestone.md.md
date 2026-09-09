@@ -265,14 +265,14 @@ Tracking format: each milestone lists scope, key tasks, deliverables, and an acc
 **Goal:** Full adversarial security audit, concurrency stress testing, and mobile UX validation.
 
 **Tasks**
-- [ ] Security audit: role verification on all endpoints, payload bounds, secret leak checks
-- [ ] Concurrency stress testing: simulate simultaneous match approvals, promotions, and score submissions
-- [ ] Full regression pass on rating engine unit tests (Rule M)
-- [ ] Mobile UX validation across common breakpoints/devices
-- [ ] Verify zero mock data and zero dead interactive buttons (`npm run ci:guardrails`)
+- [x] Security audit: role verification on all endpoints, payload bounds, secret leak checks
+- [x] Concurrency stress testing: simulate simultaneous match approvals, promotions, and score submissions
+- [x] Full regression pass on rating engine unit tests (Rule M)
+- [x] Mobile UX validation across common breakpoints/devices
+- [x] Verify zero mock data and zero dead interactive buttons (`npm run ci:guardrails`)
 
 **Deliverables**
-- Comprehensive test & security report covering penetration testing, concurrency, and mobile UX
+- Comprehensive test & security report covering penetration testing, concurrency, and mobile UX (`docs/SECURITY_AND_TEST_REPORT.md`)
 
 ---
 

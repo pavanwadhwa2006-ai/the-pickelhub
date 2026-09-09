@@ -14,9 +14,16 @@ const sanitizeObject = (obj) => {
 
   const sanitized = {};
   for (const [key, value] of Object.entries(obj)) {
-    // Strip keys starting with $ (MongoDB query operators) or containing . (path traversal)
-    if (key.startsWith('$') || key.includes('.')) {
-      console.warn(`⚠️ [NoSQL Injection Block] Sanitized suspicious key: "${key}"`);
+    // Strip keys starting with $ (MongoDB query operators), containing . (path traversal),
+    // or dangerous prototype pollution keys (__proto__, constructor, prototype)
+    if (
+      key.startsWith('$') ||
+      key.includes('.') ||
+      key === '__proto__' ||
+      key === 'constructor' ||
+      key === 'prototype'
+    ) {
+      console.warn(`⚠️ [Injection Block] Sanitized suspicious key: "${key}"`);
       continue;
     }
 

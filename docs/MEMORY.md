@@ -28,12 +28,12 @@ Two other files this works alongside:
 
 > Overwrite this section every time. It should always describe *right now*, not history.
 
-- **Last completed milestone:** Milestone 11 — Admin Perspective Switcher, Performance Optimization & Experiential UX Polish (Sprint 11)
+- **Last completed milestone:** Milestone 12 — Deep Testing & Security Pen-Test (Sprint 12)
 - **In progress:** None
-- **Next milestone to start:** Milestone 12 — Deep Testing & Security Pen-Test (Sprint 12)
-- **Repo state:** Dual Identity Mode ("👑 Admin Mode" vs "🏓 Athlete View") fully operational with persistent view state and ambient preview banner; dedicated Admin portal route guard auto-enables Admin Mode; Live pending match verification counter on Navbar; High-throughput in-memory rate limiting (<0.01ms latency overhead); Zero-delay client SWR caching on `/players` and `/tournaments`; Route chunk prefetching on nav hover; Flawless theme token consistency with zero hardcoded dark backgrounds or contrast mismatches across dark and light modes; Client builds cleanly with zero errors/warnings; All 131 tests passing across 14 test suites.
-- **Environment/deploy state:** Local development (`client: localhost:5173`, `server: localhost:5000`)
-- **Last updated:** 2026-09-05 by AI Coding Agent (Milestone 11 Complete)
+- **Next milestone to start:** Milestone 13 — Deployment (Sprint 13)
+- **Repo state:** Comprehensive penetration testing & concurrency stress test suite operational (18/18 pen tests passing); prototype pollution & NoSQL injection defense hardened; password credential leaks prevention verified; double-approval & double-bonus race conditions blocked; tournament capacity atomic limit verified; atomic non-colliding sequential Player ID generation verified; rating engine edge invariant regressions passing (Rule M); CI guardrails clean with zero mock data and zero dead buttons across 41 UI files; All 149 tests passing across 15 test suites; clean production build.
+- **Environment/deploy state:** Local development (`client: localhost:5173`, `server: localhost:5000`) ready for Vercel production deployment
+- **Last updated:** 2026-09-09 by AI Coding Agent (Milestone 12 Complete)
 
 ---
 
@@ -815,8 +815,47 @@ Two other files this works alongside:
 - `npm --prefix client run build` — Clean Vite production build
 - End-to-end browser inspection — Validated dual perspective toggling, live pending badge, instant page loads, and theme contrast harmony.
 
+---
+
+### Milestone 12 — Deep Testing & Security Pen-Test (Sprint 12)
+- **Status:** Completed
+- **Date:** 2026-09-09
+- **Session/Agent:** Security Audit, Concurrency Stress & Pen-Test Sprint
+
+**What was built:**
+- **Part A: Adversarial Penetration Testing (`server/test/securityPenTest.test.js`)**:
+  - **RBAC Enforcement**: Validated 401 Unauthorized for unauthenticated requests and 403 Forbidden for non-admin users attempting administrative actions.
+  - **Match Submitter Fraud Protection**: Verified that players cannot submit match scores where they are not active participants.
+  - **Prototype Pollution Defense**: Upgraded `server/src/middleware/sanitizer.js` to strip `__proto__`, `constructor`, and `prototype` keys from all JSON payloads.
+  - **NoSQL Injection Defense**: Hardened stripping of MongoDB query operators (`$where`, `$gt`, `$ne`, `$regex`) in nested request structures.
+  - **Secret Disclosure Audits**: Verified that password hashes are stripped from `User.findById` queries (`select('-password')`), that `Player` documents contain zero password fields, and that `.env` files are not tracked in git history.
+- **Part B: Concurrency Stress Testing**:
+  - **Double-Approval Race Condition**: Tested 5 concurrent approval requests on the same match; verified that exactly 1 succeeds and 4 abort cleanly without duplicate rating updates.
+  - **Tournament Registration Limit**: Tested 5 concurrent registrations for a single available tournament spot; verified that exactly 1 succeeds and 4 receive capacity errors.
+  - **Double-Award Bonus Guard**: Tested 4 concurrent bonus payout executions for a completed tournament; verified that exactly 1 succeeds and 3 receive `409 Conflict`.
+  - **Atomic Counter Generation**: Tested 10 concurrent requests to sequential player ID generator; verified zero collisions and strictly sequential IDs.
+- **Part C: Rating Engine Edge Regressions (Rule M)**:
+  - Validated extreme rating gaps (1000 vs 2400 Elo), doubles zero-sum invariant preservation, and exact category threshold mappings.
+- **Part D: Deliverable**:
+  - Authored comprehensive report in `docs/SECURITY_AND_TEST_REPORT.md`.
+
+**Files touched:**
+- `server/test/securityPenTest.test.js` (NEW)
+- `server/src/middleware/sanitizer.js`
+- `server/package.json`
+- `client/src/pages/LeaderboardPage.jsx`
+- `docs/SECURITY_AND_TEST_REPORT.md` (NEW)
+- `docs/milestone.md.md`
+- `docs/MEMORY.md`
+
+**Tests run and results:**
+- `npm test` — **149 / 149 pass** across 15 test suites (100% pass)
+- `npm run lint` — **0 errors, 0 warnings** across server ESLint, client Oxlint, and CI Guardrails
+- `npm --prefix client run build` — Clean Vite production build in ~5.3s
+- CI Guardrails: Scanned 41 UI files; verified 0 mock data and 0 dead interactive buttons.
+
 **Resume point for next agent:**
-- Proceed to **Milestone 12 — Deep Testing & Security Pen-Test (Sprint 12)**.
+- Proceed to **Milestone 13 — Deployment (Sprint 13)**.
 
 ---
 
