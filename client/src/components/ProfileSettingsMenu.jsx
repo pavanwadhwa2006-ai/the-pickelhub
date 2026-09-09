@@ -13,6 +13,7 @@ import { useAuth } from '../context/useAuth';
 import { useTheme } from '../context/useTheme';
 import { THEMES } from '../context/themeConstants';
 import api from '../services/api';
+import QRCode from 'qrcode';
 
 const ProfileSettingsMenu = () => {
   const { user, player, logout, refreshProfile, isAdmin, isAdminMode, toggleAdminViewMode } = useAuth();
@@ -24,6 +25,8 @@ const ProfileSettingsMenu = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [qrCopied, setQrCopied] = useState(false);
 
   const menuRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -38,6 +41,23 @@ const ProfileSettingsMenu = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Generate QR Code for instant match fixation
+  useEffect(() => {
+    if (!player?.playerId) return;
+
+    const challengeUrl = `${window.location.origin}/matches/submit?opponent=${player.playerId}`;
+    QRCode.toDataURL(challengeUrl, {
+      width: 260,
+      margin: 1.5,
+      color: {
+        dark: '#140f02',
+        light: '#ffffff',
+      },
+    })
+      .then((url) => setQrDataUrl(url))
+      .catch((err) => console.error('Failed to render instant match QR:', err));
+  }, [player?.playerId]);
 
   const getInitials = (name) => {
     if (!name) return 'P';
@@ -312,6 +332,76 @@ const ProfileSettingsMenu = () => {
               </p>
             </div>
           )}
+
+          {/* Instant Match Fixation QR Code (Courtside Challenge) */}
+          <div className="py-4">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase flex items-center gap-1.5">
+                <span>⚡</span>
+                <span>MATCH FIXATION QR</span>
+              </span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-accent-primary)]/20 text-[var(--color-accent-primary)] font-mono font-bold">
+                SCAN TO PLAY
+              </span>
+            </div>
+
+            <div className="p-3 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] rounded-xl flex flex-col items-center text-center">
+              {qrDataUrl ? (
+                <div className="relative p-2 bg-white rounded-xl shadow-inner mb-2 border border-black/10">
+                  <img
+                    src={qrDataUrl}
+                    alt={`Instant Match QR for ${player?.name || 'Athlete'}`}
+                    className="w-36 h-36 object-contain"
+                  />
+                  {/* Subtle centered brand icon */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-7 h-7 rounded-full bg-[#ff3b3f] text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-md font-['Playfair_Display']">
+                      P
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-36 h-36 bg-black/20 rounded-xl flex items-center justify-center text-xs text-[var(--color-text-muted)] mb-2">
+                  Generating QR...
+                </div>
+              )}
+
+              <div className="text-[11px] font-bold text-[var(--color-text-primary)] mb-0.5">
+                {player?.playerId || 'PH-00001'} Instant Challenge
+              </div>
+              <p className="text-[10px] text-[var(--color-text-muted)] leading-tight mb-3">
+                Opponents scan this courtside with any phone camera to start an instant match against you.
+              </p>
+
+              <div className="flex items-center gap-2 w-full">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const challengeUrl = `${window.location.origin}/matches/submit?opponent=${player?.playerId}`;
+                    navigator.clipboard.writeText(challengeUrl);
+                    setQrCopied(true);
+                    setTimeout(() => setQrCopied(false), 2000);
+                  }}
+                  className={`flex-1 py-1.5 px-2 text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all cursor-pointer border ${
+                    qrCopied
+                      ? 'bg-emerald-600/20 text-emerald-400 border-emerald-500'
+                      : 'bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-primary)] border-[var(--color-border-subtle)]'
+                  }`}
+                >
+                  {qrCopied ? '✓ COPIED' : '📋 COPY LINK'}
+                </button>
+
+                <Link
+                  to={player?.playerId ? `/matches/submit?opponent=${player.playerId}` : '/matches/submit'}
+                  onClick={() => setIsOpen(false)}
+                  className="py-1.5 px-2.5 text-[10px] font-bold rounded-lg uppercase tracking-wider bg-[var(--color-accent-primary)] hover:brightness-110 text-white transition-all text-center shrink-0 shadow-sm"
+                  title="Test or Submit Match"
+                >
+                  START MATCH ↗
+                </Link>
+              </div>
+            </div>
+          </div>
 
           {/* Theme Selector */}
           <div className="py-4">

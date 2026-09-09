@@ -22,12 +22,14 @@ import TierProgressBar from '../components/TierProgressBar';
 import HowItWorksCard from '../components/HowItWorksCard';
 import DigitalClubPassModal from '../components/DigitalClubPassModal';
 import RatingHistoryChart from '../components/RatingHistoryChart';
+import CourtBookingModal from '../components/CourtBookingModal';
 
 const DashboardPage = () => {
   const { user, player, isAdminMode, refreshProfile } = useAuth();
   const [copied, setCopied] = useState(false);
   const [updateMsg, setUpdateMsg] = useState(null);
   const [showClubPass, setShowClubPass] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Active Pending Matches & Rating History State
   const [pendingMatches, setPendingMatches] = useState([]);
@@ -171,11 +173,24 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Right: Primary Action Button */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Right: Primary Action Buttons (Book Court & Submit Match Scores) */}
+          <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-2.5 shrink-0">
+            <button
+              type="button"
+              id="dashboard-book-court-btn"
+              onClick={() => setShowBookingModal(true)}
+              className="px-6 py-3 bg-[#251f10] hover:bg-[#322a16] border border-[#ff3b3f]/70 hover:border-[#ff3b3f] text-[#ede1c9] hover:text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_4px_16px_rgba(0,0,0,0.35)] hover:shadow-[0_0_20px_rgba(255,59,63,0.3)] rounded-xl flex items-center justify-center gap-2 cursor-pointer group"
+              title="Book Court 1 or Court 2"
+            >
+              <span className="text-base group-hover:scale-110 transition-transform">🎾</span>
+              <span>Book Court</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#ff3b3f]/20 text-[#ff3b3f] font-mono ml-1 font-semibold">COURTS 1 & 2</span>
+            </button>
+
             <Link
               to="/matches/submit"
-              className="px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] rounded-xl flex items-center gap-2"
+              id="dashboard-submit-match-btn"
+              className="px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] rounded-xl flex items-center justify-center gap-2"
             >
               <span className="text-base leading-none font-bold">+</span>
               <span>Submit Match Scores</span>
@@ -433,6 +448,14 @@ const DashboardPage = () => {
       <DigitalClubPassModal
         isOpen={showClubPass}
         onClose={() => setShowClubPass(false)}
+        player={player}
+      />
+
+      {/* Court Reservation Modal (Court 1 & Court 2 with real-time slots) */}
+      <CourtBookingModal
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        user={user}
         player={player}
       />
     </PageTransition>

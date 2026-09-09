@@ -98,6 +98,8 @@ const EVENTS = {
   TOURNAMENT_UPDATED: 'tournament-updated',
   PROFILE_UPDATED: 'profile-updated',
   LEADERBOARD_UPDATED: 'leaderboard-updated',
+  BOOKING_CREATED: 'booking-created',
+  BOOKING_CANCELLED: 'booking-cancelled',
 };
 
 module.exports = {

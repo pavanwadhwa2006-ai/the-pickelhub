@@ -26,7 +26,7 @@ const connectDB = async () => {
 
   if (!cached.promise) {
     const opts = {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: process.env.VERCEL ? 5000 : 20000,
     };
 
     cached.promise = mongoose
@@ -47,7 +47,7 @@ const connectDB = async () => {
     console.error('❌ MongoDB connection failed:', error.message);
     if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
       console.warn('⚠️  Retrying connection to MongoDB Atlas in 5 seconds...');
-      setTimeout(connectDB, 5000);
+      setTimeout(() => connectDB().catch(() => {}), 5000);
     }
     throw error;
   }
