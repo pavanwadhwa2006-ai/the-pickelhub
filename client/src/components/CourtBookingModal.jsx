@@ -201,35 +201,50 @@ const CourtBookingModal = ({ isOpen, onClose, user, player }) => {
           </div>
         )}
 
-        {/* Court & Date Selector Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 p-2.5 sm:p-3 bg-[var(--color-bg-base,#140f02)] border border-[var(--color-border-subtle,#3b3423)] rounded-2xl mb-3 shrink-0">
-          {/* Court Tabs */}
-          <div className="flex items-center gap-1.5 p-1 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl">
-            {COURTS.map((court) => (
-              <button
-                key={court}
-                type="button"
-                onClick={() => setSelectedCourt(court)}
-                className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer ${
-                  selectedCourt === court
-                    ? 'bg-[#ff3b3f] text-white shadow-sm'
-                    : 'text-[var(--color-text-muted)] hover:text-white'
-                }`}
-              >
-                {court}
-              </button>
-            ))}
+        {/* Court Selection Tabs with Dynamic Outer Frame */}
+        <div className="mb-2.5 shrink-0">
+          <div className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted,#9a8e7a)] uppercase mb-1.5 px-1 flex items-center justify-between">
+            <span>SELECT FACILITY COURT</span>
+            <span className="text-[#ff3b3f] font-mono font-bold">ACTIVE: {selectedCourt.toUpperCase()}</span>
           </div>
 
-          {/* Quick Date Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto">
+          <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-[var(--color-bg-base,#140f02)] border border-[var(--color-border-subtle,#3b3423)] rounded-2xl">
+            {COURTS.map((court) => {
+              const isSelected = selectedCourt === court;
+              return (
+                <button
+                  key={court}
+                  type="button"
+                  onClick={() => setSelectedCourt(court)}
+                  className={`relative py-2.5 px-4 rounded-xl text-xs font-bold uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
+                    isSelected
+                      ? 'bg-[var(--color-bg-card,#1a1508)] text-white border-2 border-[#ff3b3f] ring-4 ring-[#ff3b3f]/25 shadow-[0_0_18px_rgba(255,59,63,0.35)] scale-[1.01]'
+                      : 'bg-transparent text-[var(--color-text-muted,#9a8e7a)] border-2 border-transparent hover:border-[#3b3423] hover:text-white'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full transition-colors ${isSelected ? 'bg-[#ff3b3f] animate-pulse' : 'bg-[#3b3423]'}`} />
+                  <span className="tracking-wider">{court}</span>
+                  {isSelected && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#ff3b3f] text-white font-mono font-bold ml-1">
+                      SELECTED
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Date Selector Strip */}
+        <div className="flex items-center justify-between gap-2 p-2 bg-[var(--color-bg-base,#140f02)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl mb-3 shrink-0">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => setSelectedDate(todayStr)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer shrink-0 ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer ${
                 selectedDate === todayStr
                   ? 'bg-[#ff3b3f] text-white shadow-sm'
-                  : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border border-[var(--color-border-subtle)] hover:text-white'
+                  : 'text-[var(--color-text-muted)] hover:text-white'
               }`}
             >
               Today
@@ -237,33 +252,36 @@ const CourtBookingModal = ({ isOpen, onClose, user, player }) => {
             <button
               type="button"
               onClick={() => setSelectedDate(tomorrowStr)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer shrink-0 ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer ${
                 selectedDate === tomorrowStr
                   ? 'bg-[#ff3b3f] text-white shadow-sm'
-                  : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border border-[var(--color-border-subtle)] hover:text-white'
+                  : 'text-[var(--color-text-muted)] hover:text-white'
               }`}
             >
               Tomorrow
             </button>
-            <input
-              type="date"
-              min={todayStr}
-              value={selectedDate}
-              onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
-              className="px-2 py-1 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] text-xs rounded-lg focus:outline-none focus:border-[#ff3b3f] shrink-0"
-            />
           </div>
+          <input
+            type="date"
+            min={todayStr}
+            value={selectedDate}
+            onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+            className="px-2.5 py-1 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] text-xs rounded-lg focus:outline-none focus:border-[#ff3b3f]"
+          />
         </div>
 
-        {/* Schedule Subtitle */}
-        <div className="flex items-center justify-between text-[11px] font-bold tracking-wider text-[var(--color-text-muted)] uppercase mb-2 px-1 shrink-0">
-          <span>
-            {selectedCourt} Slots ({new Date(`${selectedDate}T00:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })})
-          </span>
-          <span className="text-[#ff3b3f] font-mono">
-            {courtSlots.filter((s) => !s.isBooked).length} Available
-          </span>
-        </div>
+        {/* Outer Court Frame Boundary for Selected Court */}
+        <div className="border-2 border-[#ff3b3f]/40 rounded-2xl p-2.5 bg-[var(--color-bg-base,#140f02)]/50 relative flex flex-col flex-1 overflow-hidden shadow-inner mb-2">
+          {/* Schedule Subtitle Header */}
+          <div className="flex items-center justify-between text-[11px] font-bold tracking-wider text-[var(--color-text-muted)] uppercase mb-2 px-1 shrink-0">
+            <span className="flex items-center gap-1.5 text-[#ff3b3f]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff3b3f]" />
+              <span>{selectedCourt} Boundary ({new Date(`${selectedDate}T00:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })})</span>
+            </span>
+            <span className="text-emerald-400 font-mono">
+              {courtSlots.filter((s) => !s.isBooked).length} Available
+            </span>
+          </div>
 
         {/* Slots Grid (11:00 AM – 11:00 PM) */}
         {loading ? (
@@ -353,6 +371,7 @@ const CourtBookingModal = ({ isOpen, onClose, user, player }) => {
             })}
           </div>
         )}
+        </div>
 
         {/* Modal Footer Confirmation Action */}
         <div className="pt-3 border-t border-[var(--color-border-subtle,#3b3423)] mt-2 shrink-0">

@@ -131,11 +131,11 @@ const matchSubmitLimiter = createRateLimiter({
   message: 'Match submission rate limit exceeded from this IP.',
 });
 
-// 3. Global API Limiter: 200 requests per 15 minutes (Milestone 10 — Traffic Resilience)
+// 3. Global API Limiter: 300 requests per 15 min (or 2000 in dev)
 // In-memory sliding window for sub-millisecond throughput on public endpoints
 const globalApiLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: process.env.NODE_ENV === 'development' ? 2000 : (process.env.GLOBAL_RATE_LIMIT ? parseInt(process.env.GLOBAL_RATE_LIMIT, 10) : 300),
   prefix: 'global_api',
   message: 'Too many requests from this IP. Please slow down.',
   inMemory: true,
