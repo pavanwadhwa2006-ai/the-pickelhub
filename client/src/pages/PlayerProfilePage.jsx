@@ -15,6 +15,8 @@ import AnimatedNumber from '../components/AnimatedNumber';
 import RevealOnScroll from '../components/RevealOnScroll';
 import TierBadge from '../components/TierBadge';
 import RatingHistoryChart from '../components/RatingHistoryChart';
+import DigitalClubPassModal from '../components/DigitalClubPassModal';
+import QRCode from 'qrcode';
 
 const PlayerProfilePage = () => {
   const { id } = useParams();
@@ -22,6 +24,8 @@ const PlayerProfilePage = () => {
   const [ratingHistory, setRatingHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showClubPassModal, setShowClubPassModal] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState('');
 
   useEffect(() => {
     let isCancelled = false;
@@ -57,6 +61,23 @@ const PlayerProfilePage = () => {
       isCancelled = true;
     };
   }, [id]);
+
+  // Generate scannable courtside challenge QR code URL
+  useEffect(() => {
+    if (!player?.playerId) return;
+
+    const challengeUrl = `${window.location.origin}/matches/submit?opponent=${player.playerId}`;
+    QRCode.toDataURL(challengeUrl, {
+      width: 240,
+      margin: 1.5,
+      color: {
+        dark: '#140f02',
+        light: '#ede1c9',
+      },
+    })
+      .then((url) => setQrDataUrl(url))
+      .catch((err) => console.error('Failed to generate profile QR code:', err));
+  }, [player?.playerId]);
 
   if (loading) {
     return (
@@ -127,12 +148,16 @@ const PlayerProfilePage = () => {
           </Link>
         </div>
 
-        {/* Player Header Banner */}
+        {/* Player Header Banner with Integrated QR Code */}
         <div className="p-8 sm:p-12 bg-[var(--color-bg-card,#251f10)] border border-[var(--color-border-subtle,#3b3423)] mb-12 relative overflow-hidden rounded-3xl shadow-xl">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative z-10">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 relative z-10">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              {/* Profile Avatar / Photo */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-4xl flex items-center justify-center shrink-0 border-2 border-[var(--color-border-subtle,#3b3423)] shadow-lg">
+              {/* Profile Avatar / Photo (Clickable to open QR Pass) */}
+              <div
+                onClick={() => setShowClubPassModal(true)}
+                title="Click to view full digital pass & QR code"
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-4xl flex items-center justify-center shrink-0 border-2 border-[var(--color-border-subtle,#3b3423)] hover:border-[#ff3b3f] shadow-lg cursor-pointer transition-all hover:scale-105"
+              >
                 {player.profilePhoto ? (
                   <img
                     src={player.profilePhoto}
@@ -154,8 +179,16 @@ const PlayerProfilePage = () => {
                     {player.accountStatus}
                   </span>
                 </div>
-                <h1 className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[var(--color-text-primary,#ede1c9)]">
-                  {player.name}
+                {/* Player Name — Clickable to open QR Pass */}
+                <h1
+                  onClick={() => setShowClubPassModal(true)}
+                  title="Click to view full digital pass & QR code"
+                  className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[var(--color-text-primary,#ede1c9)] hover:text-[#ff3b3f] cursor-pointer transition-colors flex items-center gap-3 group"
+                >
+                  <span>{player.name}</span>
+                  <span className="text-base opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all" title="View QR Pass">
+                    🪪
+                  </span>
                 </h1>
                 <p className="text-xs text-[var(--color-text-muted,#9a8e7a)] mt-1 font-mono">
                   Official Member since {new Date(player.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
@@ -163,17 +196,50 @@ const PlayerProfilePage = () => {
               </div>
             </div>
 
-            {/* Rating Highlight Pill */}
-            <div className="p-6 bg-[#1a1508] border border-[#3b3423] hover:border-[#ff3b3f]/60 rounded-2xl flex flex-col items-start md:items-end shrink-0 transition-colors shadow-lg">
-              <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase mb-1">
-                OFFICIAL RATING
-              </span>
-              <div className="font-['Playfair_Display'] text-4xl sm:text-5xl font-bold text-[#ede1c9] flex items-baseline gap-2">
-                <AnimatedNumber value={player.currentRating} duration={1000} />
-                <span className="text-xs font-sans font-normal text-[#ffb3ad]">Elo</span>
-              </div>
-              <div className="mt-2">
-                <TierBadge category={player.category} />
+            {/* Right Side: QR Pass Card & Official Rating Card */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shrink-0 w-full lg:w-auto">
+              {/* Digital QR Member Pass */}
+              <button
+                type="button"
+                onClick={() => setShowClubPassModal(true)}
+                title="Click to view full digital pass & QR code"
+                className="p-4 bg-[#1a1508] border border-[#3b3423] hover:border-[#ff3b3f] rounded-2xl flex items-center gap-4 cursor-pointer transition-all hover:scale-[1.02] shadow-lg group text-left"
+              >
+                {qrDataUrl ? (
+                  <div className="w-16 h-16 bg-[#ede1c9] p-1 rounded-xl overflow-hidden shadow shrink-0">
+                    <img src={qrDataUrl} alt={`${player.name} QR Code`} className="w-full h-full object-contain" />
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 bg-[#251f10] rounded-xl flex items-center justify-center text-2xl shrink-0">
+                    🪪
+                  </div>
+                )}
+                <div>
+                  <span className="text-[9px] font-bold tracking-[0.2em] text-[#ff3b3f] uppercase block font-mono">
+                    DIGITAL PASS
+                  </span>
+                  <span className="text-xs font-bold text-[#ede1c9] group-hover:text-white flex items-center gap-1 mt-0.5">
+                    <span>Scan QR Code</span>
+                    <span className="text-[10px] text-[#ad8885]">↗</span>
+                  </span>
+                  <span className="text-[10px] text-[#9a8e7a] block mt-0.5">
+                    Click to enlarge
+                  </span>
+                </div>
+              </button>
+
+              {/* Rating Highlight Pill */}
+              <div className="p-5 bg-[#1a1508] border border-[#3b3423] hover:border-[#ff3b3f]/60 rounded-2xl flex flex-col items-start sm:items-end justify-center shrink-0 transition-colors shadow-lg">
+                <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase mb-1">
+                  OFFICIAL RATING
+                </span>
+                <div className="font-['Playfair_Display'] text-3xl sm:text-4xl font-bold text-[#ede1c9] flex items-baseline gap-2">
+                  <AnimatedNumber value={player.currentRating} duration={1000} />
+                  <span className="text-xs font-sans font-normal text-[#ffb3ad]">Elo</span>
+                </div>
+                <div className="mt-1.5">
+                  <TierBadge category={player.category} />
+                </div>
               </div>
             </div>
           </div>
@@ -234,6 +300,13 @@ const PlayerProfilePage = () => {
           />
         </RevealOnScroll>
       </div>
+
+      {/* Digital Club Pass Modal with QR Code */}
+      <DigitalClubPassModal
+        isOpen={showClubPassModal}
+        onClose={() => setShowClubPassModal(false)}
+        player={player}
+      />
     </PageTransition>
   );
 };
