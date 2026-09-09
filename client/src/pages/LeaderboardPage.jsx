@@ -13,6 +13,8 @@ import PageTransition from '../components/PageTransition';
 import TiltCard from '../components/TiltCard';
 import AnimatedNumber from '../components/AnimatedNumber';
 import TierBadge from '../components/TierBadge';
+import useLiveSync from '../hooks/useLiveSync';
+import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
 
 // Module-level in-memory cache for instant route navigation
 const clientLeaderboardCache = new Map();
@@ -99,6 +101,20 @@ const LeaderboardPage = () => {
     }, delay);
     return () => clearTimeout(timer);
   }, [fetchLeaderboard, search]);
+
+  // Real-time WebSocket sync: update leaderboard immediately on any rating/match change
+  useLiveSync(
+    REALTIME_CHANNELS.GLOBAL,
+    [REALTIME_EVENTS.LEADERBOARD_UPDATED, REALTIME_EVENTS.MATCH_APPROVED, REALTIME_EVENTS.RATING_UPDATED],
+    useCallback(() => {
+      clientLeaderboardCache.clear();
+      clientSpecialtiesCache = null;
+      fetchLeaderboard();
+      api.get('/players/leaders').then((res) => {
+        if (res.data.success) setSpecialties(res.data.data);
+      }).catch(() => {});
+    }, [fetchLeaderboard])
+  );
 
   // Execute Head-to-Head Comparison
   const handleOpenCompare = async (p1, p2 = null) => {

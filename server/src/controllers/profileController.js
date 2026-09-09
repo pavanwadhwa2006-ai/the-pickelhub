@@ -7,6 +7,7 @@
 
 const { getOrCreatePlayerProfile } = require('../services/playerService');
 const { uploadAvatar, deleteAvatar } = require('../services/storageService');
+const { broadcast, CHANNELS, EVENTS } = require('../services/realtimeService');
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -58,6 +59,10 @@ const uploadProfilePhoto = async (req, res, next) => {
     player.profilePhoto = photoUrl;
     await player.save();
 
+    // Broadcast profile update to user's private channel and global channel
+    broadcast(CHANNELS.userChannel(req.user._id), EVENTS.PROFILE_UPDATED, { player });
+    broadcast(CHANNELS.GLOBAL, EVENTS.LEADERBOARD_UPDATED, {});
+
     res.status(200).json({
       success: true,
       message: 'Profile photo updated successfully.',
@@ -83,6 +88,10 @@ const deleteProfilePhoto = async (req, res, next) => {
       await deleteAvatar(player.profilePhoto);
       player.profilePhoto = '';
       await player.save();
+
+      // Broadcast profile update
+      broadcast(CHANNELS.userChannel(req.user._id), EVENTS.PROFILE_UPDATED, { player });
+      broadcast(CHANNELS.GLOBAL, EVENTS.LEADERBOARD_UPDATED, {});
     }
 
     res.status(200).json({

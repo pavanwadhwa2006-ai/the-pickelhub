@@ -11,6 +11,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import ProfileSettingsMenu from './ProfileSettingsMenu';
 import api from '../services/api';
+import useLiveSync from '../hooks/useLiveSync';
+import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
 
 const prefetchRoute = (path) => {
   try {
@@ -54,6 +56,39 @@ const Navbar = () => {
       clearInterval(interval);
     };
   }, [isAdminMode]);
+
+  // Real-time instant notification when new match submitted or approved
+  useLiveSync(
+    isAdminMode ? REALTIME_CHANNELS.ADMIN : null,
+    [REALTIME_EVENTS.MATCH_SUBMITTED],
+    async () => {
+      try {
+        const res = await api.get('/admin/matches/pending');
+        if (res.data.success) {
+          setPendingCount(res.data.count || 0);
+        }
+      } catch {
+        // Silently ignore
+      }
+    },
+    { enabled: isAdminMode }
+  );
+
+  useLiveSync(
+    isAdminMode ? REALTIME_CHANNELS.GLOBAL : null,
+    [REALTIME_EVENTS.MATCH_APPROVED],
+    async () => {
+      try {
+        const res = await api.get('/admin/matches/pending');
+        if (res.data.success) {
+          setPendingCount(res.data.count || 0);
+        }
+      } catch {
+        // Silently ignore
+      }
+    },
+    { enabled: isAdminMode }
+  );
 
   const navLinks = [
     { label: 'HOME', path: '/' },

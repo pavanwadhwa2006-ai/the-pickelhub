@@ -11,6 +11,7 @@ const Match = require('../models/Match');
 const Player = require('../models/Player');
 const Counter = require('../models/Counter');
 const { getOrCreatePlayerProfile } = require('../services/playerService');
+const { broadcast, CHANNELS, EVENTS } = require('../services/realtimeService');
 
 /**
  * Validates match participants, counts, scores, and winner consistency.
@@ -210,6 +211,11 @@ const submitMatch = async (req, res, next) => {
       success: true,
       message: 'Match submitted successfully. Pending administrator verification.',
       data: populatedMatch,
+    });
+
+    // Broadcast to admin channel so admin devices see new pending match instantly
+    broadcast(CHANNELS.ADMIN, EVENTS.MATCH_SUBMITTED, {
+      matchId: newMatch.matchId,
     });
   } catch (error) {
     next(error);

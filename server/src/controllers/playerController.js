@@ -11,6 +11,7 @@ const Match = require('../models/Match');
 const RatingHistory = require('../models/RatingHistory');
 const { getOrCreatePlayerProfile } = require('../services/playerService');
 const { calculateExpectedScore } = require('../services/ratingService');
+const { broadcast, CHANNELS, EVENTS } = require('../services/realtimeService');
 
 // Public projection to prevent email/private data leakage (Point #6)
 const PUBLIC_PLAYER_FIELDS =
@@ -354,6 +355,10 @@ const updateMyProfile = async (req, res, next) => {
     }
 
     await player.save();
+
+    // Broadcast profile update to user's private channel (all other devices sync immediately)
+    broadcast(CHANNELS.userChannel(req.user._id), EVENTS.PROFILE_UPDATED, { player });
+    broadcast(CHANNELS.GLOBAL, EVENTS.LEADERBOARD_UPDATED, {});
 
     res.status(200).json({
       success: true,

@@ -18,6 +18,8 @@ import PageTransition from '../components/PageTransition';
 import TierBadge from '../components/TierBadge';
 import BracketVisualizer from '../components/BracketVisualizer';
 import InlinePlayerPicker from '../components/InlinePlayerPicker';
+import useLiveSync from '../hooks/useLiveSync';
+import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
 
 const COURTS = ['Court 1', 'Court 2'];
 const TOURNAMENT_FORMATS = ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES', 'OPEN'];
@@ -189,26 +191,51 @@ const AdminPage = () => {
     }
   }, []);
 
-  // Initial load of pending queue — inlined to satisfy React Compiler
-  useEffect(() => {
-    let cancelled = false;
-    const loadQueue = async () => {
-      setLoadingPending(true);
-      setActionError(null);
-      try {
-        const res = await api.get('/admin/matches/pending?limit=50');
-        if (!cancelled && res.data.success) {
-          setPendingMatches(res.data.data);
-        }
-      } catch (err) {
-        if (!cancelled) setActionError(err.response?.data?.message || 'Failed to fetch pending matches queue.');
-      } finally {
-        if (!cancelled) setLoadingPending(false);
+  const fetchPendingQueue = useCallback(async () => {
+    setLoadingPending(true);
+    try {
+      const res = await api.get('/admin/matches/pending?limit=50');
+      if (res.data.success) {
+        setPendingMatches(res.data.data);
       }
-    };
-    loadQueue();
-    return () => { cancelled = true; };
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Failed to fetch pending matches queue.');
+    } finally {
+      setLoadingPending(false);
+    }
   }, []);
+
+  // Initial load of pending queue
+  useEffect(() => {
+    fetchPendingQueue();
+  }, [fetchPendingQueue]);
+
+  // Real-time sync: when athletes submit matches or other admins approve matches
+  useLiveSync(
+    REALTIME_CHANNELS.ADMIN,
+    [REALTIME_EVENTS.MATCH_SUBMITTED],
+    fetchPendingQueue
+  );
+
+  useLiveSync(
+    REALTIME_CHANNELS.GLOBAL,
+    [REALTIME_EVENTS.MATCH_APPROVED],
+    fetchPendingQueue
+  );
+
+  // Real-time sync: when tournaments update, refresh tournament state if active
+  useLiveSync(
+    REALTIME_CHANNELS.GLOBAL,
+    [REALTIME_EVENTS.TOURNAMENT_UPDATED],
+    useCallback(() => {
+      if (activeTab === 'tournaments') {
+        fetchTournaments();
+        if (selectedTournament?._id) {
+          fetchTournamentDetails(selectedTournament._id);
+        }
+      }
+    }, [activeTab, fetchTournaments, fetchTournamentDetails, selectedTournament?._id])
+  );
 
   // Tab-switching data loader — inlined to satisfy React Compiler
   useEffect(() => {

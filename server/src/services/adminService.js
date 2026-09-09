@@ -15,6 +15,7 @@ const AuditLog = require('../models/AuditLog');
 const { calculateMatchRatingChanges } = require('./ratingService');
 const { calculateCategory } = require('./playerService');
 const { invalidateCache } = require('../middleware/responseCache');
+const { broadcast, CHANNELS, EVENTS } = require('./realtimeService');
 
 /**
  * Executes atomic rating updates and audit logging for an approved or direct match
@@ -199,6 +200,13 @@ const executeAtomicMatchApproval = async ({
     // Bust response cache so leaderboard/leaders reflect updated ratings immediately
     invalidateCache();
 
+    // Broadcast real-time update to all connected clients
+    broadcast(CHANNELS.GLOBAL, EVENTS.MATCH_APPROVED, {
+      matchId: match.matchId || match._id.toString(),
+      type: actionType,
+    });
+    broadcast(CHANNELS.GLOBAL, EVENTS.LEADERBOARD_UPDATED, {});
+
     return populatedMatch;
   } catch (error) {
     if (isOwnerSession && session.inTransaction()) {
@@ -330,6 +338,13 @@ const executeManualRatingAdjustment = async ({ adminUserId, playerId, newRating,
 
   // Bust response cache so leaderboard reflects updated ratings
   invalidateCache();
+
+  // Broadcast real-time rating update
+  broadcast(CHANNELS.GLOBAL, EVENTS.RATING_UPDATED, {
+    playerId: player.playerId,
+    newRating: ratingNum,
+  });
+  broadcast(CHANNELS.GLOBAL, EVENTS.LEADERBOARD_UPDATED, {});
 
   return { player, ratingHistory };
 };

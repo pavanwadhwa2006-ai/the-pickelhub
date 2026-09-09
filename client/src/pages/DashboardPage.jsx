@@ -6,10 +6,12 @@
  * and quick actions linking to match submission, leaderboard, and tournaments.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/useAuth';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import useLiveSync from '../hooks/useLiveSync';
+import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
 import PageTransition from '../components/PageTransition';
 import TiltCard from '../components/TiltCard';
 import AnimatedNumber from '../components/AnimatedNumber';
@@ -35,35 +37,37 @@ const DashboardPage = () => {
   const [loadingPending, setLoadingPending] = useState(true);
   const [ratingHistory, setRatingHistory] = useState([]);
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchDashboardData = async () => {
-      try {
-        const promises = [api.get('/matches/pending')];
-        if (player?.playerId) {
-          promises.push(api.get(`/players/${player.playerId}/rating-history`));
-        }
-
-        const [pendingRes, historyRes] = await Promise.allSettled(promises);
-        if (isMounted) {
-          if (pendingRes.status === 'fulfilled' && pendingRes.value.data.success) {
-            setPendingMatches(pendingRes.value.data.data || []);
-          }
-          if (historyRes && historyRes.status === 'fulfilled' && historyRes.value.data.success) {
-            setRatingHistory(historyRes.value.data.data.history || []);
-          }
-        }
-      } catch {
-        if (isMounted) setPendingMatches([]);
-      } finally {
-        if (isMounted) setLoadingPending(false);
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const promises = [api.get('/matches/pending')];
+      if (player?.playerId) {
+        promises.push(api.get(`/players/${player.playerId}/rating-history`));
       }
-    };
-    fetchDashboardData();
-    return () => {
-      isMounted = false;
-    };
+
+      const [pendingRes, historyRes] = await Promise.allSettled(promises);
+      if (pendingRes.status === 'fulfilled' && pendingRes.value.data.success) {
+        setPendingMatches(pendingRes.value.data.data || []);
+      }
+      if (historyRes && historyRes.status === 'fulfilled' && historyRes.value.data.success) {
+        setRatingHistory(historyRes.value.data.data.history || []);
+      }
+    } catch {
+      setPendingMatches([]);
+    } finally {
+      setLoadingPending(false);
+    }
   }, [player?.playerId]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  // Real-time sync: refresh dashboard when match is approved or rating changes
+  useLiveSync(
+    REALTIME_CHANNELS.GLOBAL,
+    [REALTIME_EVENTS.MATCH_APPROVED, REALTIME_EVENTS.RATING_UPDATED, REALTIME_EVENTS.LEADERBOARD_UPDATED],
+    fetchDashboardData
+  );
 
   const formattedDate = player?.createdAt || user?.createdAt
     ? new Date(player?.createdAt || user?.createdAt).toLocaleDateString('en-US', {

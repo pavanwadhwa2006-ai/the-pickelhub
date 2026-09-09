@@ -23,6 +23,8 @@ const profileRoutes = require('./routes/profileRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tournamentRoutes = require('./routes/tournamentRoutes');
 
+const { authenticateChannel } = require('./services/realtimeService');
+
 const app = express();
 
 // ---------------------
@@ -97,6 +99,19 @@ app.use('/api/matches', matchRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tournaments', tournamentRoutes);
+
+// Pusher private channel authentication (real-time WebSocket sync)
+app.post('/api/pusher/auth', (req, res) => {
+  const { socket_id, channel_name } = req.body;
+  if (!socket_id || !channel_name) {
+    return res.status(400).json({ error: 'Missing socket_id or channel_name' });
+  }
+  const authResponse = authenticateChannel(socket_id, channel_name);
+  if (!authResponse) {
+    return res.status(503).json({ error: 'Real-time service not configured' });
+  }
+  res.json(authResponse);
+});
 
 // ---------------------
 // Error Handling

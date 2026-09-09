@@ -13,6 +13,8 @@ import api from '../services/api';
 import PageTransition from '../components/PageTransition';
 import TierBadge from '../components/TierBadge';
 import BracketVisualizer from '../components/BracketVisualizer';
+import useLiveSync from '../hooks/useLiveSync';
+import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
 
 // Module-level in-memory cache for instant route navigation
 let clientTournamentsCache = null;
@@ -100,6 +102,19 @@ const TournamentsPage = () => {
       setLoadingDetails(false);
     }
   }, []);
+
+  // Real-time sync: when any tournament changes, update list and current bracket
+  useLiveSync(
+    REALTIME_CHANNELS.GLOBAL,
+    [REALTIME_EVENTS.TOURNAMENT_UPDATED],
+    useCallback(() => {
+      clientTournamentsCache = null;
+      refetchTournaments();
+      if (selectedTournament?._id) {
+        fetchTournamentDetails(selectedTournament._id);
+      }
+    }, [refetchTournaments, fetchTournamentDetails, selectedTournament?._id])
+  );
 
   // Check if current user is registered for a tournament
   const isUserRegistered = (tournament) => {

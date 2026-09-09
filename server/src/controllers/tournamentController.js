@@ -17,6 +17,7 @@ const {
   executeTournamentBonusPayout,
 } = require('../services/tournamentService');
 const { getOrCreatePlayerProfile } = require('../services/playerService');
+const { broadcast, CHANNELS, EVENTS } = require('../services/realtimeService');
 
 /**
  * @desc    Get all tournaments with optional filters
@@ -252,6 +253,8 @@ const registerForTournament = async (req, res, next) => {
       });
     }
 
+    broadcast(CHANNELS.GLOBAL, EVENTS.TOURNAMENT_UPDATED, { tournamentId: updatedTournament._id });
+
     res.status(200).json({
       success: true,
       message: 'Successfully registered for competition!',
@@ -329,6 +332,8 @@ const withdrawFromTournament = async (req, res, next) => {
       (p) => p.player.toString() !== player._id.toString()
     );
     await tournament.save();
+
+    broadcast(CHANNELS.GLOBAL, EVENTS.TOURNAMENT_UPDATED, { tournamentId: tournament._id });
 
     res.status(200).json({
       success: true,
@@ -410,6 +415,8 @@ const createTournament = async (req, res, next) => {
         maxParticipants: tournament.maxParticipants,
       },
     });
+
+    broadcast(CHANNELS.GLOBAL, EVENTS.TOURNAMENT_UPDATED, { tournamentId: tournament._id });
 
     res.status(201).json({
       success: true,
@@ -557,6 +564,8 @@ const generateBracket = async (req, res, next) => {
     tournament.status = 'IN_PROGRESS';
     await tournament.save();
 
+    broadcast(CHANNELS.GLOBAL, EVENTS.TOURNAMENT_UPDATED, { tournamentId: tournament._id });
+
     res.status(200).json({
       success: true,
       message: 'Tournament bracket successfully generated and competition is now IN_PROGRESS!',
@@ -603,6 +612,8 @@ const recordMatchScore = async (req, res, next) => {
     advanceBracketMatch(tournament, matchId, Number(score1), Number(score2));
     await tournament.save();
 
+    broadcast(CHANNELS.GLOBAL, EVENTS.TOURNAMENT_UPDATED, { tournamentId: tournament._id });
+
     res.status(200).json({
       success: true,
       message: 'Match score recorded and winner advanced successfully.',
@@ -623,6 +634,9 @@ const awardBonuses = async (req, res, next) => {
     const { id } = req.params;
 
     const result = await executeTournamentBonusPayout(id, req.user._id);
+
+    broadcast(CHANNELS.GLOBAL, EVENTS.TOURNAMENT_UPDATED, { tournamentId: id });
+    broadcast(CHANNELS.GLOBAL, EVENTS.LEADERBOARD_UPDATED, {});
 
     res.status(200).json({
       success: true,

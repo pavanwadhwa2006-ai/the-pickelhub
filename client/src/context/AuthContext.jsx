@@ -13,6 +13,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import api, { setAccessToken, clearAccessToken } from '../services/api';
 import AuthContext from './authContextDef';
+import useLiveSync from '../hooks/useLiveSync';
+import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -173,6 +175,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   const clearError = () => setError(null);
+
+  const userId = user?._id || user?.id;
+
+  // Real-time cross-device sync: user's personal profile updates
+  useLiveSync(
+    userId ? REALTIME_CHANNELS.userChannel(userId) : null,
+    REALTIME_EVENTS.PROFILE_UPDATED,
+    useCallback((data) => {
+      if (data?.player) {
+        setPlayer(data.player);
+        localStorage.setItem('picklehub_player', JSON.stringify(data.player));
+      } else {
+        refreshProfile();
+      }
+    }, [])
+  );
+
+  // Real-time cross-device sync: global match approvals or rating adjustments
+  useLiveSync(
+    REALTIME_CHANNELS.GLOBAL,
+    [REALTIME_EVENTS.MATCH_APPROVED, REALTIME_EVENTS.RATING_UPDATED],
+    useCallback(
+      (data) => {
+        if (!data?.playerId || data.playerId === player?.playerId) {
+          refreshProfile();
+        }
+      },
+      [player?.playerId]
+    )
+  );
 
   const isAdmin = user?.role === 'ADMIN';
   const isAdminMode = isAdmin && adminViewMode === 'ADMIN';
