@@ -130,83 +130,109 @@ const DashboardPage = () => {
         )}
 
         {/* Welcome & Player Identity Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[#3b3423] mb-12 animate-fade-in">
-          <div className="flex items-start gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex items-center justify-center bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-2xl sm:text-3xl shrink-0 shadow-lg border-2 border-[#3b3423]">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-8 border-b border-[#3b3423] mb-10 animate-fade-in">
+          {/* Left: Player Identity */}
+          <div className="flex items-center gap-5">
+            <Link
+              to={player?.playerId ? `/players/${player.playerId}` : '#'}
+              title="View Public Profile"
+              className="group relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex items-center justify-center bg-[#ff3b3f] text-white font-['Playfair_Display'] font-bold text-2xl sm:text-3xl shrink-0 shadow-lg border-2 border-[#3b3423] hover:border-[#ff3b3f] transition-all"
+            >
               {player?.profilePhoto ? (
                 <img
                   src={player.profilePhoto}
                   alt={player.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (
                 (player?.name ? player.name.slice(0, 2) : 'P').toUpperCase()
               )}
-            </div>
+            </Link>
 
             <div>
-              <div className="flex flex-wrap items-center gap-3 mb-2">
+              {/* Eyebrow Status Badges */}
+              <div className="flex flex-wrap items-center gap-2.5 mb-2">
                 <span className="text-[10px] font-bold tracking-[0.25em] text-[#ff3b3f] uppercase">
                   ATHLETE DASHBOARD
                 </span>
-                <span className="px-2 py-0.5 bg-[#251f10] border border-[#3b3423] text-[#ffb3ad] text-[10px] font-bold tracking-wider uppercase font-mono">
-                  {player?.playerId || 'GENERATING ID...'}
-                </span>
-                <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#1a1508] border border-[#3b3423] text-[#4ade80] text-[10px] font-bold tracking-wider uppercase">
+                {player?.playerId && (
+                  <button
+                    type="button"
+                    onClick={handleCopyId}
+                    title="Click to copy Player ID"
+                    className={`px-2.5 py-0.5 border text-[11px] font-bold font-mono tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1.5 rounded ${
+                      copied
+                        ? 'bg-[#4ade80]/20 border-[#4ade80] text-[#4ade80] shadow-[0_0_10px_rgba(74,222,128,0.2)]'
+                        : 'bg-[#251f10] hover:bg-[#352c16] hover:border-[#ff3b3f]/60 border-[#3b3423] text-[#ffb3ad]'
+                    }`}
+                  >
+                    <span>{copied ? '✓ COPIED' : player.playerId}</span>
+                    <span className="text-[10px] opacity-70">{copied ? '' : '📋'}</span>
+                  </button>
+                )}
+                <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#1a1508] border border-[#3b3423] text-[#4ade80] text-[10px] font-bold tracking-wider uppercase rounded">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-live-pulse" />
                   {player?.accountStatus || 'ACTIVE'}
                 </span>
               </div>
 
-              <div className="flex items-baseline gap-4 mt-2">
-                <h1 className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[#ede1c9]">
+              {/* Player Name (Clickable to view public profile) + Minimal Edit Button */}
+              <div className="flex items-center gap-3">
+                <Link
+                  to={player?.playerId ? `/players/${player.playerId}` : '#'}
+                  title="View Public Profile"
+                  className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#ede1c9] hover:text-[#ff3b3f] transition-colors"
+                >
                   {player?.name || user?.email?.split('@')[0]}
-                </h1>
+                </Link>
                 <button
                   type="button"
                   onClick={() => {
                     setNameInput(player?.name || '');
                     setEditingName(!editingName);
                   }}
-                  className="text-[11px] font-bold tracking-wider text-[#ad8885] hover:text-[#ff3b3f] uppercase underline cursor-pointer transition-colors"
+                  title="Edit display name"
+                  className="px-2.5 py-1 text-[10px] font-bold tracking-wider text-[#ad8885] hover:text-[#ff3b3f] bg-[#251f10] hover:bg-[#352c16] border border-[#3b3423] hover:border-[#ff3b3f]/50 uppercase rounded cursor-pointer transition-all flex items-center gap-1"
                 >
-                  {editingName ? 'CANCEL' : 'EDIT NAME'}
+                  <span>✎</span>
+                  <span>{editingName ? 'Cancel' : 'Edit'}</span>
                 </button>
               </div>
 
-            {editingName && (
-              <form onSubmit={handleUpdateName} className="mt-4 flex items-center gap-3 animate-fade-in">
-                <input
-                  type="text"
-                  required
-                  value={nameInput}
-                  onChange={(e) => setNameInput(e.target.value)}
-                  placeholder="Enter new display name"
-                  className="px-3 py-1.5 bg-[#251f10] border border-[#ff3b3f] text-[#ede1c9] text-xs focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-4 py-1.5 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold uppercase disabled:opacity-50 transition-colors cursor-pointer"
-                >
-                  {saving ? 'SAVING...' : 'SAVE'}
-                </button>
-              </form>
-            )}
+              {editingName && (
+                <form onSubmit={handleUpdateName} className="mt-3 flex items-center gap-3 animate-fade-in">
+                  <input
+                    type="text"
+                    required
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    placeholder="Enter new display name"
+                    className="px-3 py-1.5 bg-[#251f10] border border-[#ff3b3f] text-[#ede1c9] text-xs focus:outline-none rounded"
+                  />
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-4 py-1.5 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold uppercase disabled:opacity-50 transition-colors cursor-pointer rounded"
+                  >
+                    {saving ? 'SAVING...' : 'SAVE'}
+                  </button>
+                </form>
+              )}
 
-            <div className="flex items-center gap-4 text-xs text-[#9a8e7a] mt-2">
-              <span>{user?.email}</span>
-              <span>•</span>
-              <span>Member since {formattedDate}</span>
+              <div className="flex items-center gap-3 text-xs text-[#9a8e7a] mt-2">
+                <span>{user?.email}</span>
+                <span>•</span>
+                <span>Member since {formattedDate}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Right: Clean Action Buttons (Only Primary Submit + Digital Pass) */}
+          <div className="flex items-center gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setShowClubPass(true)}
-              className="px-4 py-2.5 bg-[var(--color-bg-card,#251f10)] hover:bg-[var(--color-bg-card-hover,#352c16)] border border-[var(--color-accent-primary,#ff3b3f)]/60 text-[var(--color-text-primary,#ede1c9)] text-xs font-bold tracking-[0.15em] uppercase transition-all rounded-xl flex items-center gap-2 cursor-pointer shadow-sm"
+              className="px-4 py-2.5 bg-[var(--color-bg-card,#251f10)] hover:bg-[var(--color-bg-card-hover,#352c16)] border border-[var(--color-accent-primary,#ff3b3f)]/50 hover:border-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] text-xs font-bold tracking-[0.12em] uppercase transition-all rounded-xl flex items-center gap-2 cursor-pointer shadow-sm"
               title="Open Digital Club Pass with QR Code"
             >
               <span>🪪</span>
@@ -214,39 +240,11 @@ const DashboardPage = () => {
             </button>
             <Link
               to="/matches/submit"
-              className="px-5 py-2.5 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] rounded-xl"
+              className="px-5 py-2.5 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] rounded-xl flex items-center gap-1.5"
             >
-              + SUBMIT MATCH SCORES
+              <span className="text-sm leading-none">+</span>
+              <span>Submit Match Scores</span>
             </Link>
-            {player?.playerId && (
-              <button
-                type="button"
-                onClick={handleCopyId}
-                className={`px-4 py-2 border text-xs font-bold font-mono uppercase transition-all duration-200 cursor-pointer ${
-                  copied
-                    ? 'bg-[#4ade80]/20 border-[#4ade80] text-[#4ade80] shadow-[0_0_12px_rgba(74,222,128,0.3)]'
-                    : 'bg-[#251f10] hover:bg-[#3b3423] border-[#3b3423] text-[#ffb3ad]'
-                }`}
-              >
-                {copied ? '✓ COPIED ID' : `SHARE ID: ${player.playerId}`}
-              </button>
-            )}
-            {player?.playerId && (
-              <Link
-                to={`/players/${player.playerId}`}
-                className="px-4 py-2 bg-[#201b0c] hover:bg-[#3f3927] border border-[#5d3f3d] hover:border-[#ad8885] text-xs font-bold tracking-wider text-[#ede1c9] hover:text-white uppercase transition-all"
-              >
-                PUBLIC PROFILE →
-              </Link>
-            )}
-            {isAdminMode && (
-              <Link
-                to="/admin"
-                className="px-4 py-2 bg-[#201b0c] hover:bg-[#3f3927] border border-[#ff3b3f] text-[#ffb3ad] text-xs font-bold tracking-[0.15em] uppercase transition-all"
-              >
-                ADMIN QUEUE →
-              </Link>
-            )}
           </div>
         </div>
 
