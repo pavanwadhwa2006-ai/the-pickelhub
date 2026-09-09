@@ -193,9 +193,16 @@ const ProfileSettingsMenu = () => {
         </span>
       </button>
 
-      {/* Dropdown Menu Modal */}
+      {/* Dropdown Menu Modal (Smooth Bottom Sheet on Mobile, Popover on Desktop) */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 max-h-[calc(100vh-100px)] overflow-y-auto bg-[var(--color-bg-card)] border-2 border-[var(--color-border-subtle)] text-[var(--color-text-primary)] shadow-2xl p-6 z-50 animate-fade-in divide-y divide-[var(--color-border-subtle)] rounded-2xl">
+        <>
+          {/* Mobile Backdrop overlay */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 sm:hidden animate-fade-in"
+            onClick={() => setIsOpen(false)}
+          />
+
+          <div className="fixed inset-x-2 bottom-2 top-auto sm:inset-auto sm:absolute sm:right-0 sm:mt-3 sm:w-80 max-h-[85vh] sm:max-h-[calc(100vh-100px)] overflow-y-auto bg-[var(--color-bg-card)] border-2 border-[var(--color-border-subtle)] text-[var(--color-text-primary)] shadow-2xl p-5 sm:p-6 z-50 animate-fade-in divide-y divide-[var(--color-border-subtle)] rounded-3xl sm:rounded-2xl">
           {/* Header Action Bar with Quick Logout */}
           <div className="flex items-center justify-between pb-3 mb-2">
             <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted)] uppercase">
@@ -498,7 +505,8 @@ const ProfileSettingsMenu = () => {
             </button>
           </div>
         </div>
-      )}
+      </>
+    )}
     </div>
   );
 };

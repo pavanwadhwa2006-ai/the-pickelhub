@@ -17,13 +17,8 @@ const { broadcast, CHANNELS, EVENTS } = require('../services/realtimeService');
 // Club Court Definitions
 const COURTS = ['Court 1', 'Court 2'];
 
-// Club Operating Hours: 6:00 AM to 11:00 PM (1-hour slots)
+// Club Operating Hours: 11:00 AM to 11:00 PM (1-hour slots)
 const OPERATING_SLOTS = [
-  { slot: '06:00', timeLabel: '6:00 AM - 7:00 AM' },
-  { slot: '07:00', timeLabel: '7:00 AM - 8:00 AM' },
-  { slot: '08:00', timeLabel: '8:00 AM - 9:00 AM' },
-  { slot: '09:00', timeLabel: '9:00 AM - 10:00 AM' },
-  { slot: '10:00', timeLabel: '10:00 AM - 11:00 AM' },
   { slot: '11:00', timeLabel: '11:00 AM - 12:00 PM' },
   { slot: '12:00', timeLabel: '12:00 PM - 1:00 PM' },
   { slot: '13:00', timeLabel: '1:00 PM - 2:00 PM' },

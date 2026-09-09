@@ -514,33 +514,50 @@ const TournamentsPage = () => {
               )}
             </div>
 
-            {/* Participants Grid */}
+            {/* Participants Roster: Mobile-Optimized Horizontal Strip & Desktop Grid */}
             <div>
-              <h3 className="text-xs font-bold tracking-wider text-[var(--color-text-muted)] uppercase mb-4">
-                Registered Competitors ({selectedTournament.participants?.length || 0} / {selectedTournament.maxParticipants})
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold tracking-wider text-[var(--color-text-muted)] uppercase">
+                  Registered Competitors ({selectedTournament.participants?.length || 0} / {selectedTournament.maxParticipants})
+                </h3>
+                <span className="text-[11px] font-mono text-[var(--color-accent-primary)] sm:hidden">
+                  Swipe →
+                </span>
+              </div>
               {selectedTournament.participants?.length === 0 ? (
                 <p className="text-xs text-[var(--color-text-muted)]">No players registered yet. Be the first to apply!</p>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {selectedTournament.participants.map((p, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl flex items-center justify-between"
-                    >
-                      <div className="overflow-hidden">
-                        <span className="text-xs font-bold text-[var(--color-text-primary)] block truncate">
-                          {p.player?.name || 'Player'}
-                        </span>
-                        <span className="text-[10px] text-[var(--color-text-muted)] font-mono">
-                          {p.seedRating || p.player?.currentRating} Elo
+                <div className="flex sm:grid overflow-x-auto pb-2 sm:pb-0 scrollbar-none sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  {selectedTournament.participants.map((p, idx) => {
+                    const playerName = p.player?.name || 'Player';
+                    const initial = playerName[0]?.toUpperCase() || 'P';
+                    const rating = p.seedRating || p.player?.currentRating || 1000;
+                    const seedNumber = p.seed ? `#${p.seed}` : `#${idx + 1}`;
+
+                    return (
+                      <div
+                        key={idx}
+                        className="min-w-[155px] sm:min-w-0 shrink-0 sm:shrink p-2.5 sm:p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl flex items-center justify-between gap-2 shadow-sm hover:border-[var(--color-accent-primary)]/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <div className="w-6 h-6 rounded-full bg-[var(--color-accent-primary)]/15 text-[var(--color-accent-primary)] font-bold text-[10px] flex items-center justify-center shrink-0">
+                            {initial}
+                          </div>
+                          <div className="overflow-hidden">
+                            <span className="text-xs font-bold text-[var(--color-text-primary)] block truncate">
+                              {playerName}
+                            </span>
+                            <span className="text-[10px] text-[var(--color-text-muted)] font-mono block">
+                              {rating} Elo
+                            </span>
+                          </div>
+                        </div>
+                        <span className="px-1.5 py-0.5 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded text-[10px] font-mono font-bold text-[var(--color-accent-primary)] shrink-0">
+                          {seedNumber}
                         </span>
                       </div>
-                      <span className="px-1.5 py-0.5 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded text-[10px] font-mono font-bold text-[var(--color-accent-primary)]">
-                        {p.seed ? `#${p.seed}` : `#${idx + 1}`}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

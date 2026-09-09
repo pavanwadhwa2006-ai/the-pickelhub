@@ -10,6 +10,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import QRCode from 'qrcode';
 import TierBadge from './TierBadge';
@@ -46,13 +47,15 @@ const DigitalClubPassModal = ({ isOpen, onClose, player }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="fixed inset-0" onClick={onClose} />
       <motion.div
         initial={{ scale: 0.92, opacity: 0, y: 10 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.92, opacity: 0, y: 10 }}
-        className="w-full max-w-sm bg-[var(--color-bg-card,#1a1508)] border-2 border-[var(--color-accent-primary,#ff3b3f)] rounded-3xl p-6 shadow-2xl relative overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+        className="relative z-10 w-full max-w-sm bg-[var(--color-bg-card,#1a1508)] border-2 border-[var(--color-accent-primary,#ff3b3f)] rounded-3xl p-6 shadow-2xl overflow-hidden"
       >
         {/* Top Accent Gradient Bar */}
         <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-[var(--color-accent-primary,#ff3b3f)] via-amber-500 to-emerald-500" />
@@ -139,7 +142,8 @@ const DigitalClubPassModal = ({ isOpen, onClose, player }) => {
           </button>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
