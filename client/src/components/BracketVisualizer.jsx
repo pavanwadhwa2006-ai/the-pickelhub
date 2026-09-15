@@ -7,14 +7,33 @@
  */
 
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const BracketVisualizer = ({
   tournament,
   onScoreMatch = null, // Callback for admin score entry: (match) => void
   isAdmin = false,
 }) => {
-  if (!tournament || !tournament.bracket || tournament.bracket.length === 0) {
+  const hasBracket = Boolean(tournament?.bracket && tournament.bracket.length > 0);
+
+  const maxRound = useMemo(() => {
+    if (!hasBracket) return 1;
+    return Math.max(...tournament.bracket.map((m) => m.round));
+  }, [hasBracket, tournament?.bracket]);
+
+  // Find active round default (earliest READY match, or final if completed)
+  const defaultRound = useMemo(() => {
+    if (!hasBracket) return 1;
+    const readyMatch = tournament.bracket.find((m) => m.status === 'READY');
+    if (readyMatch) return readyMatch.round;
+    if (tournament?.status === 'COMPLETED') return maxRound;
+    return 1;
+  }, [hasBracket, tournament?.bracket, tournament?.status, maxRound]);
+
+  const [activeMobileRound, setActiveMobileRound] = useState(defaultRound);
+  const [mobileViewMode, setMobileViewMode] = useState('CARDS'); // 'CARDS' | 'TREE'
+
+  if (!hasBracket) {
     return (
       <div className="p-12 text-center bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-2xl">
         <div className="w-16 h-16 rounded-full bg-[var(--color-accent-primary)]/10 text-[var(--color-accent-primary)] flex items-center justify-center text-2xl mx-auto mb-4 font-mono font-bold">
@@ -24,7 +43,7 @@ const BracketVisualizer = ({
           Bracket Generating Soon
         </h3>
         <p className="text-xs text-[var(--color-text-muted)] max-w-md mx-auto leading-relaxed">
-          {tournament.status === 'REGISTRATION_OPEN'
+          {tournament?.status === 'REGISTRATION_OPEN'
             ? 'Registration is currently open. The bracket will be generated and seeded automatically once registration closes.'
             : 'Tournament bracket has not yet been initialized.'}
         </p>
@@ -33,24 +52,12 @@ const BracketVisualizer = ({
   }
 
   // Group bracket matches by round
-  const maxRound = Math.max(...tournament.bracket.map((m) => m.round));
   const roundsMap = {};
   for (let r = 1; r <= maxRound; r++) {
     roundsMap[r] = tournament.bracket
       .filter((m) => m.round === r)
       .sort((a, b) => a.matchIndex - b.matchIndex);
   }
-
-  // Find active round default (earliest READY match, or final if completed)
-  const defaultRound = useMemo(() => {
-    const readyMatch = tournament.bracket.find((m) => m.status === 'READY');
-    if (readyMatch) return readyMatch.round;
-    if (tournament.status === 'COMPLETED') return maxRound;
-    return 1;
-  }, [tournament.bracket, tournament.status, maxRound]);
-
-  const [activeMobileRound, setActiveMobileRound] = useState(defaultRound);
-  const [mobileViewMode, setMobileViewMode] = useState('CARDS'); // 'CARDS' | 'TREE'
 
   const getRoundTitle = (roundNum, totalRounds) => {
     if (roundNum === totalRounds) return 'Championship Final';

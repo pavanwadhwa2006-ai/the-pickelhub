@@ -44,11 +44,18 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. same-origin, mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
+
+      const isLocalLan =
+        NODE_ENV !== 'production' &&
+        /^(https?:\/\/)?(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|localhost|127\.0\.0\.1)/.test(
+          origin.replace(/^https?:\/\//, '')
+        );
       if (
         origin === CLIENT_URL ||
         origin.endsWith('.vercel.app') ||
         origin.includes('localhost') ||
-        origin.includes('127.0.0.1')
+        origin.includes('127.0.0.1') ||
+        isLocalLan
       ) {
         return callback(null, true);
       }

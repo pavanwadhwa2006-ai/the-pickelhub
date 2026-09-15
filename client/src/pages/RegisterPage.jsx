@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import PageTransition from '../components/PageTransition';
 import MagneticButton from '../components/MagneticButton';
@@ -24,6 +24,11 @@ const RegisterPage = () => {
 
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from
+    ? `${location.state.from.pathname || '/dashboard'}${location.state.from.search || ''}`
+    : '/dashboard';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,7 +54,7 @@ const RegisterPage = () => {
     setSubmitting(false);
 
     if (result.success) {
-      navigate('/dashboard', { replace: true });
+      navigate(from, { replace: true });
     } else {
       setLocalError(result.message);
     }

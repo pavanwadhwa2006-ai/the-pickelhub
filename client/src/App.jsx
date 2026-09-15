@@ -11,9 +11,11 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollProgressBar from './components/ScrollProgressBar';
+import ToastContainer from './components/ToastContainer';
 import PageLoadingSkeleton from './components/PageLoadingSkeleton';
 
 // Route-level code splitting — each page loads as a separate chunk on demand
@@ -41,11 +43,13 @@ function App() {
 
   return (
     <AuthProvider>
-      <Router>
-        <ScrollProgressBar />
-        <div className="min-h-screen flex flex-col bg-[var(--color-bg-base)] text-[var(--color-text-primary)] transition-colors duration-200">
-          <Navbar />
-          <main className="flex-1">
+      <NotificationProvider>
+        <Router>
+          <ScrollProgressBar />
+          <ToastContainer />
+          <div className="min-h-screen flex flex-col bg-[var(--color-bg-base)] text-[var(--color-text-primary)] transition-colors duration-200">
+            <Navbar />
+            <main className="flex-1">
             <Suspense fallback={<PageLoadingSkeleton />}>
               <Routes>
                 {/* Public Routes */}
@@ -108,7 +112,8 @@ function App() {
           </main>
         </div>
       </Router>
-    </AuthProvider>
+    </NotificationProvider>
+  </AuthProvider>
   );
 }
 

@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import ProfileSettingsMenu from './ProfileSettingsMenu';
+import NotificationBell from './NotificationBell';
 import api from '../services/api';
 import useLiveSync from '../hooks/useLiveSync';
 import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
@@ -28,7 +29,7 @@ const prefetchRoute = (path) => {
 };
 
 const Navbar = () => {
-  const { isAuthenticated, isAdminMode } = useAuth();
+  const { isAuthenticated, isAdminMode, user, player, logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
@@ -166,12 +167,13 @@ const Navbar = () => {
           })}
         </nav>
 
-        {/* Desktop User Actions */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* User Actions & Mobile Controls */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          {isAuthenticated && <NotificationBell />}
           {isAuthenticated ? (
             <ProfileSettingsMenu />
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
               <Link
                 to="/login"
                 onMouseEnter={() => prefetchRoute('/login')}
@@ -197,39 +199,39 @@ const Navbar = () => {
               </Link>
             </div>
           )}
-        </div>
 
-        {/* Mobile Menu Toggle Button */}
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 focus:outline-none transition-colors"
-          style={{ color: 'var(--nav-text)' }}
-          aria-label="Toggle menu"
-        >
-          <svg
-            className="w-6 h-6 transition-transform duration-200"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          {/* Mobile Menu Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 focus:outline-none transition-colors ml-1"
+            style={{ color: 'var(--nav-text)' }}
+            aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? (
-              <path
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
-        </button>
+            <svg
+              className="w-6 h-6 transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              {mobileMenuOpen ? (
+                <path
+                  strokeLinecap="square"
+                  strokeLinejoin="miter"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="square"
+                  strokeLinejoin="miter"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Mobile Drawer Menu with smooth animation */}
@@ -239,6 +241,67 @@ const Navbar = () => {
           style={{ backgroundColor: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}
         >
           <div className="flex flex-col gap-4">
+            {/* Authenticated Athlete Quick Profile Banner */}
+            {isAuthenticated && (
+              <div
+                className="p-3.5 mb-1 rounded-2xl flex items-center justify-between border shadow-sm"
+                style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                  borderColor: 'var(--nav-border)',
+                }}
+              >
+                <Link
+                  to={player?.playerId ? `/players/${player.playerId}` : '/dashboard'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 min-w-0 group"
+                >
+                  <div
+                    className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center font-bold text-xs font-mono shrink-0 shadow-md border"
+                    style={{
+                      backgroundColor: 'var(--nav-accent)',
+                      color: 'var(--nav-logo-text)',
+                      borderColor: 'var(--nav-accent)',
+                    }}
+                  >
+                    {player?.profilePhoto ? (
+                      <img
+                        src={player.profilePhoto}
+                        alt={player?.name || 'Athlete'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      player?.name
+                        ? player.name.slice(0, 2).toUpperCase()
+                        : user?.email?.slice(0, 2).toUpperCase() || 'P'
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div
+                      className="text-sm font-bold truncate group-hover:text-[var(--nav-accent)] transition-colors"
+                      style={{ color: 'var(--nav-text)' }}
+                    >
+                      {player?.name || user?.email?.split('@')[0]}
+                    </div>
+                    <div className="text-[11px] font-mono opacity-80" style={{ color: 'var(--nav-accent)' }}>
+                      {player?.playerId ? `${player.playerId} • ${player.currentRating || 1000} Elo` : user?.email}
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  to={player?.playerId ? `/players/${player.playerId}` : '/dashboard'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg shrink-0 transition-transform active:scale-95 shadow-sm"
+                  style={{
+                    backgroundColor: 'var(--nav-accent)',
+                    color: 'var(--nav-logo-text)',
+                  }}
+                >
+                  VIEW PROFILE
+                </Link>
+              </div>
+            )}
+
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -260,6 +323,25 @@ const Navbar = () => {
                 )}
               </Link>
             ))}
+
+            {/* Quick Logout button for mobile drawer */}
+            {isAuthenticated && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full py-2.5 px-3 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-900/40 text-rose-300 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl transition-colors cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>LOGOUT</span>
+                </button>
+              </div>
+            )}
 
             {!isAuthenticated && (
               <div className="pt-4 flex flex-col gap-3">

@@ -8,6 +8,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { useTheme } from '../context/useTheme';
@@ -29,12 +30,29 @@ const ProfileSettingsMenu = () => {
   const [qrCopied, setQrCopied] = useState(false);
 
   const menuRef = useRef(null);
+  const modalRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target) &&
+        (!modalRef.current || !modalRef.current.contains(e.target))
+      ) {
         setIsOpen(false);
       }
     };
@@ -194,36 +212,54 @@ const ProfileSettingsMenu = () => {
       </button>
 
       {/* Dropdown Menu Modal (Smooth Bottom Sheet on Mobile, Popover on Desktop) */}
-      {isOpen && (
-        <>
-          {/* Mobile Backdrop overlay */}
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 sm:hidden animate-fade-in"
-            onClick={() => setIsOpen(false)}
-          />
+      {isOpen && (() => {
+        const modalContent = (
+          <>
+            {/* Mobile Backdrop overlay */}
+            <div
+              className="fixed inset-0 bg-black/70 backdrop-blur-xs z-[998] sm:hidden animate-fade-in"
+              onClick={() => setIsOpen(false)}
+            />
 
-          <div className="fixed inset-x-2 bottom-2 top-auto sm:inset-auto sm:absolute sm:right-0 sm:mt-3 sm:w-80 max-h-[85vh] sm:max-h-[calc(100vh-100px)] overflow-y-auto bg-[var(--color-bg-card)] border-2 border-[var(--color-border-subtle)] text-[var(--color-text-primary)] shadow-2xl p-5 sm:p-6 z-50 animate-fade-in divide-y divide-[var(--color-border-subtle)] rounded-3xl sm:rounded-2xl">
-          {/* Header Action Bar with Quick Logout */}
-          <div className="flex items-center justify-between pb-3 mb-2">
-            <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted)] uppercase">
-              ACCOUNT & SETTINGS
-            </span>
-            <button
-              type="button"
-              id="top-quick-logout-btn"
-              onClick={handleLogout}
-              className="text-[11px] font-bold tracking-wider uppercase text-rose-400 hover:text-rose-200 flex items-center gap-1.5 cursor-pointer transition-colors px-2 py-1 rounded-md bg-rose-950/20 hover:bg-rose-900/30 border border-rose-900/40"
-              title="Log out of your account"
+            <div
+              ref={modalRef}
+              className="fixed inset-x-2 bottom-2 top-auto sm:inset-auto sm:absolute sm:right-0 sm:mt-3 sm:w-80 max-h-[85vh] sm:max-h-[calc(100vh-100px)] overflow-y-auto bg-[var(--color-bg-card)] border-2 border-[var(--color-border-subtle)] text-[var(--color-text-primary)] shadow-2xl p-5 sm:p-6 z-[999] animate-fade-in divide-y divide-[var(--color-border-subtle)] rounded-3xl sm:rounded-2xl"
             >
-              <span>LOGOUT</span>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
-          </div>
+              {/* Header Action Bar with Quick Logout & Mobile Close */}
+              <div className="flex items-center justify-between pb-3 mb-2">
+                <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted)] uppercase">
+                  ACCOUNT & SETTINGS
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    id="top-quick-logout-btn"
+                    onClick={handleLogout}
+                    className="text-[11px] font-bold tracking-wider uppercase text-rose-400 hover:text-rose-200 flex items-center gap-1.5 cursor-pointer transition-colors px-2 py-1 rounded-md bg-rose-950/20 hover:bg-rose-900/30 border border-rose-900/40"
+                    title="Log out of your account"
+                  >
+                    <span>LOGOUT</span>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </button>
+                  {isMobile && (
+                    <button
+                      type="button"
+                      onClick={() => setIsOpen(false)}
+                      className="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] rounded-md hover:bg-black/20 transition-colors"
+                      aria-label="Close menu"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
 
-          {/* Header Profile Section with Avatar & Upload */}
-          <div className="pt-4 pb-5 flex flex-col items-center text-center">
+              {/* Header Profile Section with Avatar & Upload */}
+              <div className="pt-4 pb-5 flex flex-col items-center text-center">
             {/* Avatar Circle with Camera Overlay */}
             <div className="relative mb-3 group">
               <div
@@ -399,10 +435,10 @@ const ProfileSettingsMenu = () => {
                 </button>
 
                 <Link
-                  to={player?.playerId ? `/matches/submit?opponent=${player.playerId}` : '/matches/submit'}
+                  to="/matches/submit"
                   onClick={() => setIsOpen(false)}
                   className="py-1.5 px-2.5 text-[10px] font-bold rounded-lg uppercase tracking-wider bg-[var(--color-accent-primary)] hover:brightness-110 text-white transition-all text-center shrink-0 shadow-sm"
-                  title="Test or Submit Match"
+                  title="Submit a Match Result"
                 >
                   START MATCH ↗
                 </Link>
@@ -506,7 +542,12 @@ const ProfileSettingsMenu = () => {
           </div>
         </div>
       </>
-    )}
+        );
+
+        return isMobile && typeof document !== 'undefined'
+          ? createPortal(modalContent, document.body)
+          : modalContent;
+      })()}
     </div>
   );
 };

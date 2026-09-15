@@ -22,7 +22,9 @@ const GoogleAuthButton = ({ text = 'signin_with', onSuccessCustom, onErrorCustom
     '667753727792-uusm1s2podnhrh63s2i7jnduu6auc8s0.apps.googleusercontent.com';
   const isConfigured = Boolean(clientId && !clientId.includes('dummy') && !clientId.includes('placeholder'));
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = location.state?.from
+    ? `${location.state.from.pathname || '/dashboard'}${location.state.from.search || ''}`
+    : '/dashboard';
 
   const handleGoogleSuccess = async (credentialResponse) => {
     if (!credentialResponse?.credential) {

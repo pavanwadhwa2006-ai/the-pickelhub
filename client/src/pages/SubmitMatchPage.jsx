@@ -74,22 +74,34 @@ const SubmitMatchPage = () => {
   const opponentParam = searchParams.get('opponent');
   useEffect(() => {
     if (opponentParam) {
+      const cleanOpponentId = opponentParam.trim().toUpperCase();
+
+      // Guard: Check if the logged-in athlete scanned their own QR code
+      if (player?.playerId && cleanOpponentId === player.playerId.toUpperCase()) {
+        setErrorMessage(
+          `⚠️ You opened your own QR code (${player.name}). To start a match, have your opponent scan your QR code with their phone camera, or select an opponent below.`
+        );
+        return;
+      }
+
       const loadChallengedOpponent = async () => {
         try {
-          const res = await api.get(`/players/${opponentParam.trim().toUpperCase()}`);
+          const res = await api.get(`/players/${cleanOpponentId}`);
           if (res.data.success && res.data.data) {
             setTeamB1(res.data.data);
             setSuccessMessage(
-              `🎾 QR Challenge Accepted! You are playing against ${res.data.data.name} (${res.data.data.playerId}).`
+              `🎾 QR Challenge Accepted! You are playing against ${res.data.data.name} (${res.data.data.playerId}). Enter the scores and submit!`
             );
+          } else {
+            setErrorMessage(`Could not find athlete with ID "${cleanOpponentId}". Please verify the QR code.`);
           }
         } catch {
-          // Player not found by that ID
+          setErrorMessage(`Could not find athlete with ID "${cleanOpponentId}". Please verify the QR code.`);
         }
       };
       loadChallengedOpponent();
     }
-  }, [opponentParam]);
+  }, [opponentParam, player?.playerId, player?.name]);
 
   // Swap Teams action (Team A <-> Team B)
   const handleSwapTeams = () => {
