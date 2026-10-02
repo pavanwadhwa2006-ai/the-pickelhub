@@ -231,7 +231,7 @@ const executeAtomicMatchApproval = async ({
  */
 const executeBatchMatchApproval = async ({ adminUserId, matchIds = null }) => {
   let targets = [];
-  if (Array.isArray(matchIds) && matchIds.length > 0) {
+  if (Array.isArray(matchIds)) {
     targets = matchIds;
   } else {
     const pending = await Match.find({ status: 'PENDING_APPROVAL' }).select('_id matchId');

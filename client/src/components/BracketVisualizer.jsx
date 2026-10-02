@@ -66,14 +66,43 @@ const BracketVisualizer = ({
     return `Round ${roundNum}`;
   };
 
+  // Build a lookup map from participants array: ObjectId string -> player object
+  const participantMap = useMemo(() => {
+    const map = new Map();
+    if (tournament?.participants) {
+      for (const entry of tournament.participants) {
+        const p = entry.player;
+        if (p) {
+          const id = typeof p === 'object' ? (p._id || p.id) : p;
+          if (id) map.set(id.toString(), typeof p === 'object' ? p : { _id: id });
+        }
+        if (entry.partner) {
+          const pt = entry.partner;
+          const ptId = typeof pt === 'object' ? (pt._id || pt.id) : pt;
+          if (ptId) map.set(ptId.toString(), typeof pt === 'object' ? pt : { _id: ptId });
+        }
+      }
+    }
+    return map;
+  }, [tournament?.participants]);
+
+  const resolvePlayer = (p) => {
+    if (!p) return null;
+    if (typeof p === 'object') return p;
+    // p is a string ObjectId — look it up in the participant map
+    return participantMap.get(p.toString()) || null;
+  };
+
   const getPlayerName = (p) => {
-    if (!p) return 'TBD';
-    return typeof p === 'object' ? p.name || p.playerId : 'Player';
+    const resolved = resolvePlayer(p);
+    if (!resolved) return 'TBD';
+    return resolved.name || resolved.playerId || 'Player';
   };
 
   const getPlayerRating = (p) => {
-    if (!p || typeof p !== 'object') return null;
-    return p.currentRating || null;
+    const resolved = resolvePlayer(p);
+    if (!resolved) return null;
+    return resolved.currentRating || null;
   };
 
   const renderMatchCard = (m) => {

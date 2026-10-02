@@ -25,7 +25,7 @@ import RatingHistoryChart from '../components/RatingHistoryChart';
 import CourtBookingModal from '../components/CourtBookingModal';
 
 const DashboardPage = () => {
-  const { user, player, isAdminMode, refreshProfile } = useAuth();
+  const { user, player } = useAuth();
   const [copied, setCopied] = useState(false);
   const [updateMsg, setUpdateMsg] = useState(null);
   const [showClubPass, setShowClubPass] = useState(false);
