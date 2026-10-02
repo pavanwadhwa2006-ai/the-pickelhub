@@ -200,9 +200,9 @@ const LeaderboardPage = () => {
             <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase block mb-4">
               SPECIALTY DIVISION LEADERS
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+            <div className="flex overflow-x-auto pb-4 gap-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 sm:gap-6 sm:overflow-visible">
               {/* 1. Highest Rated */}
-              <TiltCard className="specialty-card-highest p-6 bg-[#251f10] border-2 border-[#ff3b3f]/70 shadow-[0_0_20px_rgba(255,59,63,0.15)] hover-lift">
+              <TiltCard className="specialty-card-highest w-[82vw] sm:w-auto shrink-0 snap-start p-6 bg-[#251f10] border-2 border-[#ff3b3f]/70 shadow-[0_0_20px_rgba(255,59,63,0.15)] hover-lift">
                 <div className="flex justify-between items-start mb-2">
                   <span className="card-title text-[10px] font-bold tracking-widest text-[#ffb3ad] uppercase">
                     👑 HIGHEST RATED
@@ -227,7 +227,7 @@ const LeaderboardPage = () => {
               </TiltCard>
 
               {/* 2. Most Wins */}
-              <TiltCard className="specialty-card-wins p-6 bg-[#201b0c] border border-[#5d3f3d] hover:border-[#ad8885] hover-lift">
+              <TiltCard className="specialty-card-wins w-[82vw] sm:w-auto shrink-0 snap-start p-6 bg-[#201b0c] border border-[#5d3f3d] hover:border-[#ad8885] hover-lift">
                 <div className="card-title text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
                   🏆 MOST WINS
                 </div>
@@ -244,7 +244,7 @@ const LeaderboardPage = () => {
               </TiltCard>
 
               {/* 3. Top Win % (min 5 matches) */}
-              <TiltCard className="specialty-card-winrate p-6 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] hover-lift">
+              <TiltCard className="specialty-card-winrate w-[82vw] sm:w-auto shrink-0 snap-start p-6 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] hover-lift">
                 <div className="card-title text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
                   🎯 TOP WIN RATE (MIN 5)
                 </div>
@@ -261,7 +261,7 @@ const LeaderboardPage = () => {
               </TiltCard>
 
               {/* 4. Longest Winning Streak */}
-              <TiltCard className="specialty-card-streak p-6 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] hover-lift">
+              <TiltCard className="specialty-card-streak w-[82vw] sm:w-auto shrink-0 snap-start p-6 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] hover-lift">
                 <div className="card-title text-[10px] font-bold tracking-widest text-[#ad8885] uppercase mb-2">
                   🔥 ACTIVE STREAK
                 </div>
@@ -278,7 +278,7 @@ const LeaderboardPage = () => {
               </TiltCard>
 
               {/* 5. Most Improved (30 Days — Deliverable D2) */}
-              <TiltCard className="specialty-card-improved p-6 bg-[#201b0c] border border-emerald-500/40 hover:border-emerald-500 hover-lift">
+              <TiltCard className="specialty-card-improved w-[82vw] sm:w-auto shrink-0 snap-start p-6 bg-[#201b0c] border border-emerald-500/40 hover:border-emerald-500 hover-lift">
                 <div className="card-title text-[10px] font-bold tracking-widest text-emerald-400 uppercase mb-2 flex items-center justify-between">
                   <span>⚡ MOST IMPROVED</span>
                   <span className="text-[9px] font-mono text-emerald-400/80">30D</span>

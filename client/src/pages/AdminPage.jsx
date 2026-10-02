@@ -810,90 +810,108 @@ const AdminPage = () => {
         {/* ==================================================== */}
         {/* Navigation Tabs                                     */}
         {/* ==================================================== */}
-        <div role="tablist" aria-label="Admin Navigation Tabs" className="flex items-center gap-2 border-b border-[var(--color-border-subtle)] mb-8 overflow-x-auto pb-px">
-          <button
-            role="tab"
-            aria-selected={activeTab === 'queue'}
-            onClick={() => setActiveTab('queue')}
-            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'queue' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
-            }`}
-          >
-            <span>Pending Approvals</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[var(--color-accent-primary)]/15 text-[var(--color-accent-primary)]">
-              {pendingMatches.length}
-            </span>
-          </button>
+        {/* ==================================================== */}
+        {/* Navigation Tabs                                     */}
+        {/* ==================================================== */}
+        {(() => {
+          const isAdvancedTab = ['rating-history', 'audit', 'adjust', 'correct'].includes(activeTab);
+          return (
+            <>
+              <div role="tablist" aria-label="Admin Navigation Tabs" className="flex items-center gap-2 border-b border-[var(--color-border-subtle)] mb-6 overflow-x-auto pb-px">
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'queue'}
+                  onClick={() => setActiveTab('queue')}
+                  className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                    activeTab === 'queue' ? 'text-[var(--color-accent-primary)] border-b-2 border-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <span>Pending Approvals</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[var(--color-accent-primary)]/15 text-[var(--color-accent-primary)]">
+                    {pendingMatches.length}
+                  </span>
+                </button>
 
-          <button
-            role="tab"
-            aria-selected={activeTab === 'tournaments'}
-            onClick={() => setActiveTab('tournaments')}
-            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'tournaments' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
-            }`}
-          >
-            <span>Competitions & Tournaments</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-500">
-              {tournaments.length}
-            </span>
-          </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'tournaments'}
+                  onClick={() => setActiveTab('tournaments')}
+                  className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                    activeTab === 'tournaments' ? 'text-[var(--color-accent-primary)] border-b-2 border-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <span>Tournaments & Brackets</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-500">
+                    {tournaments.length}
+                  </span>
+                </button>
 
-          <button
-            role="tab"
-            aria-selected={activeTab === 'direct'}
-            onClick={() => setActiveTab('direct')}
-            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'direct' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
-            }`}
-          >
-            <span>Direct Match Entry</span>
-          </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === 'direct'}
+                  onClick={() => setActiveTab('direct')}
+                  className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                    activeTab === 'direct' ? 'text-[var(--color-accent-primary)] border-b-2 border-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <span>Direct Score Entry</span>
+                </button>
 
-          <button
-            role="tab"
-            aria-selected={activeTab === 'rating-history'}
-            onClick={() => setActiveTab('rating-history')}
-            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'rating-history' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
-            }`}
-          >
-            <span>Rating History Table</span>
-          </button>
+                <button
+                  role="tab"
+                  aria-selected={isAdvancedTab}
+                  onClick={() => setActiveTab(isAdvancedTab ? activeTab : 'rating-history')}
+                  className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                    isAdvancedTab ? 'text-[var(--color-accent-primary)] border-b-2 border-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <span>⚙️ Tools & Audits</span>
+                </button>
+              </div>
 
-          <button
-            role="tab"
-            aria-selected={activeTab === 'audit'}
-            onClick={() => setActiveTab('audit')}
-            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'audit' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
-            }`}
-          >
-            <span>Governance Audit Trail</span>
-          </button>
-
-          <button
-            role="tab"
-            aria-selected={activeTab === 'adjust'}
-            onClick={() => setActiveTab('adjust')}
-            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'adjust' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
-            }`}
-          >
-            <span>Manual Rating Adjust</span>
-          </button>
-
-          <button
-            role="tab"
-            aria-selected={activeTab === 'correct'}
-            onClick={() => setActiveTab('correct')}
-            className={`px-5 py-3 min-h-[44px] text-xs sm:text-sm font-bold tracking-wider uppercase transition-all relative flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'correct' ? 'text-[var(--color-accent-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
-            }`}
-          >
-            <span>Match Correction</span>
-          </button>
-        </div>
+              {/* Consolidated Secondary Sub-Nav when viewing Tools & Audits */}
+              {isAdvancedTab && (
+                <div className="flex flex-wrap items-center gap-2 p-2 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl mb-8">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--color-text-muted)] px-2">
+                    Advanced Controls:
+                  </span>
+                  <button
+                    onClick={() => setActiveTab('rating-history')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                      activeTab === 'rating-history' ? 'bg-[var(--color-accent-primary)] text-white shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                    }`}
+                  >
+                    Rating History
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('audit')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                      activeTab === 'audit' ? 'bg-[var(--color-accent-primary)] text-white shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                    }`}
+                  >
+                    Governance Audit
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('adjust')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                      activeTab === 'adjust' ? 'bg-[var(--color-accent-primary)] text-white shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                    }`}
+                  >
+                    Manual Rating Adjust
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('correct')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                      activeTab === 'correct' ? 'bg-[var(--color-accent-primary)] text-white shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                    }`}
+                  >
+                    Match Correction
+                  </button>
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* ==================================================== */}
         {/* TAB 1: PENDING MATCH APPROVAL QUEUE                  */}

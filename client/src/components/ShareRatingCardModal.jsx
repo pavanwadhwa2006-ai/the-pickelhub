@@ -6,7 +6,7 @@
  * Features official Elo rating, tier badge, career W/L record, and verification watermark.
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import QRCode from 'qrcode';

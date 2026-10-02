@@ -95,7 +95,6 @@ const Navbar = () => {
     { label: 'HOME', path: '/' },
     { label: 'LEADERBOARD', path: '/leaderboard' },
     { label: 'TOURNAMENTS', path: '/tournaments' },
-    { label: 'COMPARE', path: '/compare' },
     ...(isAuthenticated ? [{ label: 'DASHBOARD', path: '/dashboard' }] : []),
     ...(isAdminMode ? [{ label: 'ADMIN PANEL', path: '/admin', badge: pendingCount }] : []),
   ];

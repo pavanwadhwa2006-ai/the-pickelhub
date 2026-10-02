@@ -13,6 +13,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import Navbar from './components/Navbar';
+import MobileBottomNav from './components/MobileBottomNav';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollProgressBar from './components/ScrollProgressBar';
 import ToastContainer from './components/ToastContainer';
@@ -49,7 +50,7 @@ function App() {
           <ToastContainer />
           <div className="min-h-screen flex flex-col bg-[var(--color-bg-base)] text-[var(--color-text-primary)] transition-colors duration-200">
             <Navbar />
-            <main className="flex-1">
+            <main className="flex-1 pb-20 md:pb-0">
             <Suspense fallback={<PageLoadingSkeleton />}>
               <Routes>
                 {/* Public Routes */}
@@ -110,6 +111,7 @@ function App() {
               </Routes>
             </Suspense>
           </main>
+          <MobileBottomNav />
         </div>
       </Router>
     </NotificationProvider>
