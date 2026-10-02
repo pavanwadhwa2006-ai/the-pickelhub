@@ -1,0 +1,19 @@
+{
+  "short_name": "PickleHub",
+  "name": "The PickleHub — Official Elo Ratings & Tournaments",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/leaderboard",
+  "background_color": "#121008",
+  "theme_color": "#ff3b3f",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "description": "Official pickleball club Elo ratings, live match recording, and tournament brackets."
+}

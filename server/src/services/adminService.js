@@ -130,6 +130,7 @@ const executeAtomicMatchApproval = async ({
         player.losses = (player.losses || 0) + 1;
         player.winningStreak = 0;
       }
+      player.winPercentage = Math.round((player.wins / player.matchesPlayed) * 100);
 
       await player.save({ session });
 

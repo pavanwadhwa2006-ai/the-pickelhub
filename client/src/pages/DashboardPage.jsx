@@ -21,6 +21,7 @@ import TierBadge from '../components/TierBadge';
 import TierProgressBar from '../components/TierProgressBar';
 import HowItWorksCard from '../components/HowItWorksCard';
 import DigitalClubPassModal from '../components/DigitalClubPassModal';
+import ShareRatingCardModal from '../components/ShareRatingCardModal';
 import RatingHistoryChart from '../components/RatingHistoryChart';
 import CourtBookingModal from '../components/CourtBookingModal';
 
@@ -29,6 +30,7 @@ const DashboardPage = () => {
   const [copied, setCopied] = useState(false);
   const [updateMsg, setUpdateMsg] = useState(null);
   const [showClubPass, setShowClubPass] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Active Pending Matches & Rating History State
@@ -169,6 +171,39 @@ const DashboardPage = () => {
                 <span>{user?.email}</span>
                 <span>•</span>
                 <span>Member since {formattedDate}</span>
+              </div>
+
+              {/* Quick Action Badges: Digital Pass, Share Rating Card, Public Profile */}
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowClubPass(true)}
+                  className="px-3 py-1.5 bg-[#251f10] hover:bg-[#322a16] border border-[#ff3b3f]/50 hover:border-[#ff3b3f] text-[#ede1c9] rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="View your digital pass and QR code"
+                >
+                  <span>🪪</span>
+                  <span>Digital Pass</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowShareCard(true)}
+                  className="px-3 py-1.5 bg-[#ff3b3f]/15 hover:bg-[#ff3b3f]/25 border border-[#ff3b3f]/50 hover:border-[#ff3b3f] text-[#ffb3ad] rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Generate shareable athlete card"
+                >
+                  <span>🎴</span>
+                  <span>Share Rating Card</span>
+                </button>
+
+                {player?.playerId && (
+                  <Link
+                    to={`/players/${player.playerId}`}
+                    className="px-3 py-1.5 bg-[#1a1508] hover:bg-[#251f10] border border-[#3b3423] hover:border-[#9a8e7a] text-[#9a8e7a] hover:text-[#ede1c9] rounded-lg text-xs font-mono transition-colors flex items-center gap-1"
+                  >
+                    <span>Public Profile</span>
+                    <span>↗</span>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -448,6 +483,13 @@ const DashboardPage = () => {
       <DigitalClubPassModal
         isOpen={showClubPass}
         onClose={() => setShowClubPass(false)}
+        player={player}
+      />
+
+      {/* Shareable HD Rating Card Modal */}
+      <ShareRatingCardModal
+        isOpen={showShareCard}
+        onClose={() => setShowShareCard(false)}
         player={player}
       />
 

@@ -22,50 +22,77 @@ const AnimatedNumber = ({
   const target = Number(value) || 0;
   const [displayValue, setDisplayValue] = useState(() => (isReducedMotion() ? target : 0));
   const elementRef = useRef(null);
-  const hasAnimated = useRef(false);
+  const isInView = useRef(false);
+  const currentValRef = useRef(isReducedMotion() ? target : 0);
+  const rafIdRef = useRef(null);
 
   useEffect(() => {
-    if (isReducedMotion()) return;
+    if (isReducedMotion()) {
+      setDisplayValue(target);
+      currentValRef.current = target;
+      return;
+    }
+
+    const animateToTarget = (toValue) => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      const startVal = currentValRef.current;
+      const startTime = performance.now();
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+      const updateCounter = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = duration > 0 ? Math.min(elapsed / duration, 1) : 1;
+        const easedProgress = easeOutCubic(progress);
+
+        const current = startVal + (toValue - startVal) * easedProgress;
+        currentValRef.current = current;
+        setDisplayValue(current);
+
+        if (progress < 1) {
+          rafIdRef.current = requestAnimationFrame(updateCounter);
+        } else {
+          currentValRef.current = toValue;
+          setDisplayValue(toValue);
+        }
+      };
+
+      rafIdRef.current = requestAnimationFrame(updateCounter);
+    };
 
     const node = elementRef.current;
     if (!node) return;
 
+    if (typeof IntersectionObserver === 'undefined') {
+      isInView.current = true;
+      animateToTarget(target);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          observer.disconnect();
-
-          const startTime = performance.now();
-          const startVal = 0;
-
-          const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-
-          const updateCounter = (currentTime) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const easedProgress = easeOutCubic(progress);
-
-            const current = startVal + (target - startVal) * easedProgress;
-            setDisplayValue(current);
-
-            if (progress < 1) {
-              requestAnimationFrame(updateCounter);
-            } else {
-              setDisplayValue(target);
-            }
-          };
-
-          requestAnimationFrame(updateCounter);
+        if (entry.isIntersecting) {
+          isInView.current = true;
+          animateToTarget(target);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.1 }
     );
 
     observer.observe(node);
 
+    // If already in view from a previous intersection, re-animate immediately on target update
+    if (isInView.current) {
+      animateToTarget(target);
+    }
+
     return () => {
       observer.disconnect();
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
     };
   }, [target, duration]);
 

@@ -33,6 +33,34 @@ const BracketVisualizer = ({
   const [activeMobileRound, setActiveMobileRound] = useState(defaultRound);
   const [mobileViewMode, setMobileViewMode] = useState('CARDS'); // 'CARDS' | 'TREE'
 
+  // Build a lookup map from participants array: ObjectId string -> player object
+  const participantMap = useMemo(() => {
+    const map = new Map();
+    const participants = tournament?.participants;
+    if (participants && Array.isArray(participants)) {
+      for (const entry of participants) {
+        const p = entry.player;
+        if (p) {
+          const id = typeof p === 'object' ? (p._id || p.id) : p;
+          if (id) map.set(id.toString(), typeof p === 'object' ? p : { _id: id });
+        }
+        if (entry.partner) {
+          const pt = entry.partner;
+          const ptId = typeof pt === 'object' ? (pt._id || pt.id) : pt;
+          if (ptId) map.set(ptId.toString(), typeof pt === 'object' ? pt : { _id: ptId });
+        }
+      }
+    }
+    return map;
+  }, [tournament?.participants]);
+
+  const resolvePlayer = (p) => {
+    if (!p) return null;
+    if (typeof p === 'object') return p;
+    // p is a string ObjectId — look it up in the participant map
+    return participantMap.get(p.toString()) || null;
+  };
+
   if (!hasBracket) {
     return (
       <div className="p-12 text-center bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-2xl">
@@ -64,33 +92,6 @@ const BracketVisualizer = ({
     if (roundNum === totalRounds - 1) return 'Semifinals';
     if (roundNum === totalRounds - 2) return 'Quarterfinals';
     return `Round ${roundNum}`;
-  };
-
-  // Build a lookup map from participants array: ObjectId string -> player object
-  const participantMap = useMemo(() => {
-    const map = new Map();
-    if (tournament?.participants) {
-      for (const entry of tournament.participants) {
-        const p = entry.player;
-        if (p) {
-          const id = typeof p === 'object' ? (p._id || p.id) : p;
-          if (id) map.set(id.toString(), typeof p === 'object' ? p : { _id: id });
-        }
-        if (entry.partner) {
-          const pt = entry.partner;
-          const ptId = typeof pt === 'object' ? (pt._id || pt.id) : pt;
-          if (ptId) map.set(ptId.toString(), typeof pt === 'object' ? pt : { _id: ptId });
-        }
-      }
-    }
-    return map;
-  }, [tournament?.participants]);
-
-  const resolvePlayer = (p) => {
-    if (!p) return null;
-    if (typeof p === 'object') return p;
-    // p is a string ObjectId — look it up in the participant map
-    return participantMap.get(p.toString()) || null;
   };
 
   const getPlayerName = (p) => {

@@ -16,6 +16,7 @@ import RevealOnScroll from '../components/RevealOnScroll';
 import TierBadge from '../components/TierBadge';
 import RatingHistoryChart from '../components/RatingHistoryChart';
 import DigitalClubPassModal from '../components/DigitalClubPassModal';
+import ShareRatingCardModal from '../components/ShareRatingCardModal';
 import QRCode from 'qrcode';
 
 const PlayerProfilePage = () => {
@@ -25,6 +26,7 @@ const PlayerProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showClubPassModal, setShowClubPassModal] = useState(false);
+  const [showShareCardModal, setShowShareCardModal] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState('');
 
   useEffect(() => {
@@ -228,6 +230,30 @@ const PlayerProfilePage = () => {
                 </div>
               </button>
 
+              {/* Share Rating Card Button */}
+              <button
+                type="button"
+                onClick={() => setShowShareCardModal(true)}
+                title="Generate and share your official athlete card"
+                className="p-4 bg-[#1a1508] border border-[#3b3423] hover:border-[#ff3b3f] rounded-2xl flex items-center gap-3.5 cursor-pointer transition-all hover:scale-[1.02] shadow-lg group text-left"
+              >
+                <div className="w-16 h-16 bg-[#251f10] border border-[#3b3423] rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform">
+                  🎴
+                </div>
+                <div>
+                  <span className="text-[9px] font-bold tracking-[0.2em] text-[#ff3b3f] uppercase block font-mono">
+                    SHARE CARD
+                  </span>
+                  <span className="text-xs font-bold text-[#ede1c9] group-hover:text-white flex items-center gap-1 mt-0.5">
+                    <span>Export Card</span>
+                    <span className="text-[10px] text-[#ad8885]">↗</span>
+                  </span>
+                  <span className="text-[10px] text-[#9a8e7a] block mt-0.5">
+                    WhatsApp & Social
+                  </span>
+                </div>
+              </button>
+
               {/* Rating Highlight Pill */}
               <div className="p-5 bg-[#1a1508] border border-[#3b3423] hover:border-[#ff3b3f]/60 rounded-2xl flex flex-col items-start sm:items-end justify-center shrink-0 transition-colors shadow-lg">
                 <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase mb-1">
@@ -305,6 +331,13 @@ const PlayerProfilePage = () => {
       <DigitalClubPassModal
         isOpen={showClubPassModal}
         onClose={() => setShowClubPassModal(false)}
+        player={player}
+      />
+
+      {/* Shareable HD Rating Card Modal */}
+      <ShareRatingCardModal
+        isOpen={showShareCardModal}
+        onClose={() => setShowShareCardModal(false)}
         player={player}
       />
     </PageTransition>

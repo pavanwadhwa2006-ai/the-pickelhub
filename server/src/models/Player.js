@@ -63,6 +63,17 @@ const playerSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    winPercentage: {
+      type: Number,
+      default: 0,
+      index: true,
+      get: function () {
+        if (!this.matchesPlayed || this.matchesPlayed === 0) {
+          return 0;
+        }
+        return Math.round((this.wins / this.matchesPlayed) * 100);
+      },
+    },
     winningStreak: {
       type: Number,
       default: 0,
@@ -96,6 +107,7 @@ const playerSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: {
       virtuals: true,
+      getters: true,
       transform(doc, ret) {
         delete ret.__v;
         return ret;
@@ -103,16 +115,19 @@ const playerSchema = new mongoose.Schema(
     },
     toObject: {
       virtuals: true,
+      getters: true,
     },
   }
 );
 
-// Virtual for win percentage (derivable, eliminates staleness)
-playerSchema.virtual('winPercentage').get(function () {
-  if (!this.matchesPlayed || this.matchesPlayed === 0) {
-    return 0;
+// Pre-save hook: automatically compute winPercentage so it is indexed & queryable in MongoDB
+playerSchema.pre('save', function (next) {
+  if (this.matchesPlayed && this.matchesPlayed > 0) {
+    this.winPercentage = Math.round((this.wins / this.matchesPlayed) * 100);
+  } else {
+    this.winPercentage = 0;
   }
-  return Math.round((this.wins / this.matchesPlayed) * 100);
+  next();
 });
 
 const Player = mongoose.model('Player', playerSchema);

@@ -132,7 +132,7 @@ const getLeaderboardSpecialties = async (req, res, next) => {
   try {
     const activeCondition = { accountStatus: 'ACTIVE' };
 
-    const [highestRated, mostWins, highestWinRate, longestStreak] = await Promise.all([
+    let [highestRated, mostWins, highestWinRate, longestStreak] = await Promise.all([
       // 1. Highest Rated Player
       Player.findOne(activeCondition).select(PUBLIC_PLAYER_FIELDS).sort({ currentRating: -1, wins: -1 }),
 
@@ -142,13 +142,39 @@ const getLeaderboardSpecialties = async (req, res, next) => {
       // 3. Highest Win % (minimum 5 matches played per PRD Section 8.2)
       Player.findOne({ ...activeCondition, matchesPlayed: { $gte: 5 } })
         .select(PUBLIC_PLAYER_FIELDS)
-        .sort({ winPercentage: -1, matchesPlayed: -1, currentRating: -1 }),
+        .sort({ winPercentage: -1, wins: -1, matchesPlayed: -1, currentRating: -1 }),
 
-      // 4. Longest Active Winning Streak
-      Player.findOne(activeCondition)
+      // 4. Longest Active Winning Streak (prioritize players with an active streak > 0)
+      Player.findOne({ ...activeCondition, winningStreak: { $gt: 0 } })
         .select(PUBLIC_PLAYER_FIELDS)
         .sort({ winningStreak: -1, currentRating: -1 }),
     ]);
+
+    // Fallback if no player has an active winning streak > 0
+    if (!longestStreak) {
+      longestStreak = await Player.findOne(activeCondition)
+        .select(PUBLIC_PLAYER_FIELDS)
+        .sort({ winningStreak: -1, currentRating: -1 });
+    }
+
+    // Fallback for highestWinRate if winPercentage wasn't populated on legacy documents
+    if (!highestWinRate || !highestWinRate.winPercentage) {
+      const winRateAgg = await Player.aggregate([
+        { $match: { ...activeCondition, matchesPlayed: { $gte: 5 } } },
+        {
+          $addFields: {
+            computedRate: {
+              $round: [{ $multiply: [{ $divide: ['$wins', '$matchesPlayed'] }, 100] }]
+            }
+          }
+        },
+        { $sort: { computedRate: -1, wins: -1, matchesPlayed: -1 } },
+        { $limit: 1 }
+      ]);
+      if (winRateAgg.length > 0) {
+        highestWinRate = await Player.findById(winRateAgg[0]._id).select(PUBLIC_PLAYER_FIELDS);
+      }
+    }
 
     // 5. Most Improved Player (Largest net Elo gain over the past 30 days — Deliverable D2)
     let mostImproved = null;

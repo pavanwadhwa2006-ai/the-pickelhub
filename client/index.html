@@ -19,10 +19,24 @@
     <meta name="twitter:description" content="Track your official pickleball Elo rating, view club rankings, submit match scores, and climb tournament divisions." />
     <meta name="twitter:image" content="/favicon.svg" />
 
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#121008" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PickleHub" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
     <title>The PickleHub — Official Elo Ratings & Tournaments</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>
