@@ -18,7 +18,7 @@ export const ThemeProvider = ({ children }) => {
     } catch {
       // Ignore localStorage errors
     }
-    return THEMES.CLASSIC_DARK;
+    return THEMES.GARDEN_LIGHT;
   });
 
   useEffect(() => {

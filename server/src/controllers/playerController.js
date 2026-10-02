@@ -68,11 +68,6 @@ const getPlayers = async (req, res, next) => {
         { name: { $regex: cleanSearch, $options: 'i' } },
         { playerId: { $regex: cleanSearch, $options: 'i' } },
       ];
-    } else {
-      // Default leaderboard: only show players who have played at least 1 match.
-      // This keeps test accounts and brand-new unplayed registrations off the public board.
-      // Players can still be found via explicit search above.
-      query.matchesPlayed = { $gte: 1 };
     }
 
     // Multi-sort options

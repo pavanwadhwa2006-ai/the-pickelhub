@@ -454,6 +454,26 @@ const ProfileSettingsMenu = () => {
             <div className="space-y-2">
               <label
                 className={`flex items-center justify-between p-2.5 border rounded-xl text-xs font-bold uppercase cursor-pointer transition-all ${
+                  theme === THEMES.GARDEN_LIGHT
+                    ? 'bg-[var(--color-bg-base)] border-[var(--color-accent-primary)] text-[var(--color-text-primary)] shadow-sm'
+                    : 'bg-[var(--color-bg-base)] border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-[var(--color-accent-primary)]'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="radio"
+                    name="theme"
+                    checked={theme === THEMES.GARDEN_LIGHT}
+                    onChange={() => setTheme(THEMES.GARDEN_LIGHT)}
+                    className="accent-[var(--color-accent-primary)] cursor-pointer"
+                  />
+                  <span>Botanical (Default)</span>
+                </div>
+                <span className="text-[9px] text-[var(--color-accent-primary)] font-mono">BOTANICAL</span>
+              </label>
+
+              <label
+                className={`flex items-center justify-between p-2.5 border rounded-xl text-xs font-bold uppercase cursor-pointer transition-all ${
                   theme === THEMES.CLASSIC_DARK
                     ? 'bg-[var(--color-bg-base)] border-[var(--color-accent-primary)] text-[var(--color-text-primary)] shadow-sm'
                     : 'bg-[var(--color-bg-base)] border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-[var(--color-accent-primary)]'
@@ -469,27 +489,7 @@ const ProfileSettingsMenu = () => {
                   />
                   <span>Classic dark</span>
                 </div>
-                <span className="text-[9px] text-[var(--color-accent-primary)] font-mono">MAROON</span>
-              </label>
-
-              <label
-                className={`flex items-center justify-between p-2.5 border rounded-xl text-xs font-bold uppercase cursor-pointer transition-all ${
-                  theme === THEMES.GARDEN_LIGHT
-                    ? 'bg-[var(--color-bg-base)] border-[var(--color-accent-primary)] text-[var(--color-text-primary)] shadow-sm'
-                    : 'bg-[var(--color-bg-base)] border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-[var(--color-accent-primary)]'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="radio"
-                    name="theme"
-                    checked={theme === THEMES.GARDEN_LIGHT}
-                    onChange={() => setTheme(THEMES.GARDEN_LIGHT)}
-                    className="accent-[var(--color-accent-primary)] cursor-pointer"
-                  />
-                  <span>Garden light</span>
-                </div>
-                <span className="text-[9px] text-[var(--color-accent-primary)] font-mono">BOTANICAL</span>
+                <span className="text-[9px] text-[var(--color-accent-primary)] font-mono">DARK</span>
               </label>
             </div>
           </div>
