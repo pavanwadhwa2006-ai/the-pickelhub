@@ -28,15 +28,15 @@ const ProtectedRoute = ({ children, roles = [] }) => {
 
   if (roles.length > 0 && !roles.includes(user?.role)) {
     return (
-      <div className="max-w-xl mx-auto my-20 p-8 bg-[#251f10] border border-[#ff5451]/40 text-center">
-        <div className="inline-block px-3 py-1 bg-[#ff5451]/20 text-[#ffb4ab] text-xs font-bold tracking-widest uppercase mb-4">
+      <div className="max-w-xl mx-auto my-20 p-8 bg-[var(--color-bg-card)] border border-[var(--color-accent-primary)]/40 text-center rounded-2xl shadow-xl">
+        <div className="inline-block px-3 py-1 bg-[var(--color-accent-primary)]/15 text-[var(--color-accent-primary)] text-xs font-bold tracking-widest uppercase mb-4 rounded">
           ACCESS RESTRICTED
         </div>
-        <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[#ede1c9] mb-3">
+        <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[var(--color-text-primary)] mb-3">
           Unauthorized Access
         </h2>
-        <p className="text-sm text-[#d8cdb5] mb-6">
-          Your account role (<span className="text-[#ffb3ad] font-bold">{user?.role}</span>) does not have permission to view this administrative resource.
+        <p className="text-sm text-[var(--color-text-muted)] mb-6">
+          Your account role (<span className="text-[var(--color-accent-primary)] font-bold">{user?.role}</span>) does not have permission to view this administrative resource.
         </p>
         <Navigate to="/dashboard" replace />
       </div>

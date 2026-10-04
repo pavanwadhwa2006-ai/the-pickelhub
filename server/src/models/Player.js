@@ -49,7 +49,7 @@ const playerSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      default: 'Intermediate',
+      default: 'Beginner',
     },
     matchesPlayed: {
       type: Number,

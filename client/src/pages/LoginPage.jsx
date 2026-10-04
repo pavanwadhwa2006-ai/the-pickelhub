@@ -73,8 +73,8 @@ const LoginPage = () => {
 
         {/* Error / Lockout Alert Banner */}
         {localError && (
-          <div className="mb-6 p-4 bg-rose-950/20 border-l-4 border-[var(--color-accent-primary)] text-rose-300 text-xs leading-relaxed animate-fade-in shadow-sm rounded-r-lg">
-            <div className="font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5">
+          <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-950/20 border-l-4 border-[var(--color-accent-primary)] text-rose-900 dark:text-rose-200 text-xs leading-relaxed animate-fade-in shadow-sm rounded-r-xl">
+            <div className="font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5 text-rose-950 dark:text-rose-100">
               <span>⚠</span> Authentication Notice
             </div>
             {localError}

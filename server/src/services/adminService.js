@@ -205,6 +205,11 @@ const executeAtomicMatchApproval = async ({
     broadcast(CHANNELS.GLOBAL, EVENTS.MATCH_APPROVED, {
       matchId: match.matchId || match._id.toString(),
       type: actionType,
+      match: {
+        court: populatedMatch.court,
+        teamA: (populatedMatch.teamA || []).map((p) => ({ playerId: p.playerId, name: p.name })),
+        teamB: (populatedMatch.teamB || []).map((p) => ({ playerId: p.playerId, name: p.name })),
+      },
     });
     broadcast(CHANNELS.GLOBAL, EVENTS.LEADERBOARD_UPDATED, {});
 

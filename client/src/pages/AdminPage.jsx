@@ -23,7 +23,7 @@ import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
 
 const COURTS = ['Court 1', 'Court 2'];
 const TOURNAMENT_FORMATS = ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES', 'OPEN'];
-const SKILL_DIVISIONS = ['All', 'Beginner', 'Intermediate', 'Advanced Intermediate', 'Pro'];
+const SKILL_DIVISIONS = ['All', 'Beginner', 'Intermediate', 'Advanced Intermediate', 'Pro', 'God Level'];
 
 const AdminPage = () => {
   const { user, adminViewMode } = useAuth();
@@ -1322,7 +1322,7 @@ const AdminPage = () => {
                   <div className="flex items-center justify-between p-2 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border-subtle)]">
                     <span className="text-xs">{directTeamA1?.name || 'Select Player 1'}</span>
                     {directTeamA1 ? (
-                      <button type="button" onClick={() => removeDirectPlayer('A1')} className="text-rose-500 text-xs font-bold">✕</button>
+                      <button type="button" onClick={() => removeDirectPlayer('A1')} className="w-6 h-6 rounded-full flex items-center justify-center bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all text-xs font-bold cursor-pointer" title="Remove player">✕</button>
                     ) : (
                       <button type="button" onClick={() => setDirectActiveSlot('A1')} className="text-[var(--color-accent-primary)] text-xs font-bold">+ Assign</button>
                     )}
@@ -1331,7 +1331,7 @@ const AdminPage = () => {
                     <div className="flex items-center justify-between p-2 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border-subtle)]">
                       <span className="text-xs">{directTeamA2?.name || 'Select Player 2'}</span>
                       {directTeamA2 ? (
-                        <button type="button" onClick={() => removeDirectPlayer('A2')} className="text-rose-500 text-xs font-bold">✕</button>
+                        <button type="button" onClick={() => removeDirectPlayer('A2')} className="w-6 h-6 rounded-full flex items-center justify-center bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all text-xs font-bold cursor-pointer" title="Remove player">✕</button>
                       ) : (
                         <button type="button" onClick={() => setDirectActiveSlot('A2')} className="text-[var(--color-accent-primary)] text-xs font-bold">+ Assign</button>
                       )}
@@ -1347,7 +1347,7 @@ const AdminPage = () => {
                   <div className="flex items-center justify-between p-2 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border-subtle)]">
                     <span className="text-xs">{directTeamB1?.name || 'Select Player 1'}</span>
                     {directTeamB1 ? (
-                      <button type="button" onClick={() => removeDirectPlayer('B1')} className="text-rose-500 text-xs font-bold">✕</button>
+                      <button type="button" onClick={() => removeDirectPlayer('B1')} className="w-6 h-6 rounded-full flex items-center justify-center bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all text-xs font-bold cursor-pointer" title="Remove player">✕</button>
                     ) : (
                       <button type="button" onClick={() => setDirectActiveSlot('B1')} className="text-[var(--color-accent-primary)] text-xs font-bold">+ Assign</button>
                     )}
@@ -1356,7 +1356,7 @@ const AdminPage = () => {
                     <div className="flex items-center justify-between p-2 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border-subtle)]">
                       <span className="text-xs">{directTeamB2?.name || 'Select Player 2'}</span>
                       {directTeamB2 ? (
-                        <button type="button" onClick={() => removeDirectPlayer('B2')} className="text-rose-500 text-xs font-bold">✕</button>
+                        <button type="button" onClick={() => removeDirectPlayer('B2')} className="w-6 h-6 rounded-full flex items-center justify-center bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all text-xs font-bold cursor-pointer" title="Remove player">✕</button>
                       ) : (
                         <button type="button" onClick={() => setDirectActiveSlot('B2')} className="text-[var(--color-accent-primary)] text-xs font-bold">+ Assign</button>
                       )}
@@ -1425,7 +1425,7 @@ const AdminPage = () => {
                       className="w-20 p-2 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded text-center text-sm font-mono"
                     />
                     {directGames.length > 1 && (
-                      <button type="button" onClick={() => removeGame(idx)} className="text-rose-500 text-xs font-bold">✕</button>
+                      <button type="button" onClick={() => removeGame(idx)} className="w-6 h-6 rounded-full flex items-center justify-center bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all text-xs font-bold cursor-pointer" title="Remove game">✕</button>
                     )}
                   </div>
                 ))}
@@ -1468,7 +1468,7 @@ const AdminPage = () => {
                     setRatingHistoryFilterType(e.target.value);
                     setRatingHistoryPage(1);
                   }}
-                  className="p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-xs font-bold"
+                  className="p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-xs font-bold text-[var(--color-text-primary)]"
                 >
                   <option value="">All Change Types</option>
                   <option value="MATCH">Matches</option>
@@ -1553,7 +1553,7 @@ const AdminPage = () => {
                       type="button"
                       disabled={ratingHistoryPage <= 1}
                       onClick={() => setRatingHistoryPage((p) => Math.max(1, p - 1))}
-                      className="px-3 py-1.5 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-lg font-bold disabled:opacity-40"
+                      className="px-3 py-1.5 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] rounded-lg font-bold disabled:opacity-40 cursor-pointer transition-colors"
                     >
                       ← Previous
                     </button>
@@ -1561,7 +1561,7 @@ const AdminPage = () => {
                       type="button"
                       disabled={ratingHistoryPage >= ratingHistoryTotalPages}
                       onClick={() => setRatingHistoryPage((p) => Math.min(ratingHistoryTotalPages, p + 1))}
-                      className="px-3 py-1.5 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-lg font-bold disabled:opacity-40"
+                      className="px-3 py-1.5 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] rounded-lg font-bold disabled:opacity-40 cursor-pointer transition-colors"
                     >
                       Next →
                     </button>
@@ -1842,7 +1842,7 @@ const AdminPage = () => {
                       required
                       value={correctGame1A}
                       onChange={(e) => setCorrectGame1A(e.target.value)}
-                      className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-lg font-bold text-center"
+                      className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-lg font-bold text-center text-[var(--color-text-primary)]"
                     />
                   </div>
                   <div>
@@ -1855,7 +1855,7 @@ const AdminPage = () => {
                       required
                       value={correctGame1B}
                       onChange={(e) => setCorrectGame1B(e.target.value)}
-                      className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-lg font-bold text-center"
+                      className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl font-mono text-lg font-bold text-center text-[var(--color-text-primary)]"
                     />
                   </div>
                 </div>
@@ -1867,7 +1867,7 @@ const AdminPage = () => {
                   <select
                     value={correctWinner}
                     onChange={(e) => setCorrectWinner(e.target.value)}
-                    className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold"
+                    className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold text-[var(--color-text-primary)]"
                   >
                     <option value="A">Team A Won</option>
                     <option value="B">Team B Won</option>
@@ -1884,7 +1884,7 @@ const AdminPage = () => {
                     value={correctReason}
                     onChange={(e) => setCorrectReason(e.target.value)}
                     placeholder="e.g., Official referee score sheet correction, scorekeeper typo in game 1..."
-                    className="w-full p-3.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm"
+                    className="w-full p-3.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm text-[var(--color-text-primary)]"
                   />
                 </div>
 
@@ -1928,7 +1928,14 @@ const AdminPage = () => {
                       Arrange New Competition
                     </h3>
                   </div>
-                  <button type="button" onClick={() => setShowCreateModal(false)} className="text-sm font-bold text-[var(--color-text-muted)]">✕</button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    aria-label="Close modal"
+                    className="w-8 h-8 rounded-full bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all flex items-center justify-center font-bold text-sm cursor-pointer shadow-xs"
+                  >
+                    ✕
+                  </button>
                 </div>
 
                 {createTournError && (
@@ -1946,7 +1953,7 @@ const AdminPage = () => {
                       value={newTournName}
                       onChange={(e) => setNewTournName(e.target.value)}
                       placeholder="e.g., PickleHub Autumn Championship 2026"
-                      className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm"
+                      className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm text-[var(--color-text-primary)]"
                     />
                   </div>
 
@@ -1957,7 +1964,7 @@ const AdminPage = () => {
                       value={newTournDesc}
                       onChange={(e) => setNewTournDesc(e.target.value)}
                       placeholder="Tournament format details, venue rules, prize structure..."
-                      className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm"
+                      className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm text-[var(--color-text-primary)]"
                     />
                   </div>
 
@@ -1967,7 +1974,7 @@ const AdminPage = () => {
                       <select
                         value={newTournType}
                         onChange={(e) => setNewTournType(e.target.value)}
-                        className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold"
+                        className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold text-[var(--color-text-primary)]"
                       >
                         {TOURNAMENT_FORMATS.map((f) => (
                           <option key={f} value={f}>{f.replace('_', ' ')}</option>
@@ -1980,7 +1987,7 @@ const AdminPage = () => {
                       <select
                         value={newTournCategory}
                         onChange={(e) => setNewTournCategory(e.target.value)}
-                        className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold"
+                        className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold text-[var(--color-text-primary)]"
                       >
                         {SKILL_DIVISIONS.map((d) => (
                           <option key={d} value={d}>{d}</option>
@@ -1997,7 +2004,7 @@ const AdminPage = () => {
                         required
                         value={newTournStartDate}
                         onChange={(e) => setNewTournStartDate(e.target.value)}
-                        className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm"
+                        className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm text-[var(--color-text-primary)]"
                       />
                     </div>
 
@@ -2008,7 +2015,7 @@ const AdminPage = () => {
                         required
                         value={newTournDeadline}
                         onChange={(e) => setNewTournDeadline(e.target.value)}
-                        className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm"
+                        className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm text-[var(--color-text-primary)]"
                       />
                     </div>
                   </div>
@@ -2018,7 +2025,7 @@ const AdminPage = () => {
                     <select
                       value={newTournMaxPlayers}
                       onChange={(e) => setNewTournMaxPlayers(Number(e.target.value))}
-                      className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold"
+                      className="w-full p-2.5 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-bold text-[var(--color-text-primary)]"
                     >
                       {[4, 8, 16, 32, 64].map((cap) => (
                         <option key={cap} value={cap}>{cap} Players / Teams</option>
@@ -2104,7 +2111,14 @@ const AdminPage = () => {
                   <h3 className="font-['Playfair_Display'] text-lg font-bold text-[var(--color-text-primary)]">
                     Record Bracket Score ({scoreModalMatch.matchId})
                   </h3>
-                  <button type="button" onClick={() => setScoreModalMatch(null)} className="text-xs font-bold text-[var(--color-text-muted)]">✕</button>
+                  <button
+                    type="button"
+                    onClick={() => setScoreModalMatch(null)}
+                    aria-label="Close modal"
+                    className="w-8 h-8 rounded-full bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all flex items-center justify-center font-bold text-sm cursor-pointer shadow-xs"
+                  >
+                    ✕
+                  </button>
                 </div>
 
                 {scoreError && (
@@ -2125,7 +2139,7 @@ const AdminPage = () => {
                         min="0"
                         value={score1Input}
                         onChange={(e) => setScore1Input(e.target.value)}
-                        className="w-16 p-2 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-lg text-center font-mono font-bold text-lg"
+                        className="w-16 p-2 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-lg text-center font-mono font-bold text-lg text-[var(--color-text-primary)]"
                       />
                     </div>
                     <span className="font-mono text-xs text-[var(--color-text-muted)] font-bold">vs</span>
@@ -2139,7 +2153,7 @@ const AdminPage = () => {
                         min="0"
                         value={score2Input}
                         onChange={(e) => setScore2Input(e.target.value)}
-                        className="w-16 p-2 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-lg text-center font-mono font-bold text-lg"
+                        className="w-16 p-2 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-lg text-center font-mono font-bold text-lg text-[var(--color-text-primary)]"
                       />
                     </div>
                   </div>
@@ -2186,7 +2200,13 @@ const AdminPage = () => {
                       Reject Match Submission
                     </h3>
                   </div>
-                  <button onClick={closeRejectModal} className="text-sm font-bold text-[var(--color-text-muted)]">✕</button>
+                  <button
+                    onClick={closeRejectModal}
+                    aria-label="Close modal"
+                    className="w-8 h-8 rounded-full bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all flex items-center justify-center font-bold text-sm cursor-pointer shadow-xs"
+                  >
+                    ✕
+                  </button>
                 </div>
 
                 <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
@@ -2208,7 +2228,7 @@ const AdminPage = () => {
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     placeholder="e.g., Score conflict reported by opposing player, incomplete game set..."
-                    className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm"
+                    className="w-full p-3 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-sm text-[var(--color-text-primary)]"
                   />
                 </div>
 

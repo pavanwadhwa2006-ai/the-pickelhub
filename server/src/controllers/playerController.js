@@ -35,6 +35,14 @@ const resolvePlayer = async (identifier) => {
   return null;
 };
 
+// Watertight filter ensuring synthetic test agents never surface on live leaderboard or directories
+const AUTHENTIC_PLAYER_QUERY = {
+  accountStatus: 'ACTIVE',
+  email: { $not: /(@picklehub\.test|\.test)$/i },
+  name: { $not: /^(test|refresh_test|testadmin|reg_refresh)/i },
+  playerId: { $not: /^PH-T/i },
+};
+
 /**
  * @desc    Get active players (leaderboard/directory with search and filters)
  * @route   GET /api/players
@@ -45,12 +53,25 @@ const getPlayers = async (req, res, next) => {
     const { category, page = 1, limit = 25, sort = 'rating', q, search } = req.query;
 
     const query = {
-      accountStatus: 'ACTIVE', // Only active players (PRD Section 8.2 & 8.3)
+      ...AUTHENTIC_PLAYER_QUERY,
     };
 
     // Category filter
     if (category && category !== 'ALL') {
-      query.category = category.toLowerCase();
+      const catLower = category.toLowerCase().replace(/[\s_]+/g, ' ');
+      if (catLower.includes('god')) {
+        query.category = /^god level$/i;
+      } else if (catLower.includes('pro')) {
+        query.category = /^pro$/i;
+      } else if (catLower.includes('adv')) {
+        query.category = /^advanced intermediate$/i;
+      } else if (catLower.includes('inter')) {
+        query.category = /^intermediate$/i;
+      } else if (catLower.includes('beg')) {
+        query.category = /^beginner$/i;
+      } else {
+        query.category = new RegExp(`^${category}$`, 'i');
+      }
     }
 
     // Search query filter (name, playerId)
@@ -125,7 +146,7 @@ const getPlayers = async (req, res, next) => {
  */
 const getLeaderboardSpecialties = async (req, res, next) => {
   try {
-    const activeCondition = { accountStatus: 'ACTIVE' };
+    const activeCondition = { ...AUTHENTIC_PLAYER_QUERY };
 
     let [highestRated, mostWins, highestWinRate, longestStreak] = await Promise.all([
       // 1. Highest Rated Player
@@ -405,7 +426,7 @@ const searchPlayers = async (req, res, next) => {
   try {
     const query = req.query.q || req.query.query;
 
-    let searchCondition = { accountStatus: 'ACTIVE' };
+    let searchCondition = { ...AUTHENTIC_PLAYER_QUERY };
 
     if (query && query.trim().length > 0) {
       const cleanQuery = query.trim();
@@ -476,7 +497,7 @@ const getPlayerRatingHistory = async (req, res, next) => {
         delta: 0,
         changeType: 'INITIAL_REGISTRATION',
         reason: 'Baseline Club Starting Rating',
-        category: 'Intermediate',
+        category: 'Beginner',
       },
     ];
 

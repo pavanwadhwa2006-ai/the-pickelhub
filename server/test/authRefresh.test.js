@@ -48,7 +48,8 @@ describe('Dual-Token JWT & httpOnly Refresh Cookie Suite', () => {
 
   before(async () => {
     if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGO_URI);
+      const testUri = (process.env.TEST_MONGO_URI || process.env.MONGO_URI || '').replace('/picklehub?', '/picklehub_test?');
+      await mongoose.connect(testUri);
     }
 
     const timestamp = Date.now();
@@ -61,6 +62,9 @@ describe('Dual-Token JWT & httpOnly Refresh Cookie Suite', () => {
   });
 
   after(async () => {
+    // Thorough cleanup of all test entities
+    await User.deleteMany({ email: /picklehub\.test$/i });
+    await Player.deleteMany({ email: /picklehub\.test$/i });
     if (createdUserIds.length > 0) {
       await User.deleteMany({ _id: { $in: createdUserIds } });
     }

@@ -70,8 +70,16 @@ const SubmitMatchPage = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
-  // Auto-detect and populate opponent from URL QR parameter (?opponent=PH-XXXXX)
+  // Auto-detect and populate opponent from URL QR parameter (?opponent=PH-XXXXX) or open scanner (?scan=true)
   const opponentParam = searchParams.get('opponent');
+  const scanParam = searchParams.get('scan');
+
+  useEffect(() => {
+    if (scanParam === 'true' && !teamB1) {
+      setScannerSlot('teamB1');
+    }
+  }, [scanParam, teamB1]);
+
   useEffect(() => {
     if (opponentParam) {
       const cleanOpponentId = opponentParam.trim().toUpperCase();
@@ -263,7 +271,7 @@ const SubmitMatchPage = () => {
 
         {/* Notifications */}
         {errorMessage && (
-          <div role="alert" className="mb-6 p-4 bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-center justify-between rounded-xl animate-fade-in shadow-lg">
+          <div role="alert" className="mb-6 p-4 bg-rose-500/15 border border-rose-500/40 text-rose-700 dark:text-rose-300 font-medium text-xs flex items-center justify-between rounded-xl animate-fade-in shadow-lg">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-rose-500" aria-hidden="true" />
               {errorMessage}
@@ -272,7 +280,7 @@ const SubmitMatchPage = () => {
               type="button"
               onClick={() => setErrorMessage(null)}
               aria-label="Dismiss error notification"
-              className="text-rose-300 font-bold hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+              className="text-rose-700 dark:text-rose-300 font-bold hover:opacity-75 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
             >
               ✕
             </button>
@@ -280,8 +288,8 @@ const SubmitMatchPage = () => {
         )}
 
         {successMessage && (
-          <div role="status" className="mb-6 p-4 bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs flex items-center gap-2 rounded-xl animate-fade-in shadow-[0_0_15px_rgba(74,222,128,0.2)]">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
+          <div role="status" className="mb-6 p-4 bg-emerald-500/15 border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 font-medium text-xs flex items-center gap-2 rounded-xl animate-fade-in shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
             {successMessage}
           </div>
         )}
@@ -341,24 +349,24 @@ const SubmitMatchPage = () => {
                         onClick={() => setCourt(c)}
                         className={`relative py-2.5 px-3 text-xs font-bold rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between overflow-visible ${
                           isSelected
-                            ? 'bg-[var(--color-bg-card,#1a1508)] border-[#ff3b3f] ring-4 ring-[#ff3b3f]/25 shadow-[0_0_18px_rgba(255,59,63,0.35)] text-white'
-                            : 'bg-[var(--color-bg-base,#1a1508)] border-[var(--color-border-subtle,#3b3423)] text-[var(--color-text-muted,#9a8e7a)] hover:border-[#5a4d35]'
+                            ? 'bg-[var(--color-bg-card)] border-[var(--color-accent-primary)] ring-2 ring-[var(--color-accent-primary)]/20 shadow-md text-[var(--color-text-primary)]'
+                            : 'bg-[var(--color-bg-base)] border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-[var(--color-accent-primary)]'
                         }`}
                       >
                         {isSelected && (
                           <>
-                            <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#ff3b3f] rounded-tl-sm pointer-events-none" />
-                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#ff3b3f] rounded-tr-sm pointer-events-none" />
-                            <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#ff3b3f] rounded-bl-sm pointer-events-none" />
-                            <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#ff3b3f] rounded-br-sm pointer-events-none" />
+                            <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[var(--color-accent-primary)] rounded-tl-sm pointer-events-none" />
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[var(--color-accent-primary)] rounded-tr-sm pointer-events-none" />
+                            <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[var(--color-accent-primary)] rounded-bl-sm pointer-events-none" />
+                            <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[var(--color-accent-primary)] rounded-br-sm pointer-events-none" />
                           </>
                         )}
                         <span className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-[#ff3b3f] animate-pulse' : 'bg-emerald-500'}`} />
+                          <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-[var(--color-accent-primary)] animate-pulse' : 'bg-emerald-500'}`} />
                           <span className="tracking-wider">{c}</span>
                         </span>
                         {isSelected && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#ff3b3f] text-white font-mono font-bold">
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-accent-primary)] text-white font-mono font-bold">
                             FRAMED
                           </span>
                         )}
@@ -524,7 +532,7 @@ const SubmitMatchPage = () => {
                 <button
                   type="button"
                   onClick={addGame}
-                  className="px-4 py-2 bg-[var(--color-bg-base,#201b0c)] hover:bg-[var(--color-bg-card-hover,#3b3423)] border border-[var(--color-border-strong,#5d3f3d)] rounded-xl text-xs font-bold tracking-wider text-[var(--color-text-primary,#ffb3ad)] uppercase transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] rounded-xl text-xs font-bold tracking-wider text-[var(--color-text-primary)] uppercase transition-colors cursor-pointer shadow-xs"
                 >
                   + ADD GAME
                 </button>
@@ -550,8 +558,8 @@ const SubmitMatchPage = () => {
                       <span
                         className={`text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full ${
                           isTie
-                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500'
-                            : 'bg-[var(--color-bg-card,#251f10)] text-[var(--color-text-muted,#ffb3ad)] border border-[var(--color-border-subtle,#3b3423)]'
+                            ? 'bg-rose-500/20 text-rose-500 border border-rose-500/50'
+                            : 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)]'
                         }`}
                       >
                         {gameWinner}
@@ -594,7 +602,7 @@ const SubmitMatchPage = () => {
                           type="button"
                           onClick={() => removeGame(idx)}
                           aria-label={`Remove Game ${idx + 1}`}
-                          className="text-xs text-rose-400 hover:text-white font-bold p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer"
+                          className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-white font-bold p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer"
                         >
                           ✕
                         </button>

@@ -28,30 +28,30 @@ const CustomTooltip = ({ active, payload }) => {
     const isLoss = data.delta < 0;
 
     return (
-      <div className="p-3.5 bg-[#1a1508] border border-[#ff3b3f] rounded-xl shadow-2xl text-xs font-sans text-[#ede1c9] min-w-[200px] z-50">
-        <div className="flex items-center justify-between gap-2 mb-1.5 pb-1.5 border-b border-[#3b3423]">
-          <span className="text-[10px] font-mono font-bold text-[#9a8e7a]">
+      <div className="p-3.5 bg-[var(--color-bg-card)] border border-[var(--color-accent-primary)] rounded-xl shadow-2xl text-xs font-sans text-[var(--color-text-primary)] min-w-[200px] z-50">
+        <div className="flex items-center justify-between gap-2 mb-1.5 pb-1.5 border-b border-[var(--color-border-subtle)]">
+          <span className="text-[10px] font-mono font-bold text-[var(--color-text-muted)]">
             {new Date(data.date).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
             })}
           </span>
-          <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 bg-[#251f10] border border-[#3b3423] text-[#ffb3ad] rounded">
+          <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] text-[var(--color-accent-primary)] rounded">
             {data.changeType?.replace('_', ' ') || 'EVENT'}
           </span>
         </div>
 
         <div className="flex items-baseline justify-between gap-2 mb-1">
-          <span className="text-[#9a8e7a]">Rating:</span>
+          <span className="text-[var(--color-text-muted)]">Rating:</span>
           <div className="flex items-center gap-1.5">
-            <span className="font-mono font-bold text-base text-[#ede1c9]">
+            <span className="font-mono font-bold text-base text-[var(--color-text-primary)]">
               {data.rating} Elo
             </span>
             {data.delta !== 0 && (
               <span
                 className={`font-mono font-bold text-[11px] ${
-                  isGain ? 'text-emerald-400' : isLoss ? 'text-rose-400' : 'text-[#9a8e7a]'
+                  isGain ? 'text-emerald-600 dark:text-emerald-400' : isLoss ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--color-text-muted)]'
                 }`}
               >
                 {isGain ? `+${data.delta}` : data.delta}
@@ -61,7 +61,7 @@ const CustomTooltip = ({ active, payload }) => {
         </div>
 
         {data.reason && (
-          <div className="text-[10px] text-[#ad8885] italic mt-1 pt-1 border-t border-[#2f2919]">
+          <div className="text-[10px] text-[var(--color-text-muted)] italic mt-1 pt-1 border-t border-[var(--color-border-subtle)]">
             {data.reason}
           </div>
         )}

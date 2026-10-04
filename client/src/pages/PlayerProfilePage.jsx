@@ -173,10 +173,10 @@ const PlayerProfilePage = () => {
 
               <div>
                 <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <span className="text-[10px] font-bold tracking-[0.25em] text-[#ffb3ad] uppercase font-mono px-2 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
+                  <span className="text-[10px] font-bold tracking-[0.25em] text-[var(--color-accent-primary)] uppercase font-mono px-2 py-0.5 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] rounded">
                     {player.playerId}
                   </span>
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-[#4ade80] uppercase px-2 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-[#4ade80] uppercase px-2 py-0.5 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] rounded">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse" />
                     {player.accountStatus}
                   </span>
@@ -185,14 +185,14 @@ const PlayerProfilePage = () => {
                 <h1
                   onClick={() => setShowClubPassModal(true)}
                   title="Click to view full digital pass & QR code"
-                  className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[var(--color-text-primary,#ede1c9)] hover:text-[#ff3b3f] cursor-pointer transition-colors flex items-center gap-3 group"
+                  className="font-['Playfair_Display'] text-3xl sm:text-5xl font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent-primary)] cursor-pointer transition-colors flex items-center gap-3 group"
                 >
                   <span>{player.name}</span>
                   <span className="text-base opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all" title="View QR Pass">
                     🪪
                   </span>
                 </h1>
-                <p className="text-xs text-[var(--color-text-muted,#9a8e7a)] mt-1 font-mono">
+                <p className="text-xs text-[var(--color-text-muted)] mt-1 font-mono">
                   Official Member since {new Date(player.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </p>
               </div>
@@ -205,26 +205,26 @@ const PlayerProfilePage = () => {
                 type="button"
                 onClick={() => setShowClubPassModal(true)}
                 title="Click to view full digital pass & QR code"
-                className="p-4 bg-[#1a1508] border border-[#3b3423] hover:border-[#ff3b3f] rounded-2xl flex items-center gap-4 cursor-pointer transition-all hover:scale-[1.02] shadow-lg group text-left"
+                className="p-4 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] rounded-2xl flex items-center gap-4 cursor-pointer transition-all hover:scale-[1.02] shadow-lg group text-left"
               >
                 {qrDataUrl ? (
                   <div className="w-16 h-16 bg-[#ede1c9] p-1 rounded-xl overflow-hidden shadow shrink-0">
                     <img src={qrDataUrl} alt={`${player.name} QR Code`} className="w-full h-full object-contain" />
                   </div>
                 ) : (
-                  <div className="w-16 h-16 bg-[#251f10] rounded-xl flex items-center justify-center text-2xl shrink-0">
+                  <div className="w-16 h-16 bg-[var(--color-bg-card-hover)] rounded-xl flex items-center justify-center text-2xl shrink-0">
                     🪪
                   </div>
                 )}
                 <div>
-                  <span className="text-[9px] font-bold tracking-[0.2em] text-[#ff3b3f] uppercase block font-mono">
+                  <span className="text-[9px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase block font-mono">
                     DIGITAL PASS
                   </span>
-                  <span className="text-xs font-bold text-[#ede1c9] group-hover:text-white flex items-center gap-1 mt-0.5">
+                  <span className="text-xs font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent-primary)] flex items-center gap-1 mt-0.5">
                     <span>Scan QR Code</span>
-                    <span className="text-[10px] text-[#ad8885]">↗</span>
+                    <span className="text-[10px] text-[var(--color-text-muted)]">↗</span>
                   </span>
-                  <span className="text-[10px] text-[#9a8e7a] block mt-0.5">
+                  <span className="text-[10px] text-[var(--color-text-muted)] block mt-0.5">
                     Click to enlarge
                   </span>
                 </div>
@@ -235,33 +235,33 @@ const PlayerProfilePage = () => {
                 type="button"
                 onClick={() => setShowShareCardModal(true)}
                 title="Generate and share your official athlete card"
-                className="p-4 bg-[#1a1508] border border-[#3b3423] hover:border-[#ff3b3f] rounded-2xl flex items-center gap-3.5 cursor-pointer transition-all hover:scale-[1.02] shadow-lg group text-left"
+                className="p-4 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] rounded-2xl flex items-center gap-3.5 cursor-pointer transition-all hover:scale-[1.02] shadow-lg group text-left"
               >
-                <div className="w-16 h-16 bg-[#251f10] border border-[#3b3423] rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform">
+                <div className="w-16 h-16 bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform">
                   🎴
                 </div>
                 <div>
-                  <span className="text-[9px] font-bold tracking-[0.2em] text-[#ff3b3f] uppercase block font-mono">
+                  <span className="text-[9px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase block font-mono">
                     SHARE CARD
                   </span>
-                  <span className="text-xs font-bold text-[#ede1c9] group-hover:text-white flex items-center gap-1 mt-0.5">
+                  <span className="text-xs font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent-primary)] flex items-center gap-1 mt-0.5">
                     <span>Export Card</span>
-                    <span className="text-[10px] text-[#ad8885]">↗</span>
+                    <span className="text-[10px] text-[var(--color-text-muted)]">↗</span>
                   </span>
-                  <span className="text-[10px] text-[#9a8e7a] block mt-0.5">
+                  <span className="text-[10px] text-[var(--color-text-muted)] block mt-0.5">
                     WhatsApp & Social
                   </span>
                 </div>
               </button>
 
               {/* Rating Highlight Pill */}
-              <div className="p-5 bg-[#1a1508] border border-[#3b3423] hover:border-[#ff3b3f]/60 rounded-2xl flex flex-col items-start sm:items-end justify-center shrink-0 transition-colors shadow-lg">
-                <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase mb-1">
+              <div className="p-5 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)]/60 rounded-2xl flex flex-col items-start sm:items-end justify-center shrink-0 transition-colors shadow-lg">
+                <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase mb-1">
                   OFFICIAL RATING
                 </span>
-                <div className="font-['Playfair_Display'] text-3xl sm:text-4xl font-bold text-[#ede1c9] flex items-baseline gap-2">
+                <div className="font-['Playfair_Display'] text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] flex items-baseline gap-2">
                   <AnimatedNumber value={player.currentRating} duration={1000} />
-                  <span className="text-xs font-sans font-normal text-[#ffb3ad]">Elo</span>
+                  <span className="text-xs font-sans font-normal text-[var(--color-accent-primary)]">Elo</span>
                 </div>
                 <div className="mt-1.5">
                   <TierBadge category={player.category} />
@@ -273,47 +273,47 @@ const PlayerProfilePage = () => {
 
         {/* Stats Grid with 3D Tilt Cards & Count-Ups */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <TiltCard className="p-8 bg-[#251f10] border border-[#3b3423] hover:border-[#ff3b3f] transition-all hover-lift rounded-2xl">
-            <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase block mb-1">
+          <TiltCard className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift rounded-2xl">
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase block mb-1">
               MATCHES PLAYED
             </span>
-            <div className="font-['Playfair_Display'] text-4xl font-bold text-[#ede1c9] mb-2">
+            <div className="font-['Playfair_Display'] text-4xl font-bold text-[var(--color-text-primary)] mb-2">
               <AnimatedNumber value={player.matchesPlayed} duration={800} />
             </div>
-            <span className="text-xs text-[#9a8e7a]">Total approved career games</span>
+            <span className="text-xs text-[var(--color-text-muted)]">Total approved career games</span>
           </TiltCard>
 
-          <TiltCard className="p-8 bg-[#251f10] border border-[#3b3423] hover:border-[#ad8885] transition-all hover-lift rounded-2xl">
-            <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase block mb-1">
+          <TiltCard className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift rounded-2xl">
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase block mb-1">
               WIN RECORD
             </span>
-            <div className="font-['Playfair_Display'] text-4xl font-bold text-[#ede1c9] mb-2 flex items-baseline gap-2">
+            <div className="font-['Playfair_Display'] text-4xl font-bold text-[var(--color-text-primary)] mb-2 flex items-baseline gap-2">
               <AnimatedNumber value={player.wins} duration={800} />
-              <span className="text-sm font-sans font-normal text-[#9a8e7a]">
+              <span className="text-sm font-sans font-normal text-[var(--color-text-muted)]">
                 ({player.winPercentage}%)
               </span>
             </div>
-            <span className="text-xs text-[#9a8e7a]">{player.losses} Losses recorded</span>
+            <span className="text-xs text-[var(--color-text-muted)]">{player.losses} Losses recorded</span>
           </TiltCard>
 
-          <TiltCard className="p-8 bg-[#251f10] border border-[#3b3423] hover:border-[#ad8885] transition-all hover-lift rounded-2xl">
-            <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase block mb-1">
+          <TiltCard className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift rounded-2xl">
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase block mb-1">
               CURRENT WINNING STREAK
             </span>
-            <div className="font-['Playfair_Display'] text-4xl font-bold text-[#ede1c9] mb-2">
+            <div className="font-['Playfair_Display'] text-4xl font-bold text-[var(--color-text-primary)] mb-2">
               <AnimatedNumber value={player.winningStreak} duration={800} />
             </div>
-            <span className="text-xs text-[#9a8e7a]">Consecutive victories</span>
+            <span className="text-xs text-[var(--color-text-muted)]">Consecutive victories</span>
           </TiltCard>
 
-          <TiltCard className="p-8 bg-[#251f10] border border-[#3b3423] hover:border-[#ad8885] transition-all hover-lift rounded-2xl">
-            <span className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase block mb-1">
+          <TiltCard className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift rounded-2xl">
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase block mb-1">
               CAREER PEAK ELO
             </span>
-            <div className="font-['Playfair_Display'] text-4xl font-bold text-[#ede1c9] mb-2">
+            <div className="font-['Playfair_Display'] text-4xl font-bold text-[var(--color-text-primary)] mb-2">
               <AnimatedNumber value={player.highestRating} duration={800} />
             </div>
-            <span className="text-xs text-[#9a8e7a]">All-time highest rating</span>
+            <span className="text-xs text-[var(--color-text-muted)]">All-time highest rating</span>
           </TiltCard>
         </div>
 

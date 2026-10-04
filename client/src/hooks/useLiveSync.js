@@ -23,11 +23,11 @@ import { useEffect, useRef } from 'react';
 import { getPusherClient } from '../services/realtime';
 
 export const useLiveSync = (channelName, eventNames, onEvent, options = {}) => {
-  const { syncOnFocus = true, enabled = true } = options;
+  const { enabled = true } = options;
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
 
-  // 1. Pusher WebSocket subscription
+  // Real-time Pusher WebSocket subscription (only fires when genuine events arrive)
   useEffect(() => {
     if (!enabled || !channelName) return;
 
@@ -38,6 +38,8 @@ export const useLiveSync = (channelName, eventNames, onEvent, options = {}) => {
     const events = Array.isArray(eventNames) ? eventNames : [eventNames];
 
     const handler = (data) => {
+      // Discard any empty or corrupt payloads
+      if (!data) return;
       if (typeof onEventRef.current === 'function') {
         onEventRef.current(data);
       }
@@ -51,39 +53,8 @@ export const useLiveSync = (channelName, eventNames, onEvent, options = {}) => {
       events.forEach((evt) => {
         channel.unbind(evt, handler);
       });
-      // Do not unsubscribe completely if other components share the channel,
-      // Pusher manages subscriber reference counts internally if left subscribed,
-      // but unbinding the specific callback ensures no memory leaks.
     };
   }, [channelName, JSON.stringify(eventNames), enabled]);
-
-  // 2. Smart Focus Sync (when tab gains focus or device wakes up)
-  useEffect(() => {
-    if (!enabled || !syncOnFocus) return;
-
-    let lastSync = Date.now();
-
-    const handleFocus = () => {
-      // Throttle focus sync to once every 4 seconds to avoid spamming
-      if (Date.now() - lastSync > 4000) {
-        lastSync = Date.now();
-        if (typeof onEventRef.current === 'function') {
-          onEventRef.current({ source: 'focus' });
-        }
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        handleFocus();
-      }
-    });
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [syncOnFocus, enabled]);
 };
 
 export default useLiveSync;

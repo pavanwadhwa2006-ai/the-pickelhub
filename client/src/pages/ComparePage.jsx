@@ -165,7 +165,7 @@ const ComparePage = () => {
               onClick={handleSwap}
               disabled={!player1 || !player2}
               aria-label="Swap athlete positions"
-              className="px-4 py-2.5 min-h-[44px] bg-[var(--color-bg-card,#201b0c)] hover:bg-[var(--color-bg-card-hover,#2f2814)] border border-[var(--color-border-subtle,#3b3423)] rounded-xl text-xs font-bold tracking-wider text-[var(--color-text-muted,#9a8e7a)] hover:text-white uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+              className="px-4 py-2.5 min-h-[44px] bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] rounded-xl text-xs font-bold tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
               title="Swap Athlete Positions"
             >
               <span aria-hidden="true">⇄</span>
@@ -212,7 +212,7 @@ const ComparePage = () => {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono font-bold text-[#ffb3ad] px-1.5 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
+                        <span className="text-[10px] font-mono font-bold text-[var(--color-accent-primary)] px-1.5 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
                           {player1.playerId}
                         </span>
                         <TierBadge category={player1.category} />
@@ -226,13 +226,13 @@ const ComparePage = () => {
                   {/* Quick Metric Bar */}
                   <div className="grid grid-cols-3 gap-3 p-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded-2xl text-center">
                     <div>
-                      <span className="text-[9px] font-bold text-[#ad8885] uppercase block">Rating</span>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase block">Rating</span>
                       <span className="font-mono font-bold text-xl text-[var(--color-text-primary,#ede1c9)]">
                         {player1.currentRating}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[9px] font-bold text-[#ad8885] uppercase block">Win Rate</span>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase block">Win Rate</span>
                       <span className="font-mono font-bold text-xl text-[var(--color-text-primary,#ede1c9)]">
                         {player1.winPercentage}%
                       </span>
@@ -256,7 +256,7 @@ const ComparePage = () => {
               <div className="mt-6 pt-4 border-t border-[var(--color-border-subtle,#2f2919)] flex items-center justify-between text-xs">
                 <Link
                   to={`/players/${player1.playerId}`}
-                  className="text-[#ffb3ad] hover:text-white underline underline-offset-2 font-mono text-[11px]"
+                  className="text-[var(--color-accent-primary)] hover:opacity-80 underline underline-offset-2 font-mono text-[11px] font-bold"
                 >
                   View Full Profile →
                 </Link>
@@ -291,7 +291,7 @@ const ComparePage = () => {
               {player2 ? (
                 <div className="pt-4 border-t border-[var(--color-border-subtle,#2f2919)]">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-2xl bg-[#10586B] text-white font-['Playfair_Display'] font-bold text-2xl flex items-center justify-center shrink-0 border border-[#3b3423] shadow-md">
+                    <div className="w-16 h-16 rounded-2xl bg-sky-600 text-white font-['Playfair_Display'] font-bold text-2xl flex items-center justify-center shrink-0 border border-[var(--color-border-subtle)] shadow-md">
                       {player2.profilePhoto ? (
                         <img src={player2.profilePhoto} alt={player2.name} className="w-full h-full object-cover rounded-2xl" />
                       ) : (
@@ -300,7 +300,7 @@ const ComparePage = () => {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono font-bold text-[#ffb3ad] px-1.5 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
+                        <span className="text-[10px] font-mono font-bold text-[var(--color-accent-primary)] px-1.5 py-0.5 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded">
                           {player2.playerId}
                         </span>
                         <TierBadge category={player2.category} />
@@ -314,13 +314,13 @@ const ComparePage = () => {
                   {/* Quick Metric Bar */}
                   <div className="grid grid-cols-3 gap-3 p-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] rounded-2xl text-center">
                     <div>
-                      <span className="text-[9px] font-bold text-[#ad8885] uppercase block">Rating</span>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase block">Rating</span>
                       <span className="font-mono font-bold text-xl text-[var(--color-text-primary,#ede1c9)]">
                         {player2.currentRating}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[9px] font-bold text-[#ad8885] uppercase block">Win Rate</span>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase block">Win Rate</span>
                       <span className="font-mono font-bold text-xl text-[var(--color-text-primary,#ede1c9)]">
                         {player2.winPercentage}%
                       </span>
@@ -344,7 +344,7 @@ const ComparePage = () => {
               <div className="mt-6 pt-4 border-t border-[var(--color-border-subtle,#2f2919)] flex items-center justify-between text-xs">
                 <Link
                   to={`/players/${player2.playerId}`}
-                  className="text-[#ffb3ad] hover:text-white underline underline-offset-2 font-mono text-[11px]"
+                  className="text-[var(--color-accent-primary)] hover:opacity-80 underline underline-offset-2 font-mono text-[11px] font-bold"
                 >
                   View Full Profile →
                 </Link>
@@ -384,7 +384,7 @@ const ComparePage = () => {
                     <span className="text-[#ff3b3f]">
                       {player1.name}: {p1Prob.toFixed(0)}%
                     </span>
-                    <span className="text-[#10586B]">
+                    <span className="text-sky-600 dark:text-sky-400">
                       {player2.name}: {p2Prob.toFixed(0)}%
                     </span>
                   </div>
@@ -402,7 +402,7 @@ const ComparePage = () => {
                         style={{ width: `${p1Prob}%` }}
                       />
                       <div
-                        className="bg-[#10586B] h-full transition-all duration-700"
+                        className="bg-sky-500 h-full transition-all duration-700"
                         style={{ width: `${p2Prob}%` }}
                       />
                     </div>
@@ -449,8 +449,8 @@ const ComparePage = () => {
 
               <div className="flex items-center gap-4 text-xs font-mono font-bold">
                 <span className="text-[#ff3b3f]">{player1.name}: {headToHead.player1Wins} Wins</span>
-                <span className="text-[#9a8e7a]">|</span>
-                <span className="text-[#10586B]">{player2.name}: {headToHead.player2Wins} Wins</span>
+                <span className="text-[var(--color-text-muted)]">|</span>
+                <span className="text-sky-600 dark:text-sky-400">{player2.name}: {headToHead.player2Wins} Wins</span>
               </div>
             </div>
 

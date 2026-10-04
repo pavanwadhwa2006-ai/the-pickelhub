@@ -10,6 +10,7 @@
 
 const getTierKey = (category = '') => {
   const cat = category.toLowerCase().replace(/[\s.-]+/g, '_');
+  if (cat.includes('god')) return 'god_level';
   if (cat.includes('pro')) return 'pro';
   if (cat.includes('adv') || cat.includes('advanced')) return 'advanced_intermediate';
   if (cat.includes('beg') || cat.includes('novice')) return 'beginner';
@@ -19,6 +20,8 @@ const getTierKey = (category = '') => {
 const getTierLabel = (category = '') => {
   const key = getTierKey(category);
   switch (key) {
+    case 'god_level':
+      return '⚡ GOD LEVEL';
     case 'pro':
       return 'PRO DIVISION';
     case 'advanced_intermediate':

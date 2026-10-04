@@ -20,28 +20,35 @@ const Player = require('../src/models/Player');
 
 describe('Player Identity & Rating Tier Tests (Milestone 3)', () => {
   describe('Skill Category Calculation (PRD Section 8.1)', () => {
-    it('should categorize ratings 0–999 as Beginner', () => {
+    it('should categorize ratings 0–1099 as Beginner', () => {
       assert.equal(calculateCategory(0), 'Beginner');
       assert.equal(calculateCategory(500), 'Beginner');
-      assert.equal(calculateCategory(999), 'Beginner');
+      assert.equal(calculateCategory(1000), 'Beginner');
+      assert.equal(calculateCategory(1099), 'Beginner');
     });
 
-    it('should categorize ratings 1000–1199 as Intermediate', () => {
-      assert.equal(calculateCategory(1000), 'Intermediate');
+    it('should categorize ratings 1100–1299 as Intermediate', () => {
       assert.equal(calculateCategory(1100), 'Intermediate');
-      assert.equal(calculateCategory(1199), 'Intermediate');
+      assert.equal(calculateCategory(1200), 'Intermediate');
+      assert.equal(calculateCategory(1299), 'Intermediate');
     });
 
-    it('should categorize ratings 1200–1399 as Advanced Intermediate', () => {
-      assert.equal(calculateCategory(1200), 'Advanced Intermediate');
+    it('should categorize ratings 1300–1499 as Advanced Intermediate', () => {
       assert.equal(calculateCategory(1300), 'Advanced Intermediate');
-      assert.equal(calculateCategory(1399), 'Advanced Intermediate');
+      assert.equal(calculateCategory(1400), 'Advanced Intermediate');
+      assert.equal(calculateCategory(1499), 'Advanced Intermediate');
     });
 
-    it('should categorize ratings 1400+ as Pro', () => {
-      assert.equal(calculateCategory(1400), 'Pro');
+    it('should categorize ratings 1500–1799 as Pro', () => {
+      assert.equal(calculateCategory(1500), 'Pro');
       assert.equal(calculateCategory(1600), 'Pro');
-      assert.equal(calculateCategory(2200), 'Pro');
+      assert.equal(calculateCategory(1799), 'Pro');
+    });
+
+    it('should categorize ratings 1800+ as God Level', () => {
+      assert.equal(calculateCategory(1800), 'God Level');
+      assert.equal(calculateCategory(2000), 'God Level');
+      assert.equal(calculateCategory(2500), 'God Level');
     });
   });
 
@@ -57,7 +64,7 @@ describe('Player Identity & Rating Tier Tests (Milestone 3)', () => {
   });
 
   describe('Player Model — Defaults & Win Percentage Virtual', () => {
-    it('should initialize player with default 1000 rating, Intermediate category, and compute winPercentage virtual', () => {
+    it('should initialize player with default 1000 rating, Beginner category, and compute winPercentage virtual', () => {
       const mockUserId = new mongoose.Types.ObjectId();
       const player = new Player({
         userId: mockUserId,
@@ -69,7 +76,7 @@ describe('Player Identity & Rating Tier Tests (Milestone 3)', () => {
       // Assert schema defaults
       assert.equal(player.currentRating, 1000, 'Starting rating must be 1000');
       assert.equal(player.highestRating, 1000, 'Starting highest rating must be 1000');
-      assert.equal(player.category, 'Intermediate');
+      assert.equal(player.category, 'Beginner');
       assert.equal(player.matchesPlayed, 0);
       assert.equal(player.wins, 0);
       assert.equal(player.losses, 0);

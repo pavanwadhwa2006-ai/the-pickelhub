@@ -82,11 +82,11 @@
   --border: #E5DFC4;         /* warm hairline border */
   --border-strong: #D4CDAC;
 
-  /* Text */
-  --text-primary: #10241F;   /* near-midnight green-black, not pure black */
-  --text-secondary: #5C6B62; /* muted sage-gray */
-  --text-muted: #9CA79C;
-  --text-subtle: #738279;
+  /* Text — Strict WCAG AA/AAA High Contrast */
+  --text-primary: #10241F;   /* deep forest-black: 14:1 contrast on white */
+  --text-secondary: #3B4A42; /* rich charcoal sage: 7.5:1 contrast on white */
+  --text-muted: #536259;     /* clear slate moss: 5.2:1 contrast on white, 4.8:1 on cream */
+  --text-subtle: #617167;    /* crisp high-contrast subtle text */
 
   /* Accent roles — assign by MEANING, not decoration */
   --accent-primary: #1D3461;        /* sapphire — primary CTAs, links, active nav */
@@ -242,6 +242,90 @@ body {
   flex-direction: column;
 }
 
+/* ── Base Form Controls & High Contrast Guarantee ── */
+input, select, textarea {
+  color: var(--color-text-primary);
+  font-family: inherit;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+select option {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
+/* Strict Rule: Any button or surface with dark/sapphire/midnight/garnet background MUST have the background applied AND white text */
+[class*="bg-[var(--color-accent-primary)]"],
+[class*="bg-[var(--accent-primary)]"],
+.bg-accent-primary {
+  background-color: var(--color-accent-primary) !important;
+  color: #FFFFFF !important;
+}
+
+[class*="bg-[#1D3461]"],
+[class*="bg-[#10586B]"],
+[class*="bg-[#16294D]"],
+[class*="bg-[#722F37]"],
+[class*="bg-[#2C4A7C]"],
+.btn-primary {
+  color: #FFFFFF !important;
+}
+
+/* Ensure all descendant text, spans, and labels in dark-background buttons inherit white text */
+[class*="bg-[var(--color-accent-primary)]"] span,
+[class*="bg-[var(--color-accent-primary)]"] p,
+[class*="bg-[var(--color-accent-primary)]"] strong,
+[class*="bg-[var(--color-accent-primary)]"] b,
+[class*="bg-[var(--accent-primary)]"] span,
+[class*="bg-[var(--accent-primary)]"] p,
+[class*="bg-[var(--accent-primary)]"] strong,
+[class*="bg-[#1D3461]"] span,
+[class*="bg-[#1D3461]"] p,
+[class*="bg-[#1D3461]"] strong,
+[class*="bg-[#10586B]"] span,
+[class*="bg-[#10586B]"] p,
+[class*="bg-[#10586B]"] strong,
+[class*="bg-[#722F37]"] span,
+[class*="bg-[#722F37]"] p,
+[class*="bg-[#722F37]"] strong {
+  color: inherit !important;
+}
+
+/* Exclude soft alpha /10, /15, /20 backgrounds from being forced to white text */
+[class*="bg-[var(--color-accent-primary)]/10"],
+[class*="bg-[var(--color-accent-primary)]/15"],
+[class*="bg-[var(--color-accent-primary)]/20"],
+[class*="bg-[var(--color-accent-primary)]/5"],
+[class*="bg-[#1D3461]/10"],
+[class*="bg-[#1D3461]/15"],
+[class*="bg-[#1D3461]/20"] {
+  color: var(--color-accent-primary) !important;
+}
+[class*="bg-[var(--color-accent-primary)]/10"] span,
+[class*="bg-[var(--color-accent-primary)]/15"] span,
+[class*="bg-[var(--color-accent-primary)]/20"] span {
+  color: inherit !important;
+}
+
+/* In Classic Dark mode, ensure inputs, selects, textareas, and option items are clearly visible with high contrast */
+:root[data-theme="classic-dark"] input,
+:root[data-theme="classic-dark"] select,
+:root[data-theme="classic-dark"] textarea {
+  color: #EDE1C9 !important;
+}
+:root[data-theme="classic-dark"] select option {
+  background-color: #251F10 !important;
+  color: #EDE1C9 !important;
+}
+:root[data-theme="garden-light"] select option {
+  background-color: #FFFFFF !important;
+  color: #10241F !important;
+}
+
 /* ── Garden Light Dynamic Surface & Text Mapping ── */
 [data-theme="garden-light"] body,
 [data-theme="garden-light"] .bg-\[\#181305\] {
@@ -324,6 +408,19 @@ body {
   background: var(--border-strong);
 }
 
+/* ── Toast Notifications High-Contrast Engine ── */
+.toast-card {
+  border-width: 2px !important;
+}
+
+[data-theme="garden-light"] .toast-card {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="classic-dark"] .toast-card {
+  background-color: #1C160B !important;
+}
+
 /* ── Navbar Header & Links ── */
 .navbar-header {
   background-color: var(--nav-bg) !important;
@@ -374,6 +471,15 @@ body {
    ============================================ */
 
 /* ── Botanical / Garden Light Tier Badges (Default) ── */
+:root .tier-badge[data-tier="god_level"],
+:root[data-theme="garden-light"] .tier-badge[data-tier="god_level"] {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%) !important;
+  border-color: #B45309 !important;
+  color: #78350F !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.35) !important;
+  font-weight: 800 !important;
+}
+
 :root .tier-badge[data-tier="pro"],
 :root[data-theme="garden-light"] .tier-badge[data-tier="pro"] {
   background-color: #E0EFF3 !important;
@@ -403,6 +509,14 @@ body {
 }
 
 /* ── Classic Dark Tier Badges ── */
+:root[data-theme="classic-dark"] .tier-badge[data-tier="god_level"] {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.35) 100%) !important;
+  border-color: #f59e0b !important;
+  color: #fde68a !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45) !important;
+  font-weight: 800 !important;
+}
+
 :root[data-theme="classic-dark"] .tier-badge[data-tier="pro"] {
   background-color: rgba(255, 59, 63, 0.15) !important;
   border-color: #ff3b3f !important;
@@ -436,6 +550,21 @@ body {
 [data-theme="garden-light"] .filter-pill-all.active {
   background-color: #1D3461 !important;
   border-color: #1D3461 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="garden-light"] .filter-pill-god_level {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  color: #92400E !important;
+}
+[data-theme="garden-light"] .filter-pill-god_level:hover {
+  background-color: rgba(245, 158, 11, 0.22) !important;
+  border-color: #F59E0B !important;
+}
+[data-theme="garden-light"] .filter-pill-god_level.active {
+  background-color: #B45309 !important;
+  border-color: #B45309 !important;
   color: #FFFFFF !important;
 }
 

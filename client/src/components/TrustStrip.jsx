@@ -29,8 +29,8 @@ const TrustStrip = ({ className = '' }) => {
     },
     {
       label: 'SKILL DIVISIONS',
-      value: '4 Dynamic Tiers',
-      detail: 'Beginner to Pro (1400+)',
+      value: '5 Dynamic Tiers',
+      detail: 'Beginner to God Level (1800+)',
       isBadge: false,
     },
   ];

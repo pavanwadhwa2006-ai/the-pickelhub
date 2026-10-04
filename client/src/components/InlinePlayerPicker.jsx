@@ -192,7 +192,7 @@ const InlinePlayerPicker = ({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-text-muted,#9a8e7a)] hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
                 >
                   ✕
                 </button>
@@ -204,7 +204,7 @@ const InlinePlayerPicker = ({
                 type="button"
                 onClick={onOpenScanner}
                 title="Scan Opponent's Digital Pass QR"
-                className="px-3 py-2.5 bg-[var(--color-bg-card,#181305)] hover:bg-[var(--color-bg-card-hover,#251f10)] border border-[var(--color-border-subtle,#3b3423)] hover:border-[var(--color-accent-primary,#ff3b3f)] rounded-xl text-xs font-bold text-[var(--color-accent-primary,#ff3b3f)] flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                className="px-3 py-2.5 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] rounded-xl text-xs font-bold text-[var(--color-accent-primary)] flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
               >
                 <span>📷</span>
                 <span className="hidden sm:inline">Scan QR</span>
@@ -215,7 +215,7 @@ const InlinePlayerPicker = ({
               <button
                 type="button"
                 onClick={() => setManualEdit(false)}
-                className="px-2.5 py-2.5 bg-[var(--color-bg-card,#181305)] text-[var(--color-text-muted,#9a8e7a)] hover:text-white border border-[var(--color-border-subtle,#3b3423)] rounded-xl text-xs font-bold cursor-pointer"
+                className="px-2.5 py-2.5 bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] rounded-xl text-xs font-bold cursor-pointer transition-colors"
                 title="Cancel change"
               >
                 ✕

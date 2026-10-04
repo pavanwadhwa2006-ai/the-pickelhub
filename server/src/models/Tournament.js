@@ -121,7 +121,7 @@ const tournamentSchema = new mongoose.Schema(
     category: {
       type: String,
       enum: {
-        values: ['All', 'Beginner', 'Intermediate', 'Advanced Intermediate', 'Pro'],
+        values: ['All', 'Beginner', 'Intermediate', 'Advanced Intermediate', 'Pro', 'God Level'],
         message: '{VALUE} is not a valid skill category division',
       },
       default: 'All',

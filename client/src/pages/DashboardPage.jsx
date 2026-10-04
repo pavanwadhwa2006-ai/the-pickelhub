@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/useAuth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import useLiveSync from '../hooks/useLiveSync';
 import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
@@ -23,13 +23,16 @@ import HowItWorksCard from '../components/HowItWorksCard';
 import DigitalClubPassModal from '../components/DigitalClubPassModal';
 import ShareRatingCardModal from '../components/ShareRatingCardModal';
 import RatingHistoryChart from '../components/RatingHistoryChart';
+import QRScannerModal from '../components/QRScannerModal';
 
 const DashboardPage = () => {
   const { user, player } = useAuth();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [updateMsg, setUpdateMsg] = useState(null);
   const [showClubPass, setShowClubPass] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
+  const [showQrScanner, setShowQrScanner] = useState(false);
 
   // Active Pending Matches & Rating History State
   const [pendingMatches, setPendingMatches] = useState([]);
@@ -100,7 +103,7 @@ const DashboardPage = () => {
               type="button"
               onClick={() => setUpdateMsg(null)}
               aria-label="Dismiss notification"
-              className="text-[#ad8885] hover:text-white text-xs font-bold p-2 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+              className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] text-xs font-bold p-2 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer transition-colors"
             >
               ✕
             </button>
@@ -138,17 +141,17 @@ const DashboardPage = () => {
                     type="button"
                     onClick={handleCopyId}
                     title="Click to copy Player ID"
-                    className={`px-2.5 py-0.5 border text-[11px] font-bold font-mono tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1.5 rounded ${
+                    className={`px-2.5 py-0.5 border text-[11px] font-bold font-mono tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1.5 rounded-lg ${
                       copied
                         ? 'bg-[#4ade80]/20 border-[#4ade80] text-[#4ade80] shadow-[0_0_10px_rgba(74,222,128,0.2)]'
-                        : 'bg-[#251f10] hover:bg-[#352c16] hover:border-[#ff3b3f]/60 border-[#3b3423] text-[#ffb3ad]'
+                        : 'bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] hover:border-[var(--color-accent-primary)] border-[var(--color-border-subtle)] text-[var(--color-accent-primary)]'
                     }`}
                   >
                     <span>{copied ? '✓ COPIED' : player.playerId}</span>
                     <span className="text-[10px] opacity-70">{copied ? '' : '📋'}</span>
                   </button>
                 )}
-                <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#1a1508] border border-[#3b3423] text-[#4ade80] text-[10px] font-bold tracking-wider uppercase rounded">
+                <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[var(--color-bg-base)] border border-[var(--color-border-subtle)] text-[#4ade80] text-[10px] font-bold tracking-wider uppercase rounded-lg">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-live-pulse" />
                   {player?.accountStatus || 'ACTIVE'}
                 </span>
@@ -159,13 +162,13 @@ const DashboardPage = () => {
                 <Link
                   to={player?.playerId ? `/players/${player.playerId}` : '#'}
                   title="View Public Profile"
-                  className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#ede1c9] hover:text-[#ff3b3f] transition-colors"
+                  className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent-primary)] transition-colors"
                 >
                   {player?.name || user?.email?.split('@')[0]}
                 </Link>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-[#9a8e7a] mt-2">
+              <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)] mt-2">
                 <span>{user?.email}</span>
                 <span>•</span>
                 <span>Member since {formattedDate}</span>
@@ -176,7 +179,7 @@ const DashboardPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowClubPass(true)}
-                  className="px-3 py-1.5 bg-[#251f10] hover:bg-[#322a16] border border-[#ff3b3f]/50 hover:border-[#ff3b3f] text-[#ede1c9] rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] text-[var(--color-text-primary)] rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                   title="View your digital pass and QR code"
                 >
                   <span>🪪</span>
@@ -186,17 +189,27 @@ const DashboardPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowShareCard(true)}
-                  className="px-3 py-1.5 bg-[#ff3b3f]/15 hover:bg-[#ff3b3f]/25 border border-[#ff3b3f]/50 hover:border-[#ff3b3f] text-[#ffb3ad] rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] text-[var(--color-accent-primary)] rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                   title="Generate shareable athlete card"
                 >
                   <span>🎴</span>
                   <span>Share Rating Card</span>
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => setShowQrScanner(true)}
+                  className="px-3 py-1.5 bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] text-[var(--color-text-primary)] rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Scan opponent's pass QR code with mobile camera"
+                >
+                  <span>📷</span>
+                  <span>Scan Opponent QR</span>
+                </button>
+
                 {player?.playerId && (
                   <Link
                     to={`/players/${player.playerId}`}
-                    className="px-3 py-1.5 bg-[#1a1508] hover:bg-[#251f10] border border-[#3b3423] hover:border-[#9a8e7a] text-[#9a8e7a] hover:text-[#ede1c9] rounded-lg text-xs font-mono transition-colors flex items-center gap-1"
+                    className="px-3 py-1.5 bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] rounded-lg text-xs font-mono transition-colors flex items-center gap-1"
                   >
                     <span>Public Profile</span>
                     <span>↗</span>
@@ -206,12 +219,21 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Right: Primary Action Button (Submit Match Scores) */}
+          {/* Right: Primary Action Buttons (Submit Match Scores & Scan Opponent) */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setShowQrScanner(true)}
+              className="px-4 py-3 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] text-[var(--color-text-primary)] text-xs font-bold tracking-wider uppercase transition-all rounded-xl flex items-center justify-center gap-2 text-center cursor-pointer shadow-sm"
+              title="Scan Opponent's Pass with Camera"
+            >
+              <span className="text-sm">📷</span>
+              <span>Scan Pass</span>
+            </button>
             <Link
               to="/matches/submit"
               id="dashboard-submit-match-btn"
-              className="px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] rounded-xl flex items-center justify-center gap-2 text-center"
+              className="px-6 py-3 bg-[var(--color-accent-primary)] hover:brightness-110 text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-md rounded-xl flex items-center justify-center gap-2 text-center"
             >
               <span className="text-base leading-none font-bold">+</span>
               <span>Submit Scores</span>
@@ -229,16 +251,16 @@ const DashboardPage = () => {
         {/* Rating & Performance Metrics Grid with Tiered Elevation */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* Primary Stat Card 1: Elo Rating (Tiered Elevation & Glow Accent) */}
-          <TiltCard className="p-8 bg-[#251f10] border-2 border-[#ff3b3f]/80 shadow-[0_0_25px_rgba(255,59,63,0.15)] hover-lift">
+          <TiltCard className="p-8 bg-[var(--color-bg-card)] border-2 border-[var(--color-accent-primary)] shadow-lg hover-lift rounded-2xl">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold tracking-[0.2em] text-[#ffb3ad] uppercase">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase">
                 OFFICIAL RATING
               </span>
-              <span className="w-2 h-2 bg-[#ff3b3f] rounded-full animate-ping" />
+              <span className="w-2 h-2 bg-[var(--color-accent-primary)] rounded-full animate-ping" />
             </div>
-            <div className="font-['Playfair_Display'] text-5xl font-bold text-[#ede1c9] mb-3 flex items-baseline gap-2">
+            <div className="font-['Playfair_Display'] text-5xl font-bold text-[var(--color-text-primary)] mb-3 flex items-baseline gap-2">
               <AnimatedNumber value={player?.currentRating || 1000} duration={1000} />
-              <span className="text-xs font-sans font-normal text-[#ffb3ad]">Elo</span>
+              <span className="text-xs font-sans font-normal text-[var(--color-accent-primary)]">Elo</span>
             </div>
             <div>
               <TierBadge category={player?.category} />
@@ -246,15 +268,15 @@ const DashboardPage = () => {
           </TiltCard>
 
           {/* Primary Stat Card 2: Win / Loss Record */}
-          <TiltCard className="p-8 bg-[#251f10] border border-[#5d3f3d] hover:border-[#ad8885] transition-all hover-lift">
-            <div className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase mb-1">
+          <TiltCard className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift rounded-2xl">
+            <div className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase mb-1">
               MATCH RECORD
             </div>
-            <div className="font-['Playfair_Display'] text-5xl font-bold text-[#ede1c9] mb-3 flex items-baseline gap-2">
+            <div className="font-['Playfair_Display'] text-5xl font-bold text-[var(--color-text-primary)] mb-3 flex items-baseline gap-2">
               <AnimatedNumber value={player?.matchesPlayed || 0} duration={800} />
-              <span className="text-xs font-sans font-normal text-[#9a8e7a]">Played</span>
+              <span className="text-xs font-sans font-normal text-[var(--color-text-muted)]">Played</span>
             </div>
-            <div className="text-xs text-[#9a8e7a] flex items-center gap-3">
+            <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-3">
               <span>{player?.wins || 0} Wins</span>
               <span>•</span>
               <span>{player?.losses || 0} Losses ({player?.winPercentage || 0}%)</span>
@@ -262,29 +284,29 @@ const DashboardPage = () => {
           </TiltCard>
 
           {/* Secondary Stat Card: Active Winning Streak */}
-          <TiltCard className="p-8 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] transition-all hover-lift">
-            <div className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase mb-1">
+          <TiltCard className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift rounded-2xl">
+            <div className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase mb-1">
               WINNING STREAK
             </div>
-            <div className="font-['Playfair_Display'] text-5xl font-bold text-[#ede1c9] mb-3 flex items-baseline gap-2">
+            <div className="font-['Playfair_Display'] text-5xl font-bold text-[var(--color-text-primary)] mb-3 flex items-baseline gap-2">
               <AnimatedNumber value={player?.winningStreak || 0} duration={800} />
-              <span className="text-xs font-sans font-normal text-[#9a8e7a]">Matches</span>
+              <span className="text-xs font-sans font-normal text-[var(--color-text-muted)]">Matches</span>
             </div>
-            <div className="text-xs text-[#9a8e7a]">
+            <div className="text-xs text-[var(--color-text-muted)]">
               Highest Elo: {player?.highestRating || 1000}
             </div>
           </TiltCard>
 
           {/* Secondary Stat Card: Tournament Record */}
-          <TiltCard className="p-8 bg-[#201b0c] border border-[#3b3423] hover:border-[#ad8885] transition-all hover-lift">
-            <div className="text-[10px] font-bold tracking-[0.2em] text-[#ad8885] uppercase mb-1">
+          <TiltCard className="p-8 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift rounded-2xl">
+            <div className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase mb-1">
               TOURNAMENT RECORD
             </div>
-            <div className="font-['Playfair_Display'] text-5xl font-bold text-[#ede1c9] mb-3 flex items-baseline gap-2">
+            <div className="font-['Playfair_Display'] text-5xl font-bold text-[var(--color-text-primary)] mb-3 flex items-baseline gap-2">
               <AnimatedNumber value={player?.tournamentWins || 0} duration={800} />
-              <span className="text-xs font-sans font-normal text-[#9a8e7a]">Titles</span>
+              <span className="text-xs font-sans font-normal text-[var(--color-text-muted)]">Titles</span>
             </div>
-            <div className="text-xs text-[#9a8e7a]">
+            <div className="text-xs text-[var(--color-text-muted)]">
               {player?.tournamentAppearances || 0} Appearances
             </div>
           </TiltCard>
@@ -306,11 +328,11 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#f59e0b] animate-live-pulse" />
-                <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#ede1c9]">
+                <h2 className="font-['Playfair_Display'] text-xl font-bold text-[var(--color-text-primary)]">
                   Active Pending Matches ({pendingMatches.length})
                 </h2>
               </div>
-              <span className="text-[10px] font-bold font-mono tracking-widest text-[#f59e0b] px-2.5 py-1 bg-[#251f10] border border-[#f59e0b]/40 uppercase">
+              <span className="text-[10px] font-bold font-mono tracking-widest text-[#f59e0b] px-2.5 py-1 bg-[var(--color-bg-card)] border border-[#f59e0b]/40 uppercase rounded">
                 PENDING ADMIN APPROVAL
               </span>
             </div>
@@ -319,29 +341,29 @@ const DashboardPage = () => {
               {pendingMatches.map((match) => (
                 <div
                   key={match._id}
-                  className="p-6 bg-[#201b0c] border border-[#f59e0b]/50 shadow-lg relative overflow-hidden"
+                  className="p-6 bg-[var(--color-bg-card)] border border-[#f59e0b]/50 shadow-lg relative overflow-hidden rounded-2xl"
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <span className="text-[10px] font-mono font-bold text-[#ffb3ad] block">
+                      <span className="text-[10px] font-mono font-bold text-[var(--color-accent-primary)] block">
                         {match.matchId} • {match.matchType}
                       </span>
-                      <span className="text-xs text-[#9a8e7a]">
+                      <span className="text-xs text-[var(--color-text-muted)]">
                         {match.court} • {new Date(match.date || match.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    <span className="px-2 py-0.5 bg-[#f59e0b]/20 border border-[#f59e0b] text-[#f59e0b] text-[9px] font-bold uppercase font-mono">
+                    <span className="px-2 py-0.5 bg-[#f59e0b]/20 border border-[#f59e0b] text-[#f59e0b] text-[9px] font-bold uppercase font-mono rounded">
                       AWAITING VERIFICATION
                     </span>
                   </div>
 
                   {/* Match Participants & Score Summary */}
-                  <div className="p-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] mb-3">
+                  <div className="p-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] mb-3 rounded-xl">
                     <div className="flex justify-between items-center text-xs mb-1.5">
                       <span className="font-bold text-[var(--color-text-primary,#ede1c9)]">
                         Team A: {match.teamA?.map((p) => p.name || p.playerId).join(' & ')}
                       </span>
-                      <span className="font-mono text-[#ffb3ad]">
+                      <span className="font-mono text-[var(--color-accent-primary)] font-bold">
                         {match.scores?.map((s) => s.teamAScore).join(' - ')}
                       </span>
                     </div>
@@ -349,7 +371,7 @@ const DashboardPage = () => {
                       <span className="font-bold text-[var(--color-text-primary,#ede1c9)]">
                         Team B: {match.teamB?.map((p) => p.name || p.playerId).join(' & ')}
                       </span>
-                      <span className="font-mono text-[#ffb3ad]">
+                      <span className="font-mono text-[var(--color-accent-primary)] font-bold">
                         {match.scores?.map((s) => s.teamBScore).join(' - ')}
                       </span>
                     </div>
@@ -384,10 +406,10 @@ const DashboardPage = () => {
         ) : null}
 
         {/* Verified Fair-Play Governance Banner */}
-        <div className="p-8 bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] mb-12 hover:border-[var(--color-border-strong,#5d3f3d)] transition-colors">
+        <div className="p-8 bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] mb-12 hover:border-[var(--color-accent-primary)] transition-colors rounded-2xl shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <span className="text-[10px] font-bold tracking-[0.2em] text-[#ff3b3f] uppercase block mb-1">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-accent-primary)] uppercase block mb-1">
                 INDEPENDENT RATING GOVERNANCE
               </span>
               <h2 className="font-['Playfair_Display'] text-xl font-bold text-[var(--color-text-primary,#ede1c9)]">
@@ -397,7 +419,7 @@ const DashboardPage = () => {
                 Every match score submitted from the court is reviewed and verified by a club administrator before ratings and leaderboard standings are adjusted.
               </p>
             </div>
-            <div className="px-4 py-2 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] text-xs font-bold font-mono text-[#ffb3ad] shrink-0 flex items-center gap-2">
+            <div className="px-4 py-2 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] text-xs font-bold font-mono text-[var(--color-accent-primary)] shrink-0 flex items-center gap-2 rounded-xl">
               <span className="w-1.5 h-1.5 bg-[#4ade80] rounded-full animate-live-pulse" />
               STATUS: {pendingMatches.length} PENDING IN QUEUE
             </div>
@@ -409,17 +431,17 @@ const DashboardPage = () => {
           <RevealOnScroll variant="fade-rise" delay={0}>
             <Link
               to="/matches/submit"
-              className="p-6 bg-[#251f10] border border-[#3b3423] hover:border-[#ff3b3f] transition-all hover-lift h-full flex flex-col justify-between group block"
+              className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift h-full flex flex-col justify-between group block rounded-2xl shadow-sm"
             >
               <div>
-                <h3 className="font-['Playfair_Display'] text-lg font-bold text-[#ede1c9] group-hover:text-white mb-2 transition-colors">
+                <h3 className="font-['Playfair_Display'] text-lg font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent-primary)] mb-2 transition-colors">
                   Submit Match Scores
                 </h3>
-                <p className="text-xs text-[#9a8e7a] mb-4 leading-relaxed">
+                <p className="text-xs text-[var(--color-text-muted)] mb-4 leading-relaxed">
                   Record your game scores, select court and opponents, and submit for admin review.
                 </p>
               </div>
-              <span className="text-xs font-bold tracking-wider text-[#ff3b3f] uppercase block">
+              <span className="text-xs font-bold tracking-wider text-[var(--color-accent-primary)] uppercase block">
                 SUBMIT NEW MATCH →
               </span>
             </Link>
@@ -428,17 +450,17 @@ const DashboardPage = () => {
           <RevealOnScroll variant="fade-rise" delay={100}>
             <Link
               to="/leaderboard"
-              className="p-6 bg-[#251f10] border border-[#3b3423] hover:border-[#ff3b3f] transition-all hover-lift h-full flex flex-col justify-between group block"
+              className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift h-full flex flex-col justify-between group block rounded-2xl shadow-sm"
             >
               <div>
-                <h3 className="font-['Playfair_Display'] text-lg font-bold text-[#ede1c9] group-hover:text-white mb-2 transition-colors">
+                <h3 className="font-['Playfair_Display'] text-lg font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent-primary)] mb-2 transition-colors">
                   Official Leaderboard
                 </h3>
-                <p className="text-xs text-[#9a8e7a] mb-4 leading-relaxed">
+                <p className="text-xs text-[var(--color-text-muted)] mb-4 leading-relaxed">
                   Explore club player rankings, category breakdowns, and rating thresholds.
                 </p>
               </div>
-              <span className="text-xs font-bold tracking-wider text-[#ffb3ad] group-hover:text-[#ff3b3f] uppercase block transition-colors">
+              <span className="text-xs font-bold tracking-wider text-[var(--color-accent-primary)] uppercase block transition-colors">
                 EXPLORE TIERS & RANKINGS →
               </span>
             </Link>
@@ -447,17 +469,17 @@ const DashboardPage = () => {
           <RevealOnScroll variant="fade-rise" delay={200}>
             <Link
               to="/tournaments"
-              className="p-6 bg-[#251f10] border border-[#3b3423] hover:border-[#ff3b3f] transition-all hover-lift h-full flex flex-col justify-between group block"
+              className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] transition-all hover-lift h-full flex flex-col justify-between group block rounded-2xl shadow-sm"
             >
               <div>
-                <h3 className="font-['Playfair_Display'] text-lg font-bold text-[#ede1c9] group-hover:text-white mb-2 transition-colors">
+                <h3 className="font-['Playfair_Display'] text-lg font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent-primary)] mb-2 transition-colors">
                   Tournament Hub
                 </h3>
-                <p className="text-xs text-[#9a8e7a] mb-4 leading-relaxed">
+                <p className="text-xs text-[var(--color-text-muted)] mb-4 leading-relaxed">
                   Learn about upcoming club tournament formats and seeded bracket rules.
                 </p>
               </div>
-              <span className="text-xs font-bold tracking-wider text-[#ffb3ad] group-hover:text-[#ff3b3f] uppercase block transition-colors">
+              <span className="text-xs font-bold tracking-wider text-[var(--color-accent-primary)] uppercase block transition-colors">
                 VIEW TOURNAMENT HUB →
               </span>
             </Link>
@@ -477,6 +499,18 @@ const DashboardPage = () => {
         isOpen={showShareCard}
         onClose={() => setShowShareCard(false)}
         player={player}
+      />
+
+      {/* Mobile Courtside QR Scanner Modal */}
+      <QRScannerModal
+        isOpen={showQrScanner}
+        onClose={() => setShowQrScanner(false)}
+        onPlayerFound={(scannedPlayer) => {
+          setShowQrScanner(false);
+          if (scannedPlayer?.playerId) {
+            navigate(`/matches/submit?opponent=${scannedPlayer.playerId}`);
+          }
+        }}
       />
 
     </PageTransition>

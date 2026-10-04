@@ -56,6 +56,9 @@ const getPusher = () => {
  * @param {object} data    - Payload to send to subscribers
  */
 const broadcast = (channel, event, data = {}) => {
+  // Never broadcast to live WebSocket clients during automated test runs
+  if (process.env.NODE_ENV === 'test') return;
+
   const instance = getPusher();
   if (!instance) return;
 

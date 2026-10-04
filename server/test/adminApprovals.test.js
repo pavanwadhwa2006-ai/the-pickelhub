@@ -42,7 +42,8 @@ describe('Admin Approvals & Atomic Transactions — Milestone 7', () => {
 
   before(async () => {
     if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGO_URI);
+      const testUri = (process.env.TEST_MONGO_URI || process.env.MONGO_URI || '').replace('/picklehub?', '/picklehub_test?');
+      await mongoose.connect(testUri);
     }
 
     // Create a mock admin user
@@ -93,6 +94,8 @@ describe('Admin Approvals & Atomic Transactions — Milestone 7', () => {
       await RatingHistory.deleteMany({ matchId: { $in: createdMatchIds } });
       await AuditLog.deleteMany({ targetId: { $in: createdMatchIds } });
     }
+    await User.deleteMany({ email: /picklehub\.test$/i });
+    await Player.deleteMany({ email: /picklehub\.test$/i });
     if (createdPlayerIds.length > 0) {
       await Player.deleteMany({ _id: { $in: createdPlayerIds } });
     }

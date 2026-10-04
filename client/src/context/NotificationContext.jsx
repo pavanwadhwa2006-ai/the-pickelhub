@@ -5,7 +5,7 @@
  * real-time event subscriptions via Pusher, and Web Notification API integration.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from './useAuth';
 import useLiveSync from '../hooks/useLiveSync';
 import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
@@ -17,11 +17,29 @@ const MAX_NOTIFICATIONS = 30;
 export const NotificationProvider = ({ children }) => {
   const { user, player, isAdmin, isAdminMode } = useAuth();
 
-  // Stored persistent notifications
+  // Stored persistent notifications (auto-purges corrupted focus-loop artifacts)
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((n) => {
+        if (!n || !n.message) return false;
+        // Purge test notifications and synthetic agent artifacts
+        const testPattern = /test|refresh_test|testadmin|reg_refresh|picklehub\.test/i;
+        if (testPattern.test(n.title || '') || testPattern.test(n.message || '')) {
+          return false;
+        }
+        // Purge phantom focus-loop notifications (e.g. empty matchId or fallback tournament notices)
+        if (n.message.includes('was ratified and rating history deltas have been recorded') && (!n.message.includes('PH-M') && !n.message.includes('M-'))) {
+          return false;
+        }
+        if (n.message === 'Tournament schedule and bracket standings have advanced.') {
+          return false;
+        }
+        return true;
+      });
     } catch {
       return [];
     }
@@ -37,6 +55,9 @@ export const NotificationProvider = ({ children }) => {
     }
     return 'default';
   });
+
+  // Track handled event IDs to deduplicate across reconnects
+  const processedNotifsRef = useRef(new Set());
 
   // Sync notifications to localStorage
   useEffect(() => {
@@ -162,11 +183,18 @@ export const NotificationProvider = ({ children }) => {
   // Real-Time Event Handlers (Pusher WebSockets)
   // --------------------------------------------------------------------------
 
-  // 1. Real-time MATCH_APPROVED handler
+  // 1. Real-time MATCH_APPROVED handler (only notify athletes who actually played the match)
   useLiveSync(
     REALTIME_CHANNELS.GLOBAL,
     [REALTIME_EVENTS.MATCH_APPROVED],
     (data) => {
+      // Strictly ignore window-focus triggers and empty payloads
+      if (!data || data.source === 'focus' || !data.matchId) return;
+
+      const notifKey = `approved_${data.matchId}`;
+      if (processedNotifsRef.current.has(notifKey)) return;
+      processedNotifsRef.current.add(notifKey);
+
       // Check if the current authenticated athlete participated in this match
       const currentId = player?.playerId?.toUpperCase();
       const match = data?.match;
@@ -184,53 +212,59 @@ export const NotificationProvider = ({ children }) => {
           link: '/dashboard',
           icon: '🏓',
         });
-      } else if (isAdmin) {
-        addNotification({
-          title: '✅ Match Approved',
-          message: `Match ${data?.matchId || ''} was ratified and rating history deltas have been recorded.`,
-          type: 'ADMIN',
-          link: '/admin',
-          icon: '👑',
-        });
       }
     },
-    { enabled: Boolean(user) }
+    { enabled: Boolean(user), syncOnFocus: false }
   );
 
-  // 2. Real-time MATCH_SUBMITTED handler
+  // 2. Real-time MATCH_SUBMITTED handler (only notify admins on genuine match submissions)
   useLiveSync(
     isAdmin ? REALTIME_CHANNELS.ADMIN : null,
     [REALTIME_EVENTS.MATCH_SUBMITTED],
     (data) => {
+      // Strictly ignore window-focus triggers and empty payloads
+      if (!data || data.source === 'focus' || !data.matchId) return;
+
+      const notifKey = `submitted_${data.matchId}`;
+      if (processedNotifsRef.current.has(notifKey)) return;
+      processedNotifsRef.current.add(notifKey);
+
       if (isAdminMode) {
         addNotification({
           title: '📋 New Match Pending Approval',
-          message: `Match ${data?.matchId || ''} on ${data?.court || 'Court 1'} has been submitted and is awaiting administrative verification.`,
+          message: `Match ${data.matchId} on ${data?.court || 'Court 1'} has been submitted and is awaiting administrative verification.`,
           type: 'ADMIN',
           link: '/admin',
           icon: '⚖️',
         });
       }
     },
-    { enabled: Boolean(isAdmin && isAdminMode) }
+    { enabled: Boolean(isAdmin && isAdminMode), syncOnFocus: false }
   );
 
-  // 3. Real-time TOURNAMENT_UPDATED handler
+  // 3. Real-time TOURNAMENT_UPDATED handler (only notify on real tournament events)
   useLiveSync(
     REALTIME_CHANNELS.GLOBAL,
     [REALTIME_EVENTS.TOURNAMENT_UPDATED],
     (data) => {
+      // Strictly ignore window-focus triggers and empty payloads
+      if (!data || data.source === 'focus' || (!data.tournamentId && !data.title)) return;
+
+      const notifKey = `tournament_${data.tournamentId || data.title}_${data._timestamp || ''}`;
+      if (processedNotifsRef.current.has(notifKey)) return;
+      processedNotifsRef.current.add(notifKey);
+
       addNotification({
         title: '🏆 Tournament Notice',
-        message: data?.title
+        message: data.title
           ? `Updates posted for tournament: ${data.title}.`
-          : 'Tournament schedule and bracket standings have advanced.',
+          : 'Tournament schedule or bracket standings have been updated.',
         type: 'TOURNAMENT',
         link: '/tournaments',
         icon: '🏅',
       });
     },
-    { enabled: Boolean(user) }
+    { enabled: Boolean(user), syncOnFocus: false }
   );
 
   const value = {

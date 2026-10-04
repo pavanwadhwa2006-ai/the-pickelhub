@@ -20,7 +20,11 @@ const MobileBottomNav = () => {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#120e03]/95 backdrop-blur-xl border-t border-[#3b3423] pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 px-3 shadow-[0_-4px_25px_rgba(0,0,0,0.6)]"
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl border-t pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 px-3 shadow-[0_-4px_25px_rgba(0,0,0,0.35)] transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--nav-bg)',
+        borderColor: 'var(--nav-border)',
+      }}
       aria-label="Mobile Navigation"
     >
       <div className="flex items-center justify-around max-w-md mx-auto">
@@ -29,9 +33,12 @@ const MobileBottomNav = () => {
           to="/leaderboard"
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
             isActive('/leaderboard')
-              ? 'text-[#ff3b3f]'
-              : 'text-[#9a8e7a] hover:text-[#ede1c9]'
+              ? 'font-bold'
+              : 'hover:opacity-100 opacity-80'
           }`}
+          style={{
+            color: isActive('/leaderboard') ? 'var(--nav-accent)' : 'var(--nav-text-muted)',
+          }}
         >
           <span className="text-lg leading-none">🏆</span>
           <span className="text-[10px] font-bold tracking-wider uppercase font-mono">
@@ -44,9 +51,12 @@ const MobileBottomNav = () => {
           to="/tournaments"
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
             isActive('/tournaments')
-              ? 'text-[#ff3b3f]'
-              : 'text-[#9a8e7a] hover:text-[#ede1c9]'
+              ? 'font-bold'
+              : 'hover:opacity-100 opacity-80'
           }`}
+          style={{
+            color: isActive('/tournaments') ? 'var(--nav-accent)' : 'var(--nav-text-muted)',
+          }}
         >
           <span className="text-lg leading-none">🏅</span>
           <span className="text-[10px] font-bold tracking-wider uppercase font-mono">
@@ -57,9 +67,15 @@ const MobileBottomNav = () => {
         {/* 3. Center Action: Submit Match Score (Raised Glow Button) */}
         <Link
           to="/matches/submit"
-          className={`flex flex-col items-center justify-center -mt-5 w-13 h-13 rounded-full bg-gradient-to-tr from-[#e02b2f] to-[#ff3b3f] text-white shadow-[0_0_18px_rgba(255,59,63,0.55)] border-2 border-[#120e03] active:scale-95 transition-all ${
-            isActive('/matches/submit') ? 'ring-2 ring-[#ffb3ad]' : ''
+          className={`flex flex-col items-center justify-center -mt-5 w-13 h-13 rounded-full text-white shadow-xl active:scale-95 transition-all ${
+            isActive('/matches/submit') ? 'ring-2 ring-[var(--nav-accent)]' : ''
           }`}
+          style={{
+            backgroundColor: 'var(--color-accent-primary)',
+            borderColor: 'var(--nav-bg)',
+            borderWidth: '2px',
+            boxShadow: '0 0 18px var(--glow-shadow)',
+          }}
           title="Submit Match Scores"
         >
           <span className="text-xl leading-none font-bold">🏓</span>
@@ -70,9 +86,12 @@ const MobileBottomNav = () => {
           to={isAuthenticated ? '/dashboard' : '/login'}
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
             isActive('/dashboard') || isActive('/login')
-              ? 'text-[#ff3b3f]'
-              : 'text-[#9a8e7a] hover:text-[#ede1c9]'
+              ? 'font-bold'
+              : 'hover:opacity-100 opacity-80'
           }`}
+          style={{
+            color: (isActive('/dashboard') || isActive('/login')) ? 'var(--nav-accent)' : 'var(--nav-text-muted)',
+          }}
         >
           <span className="text-lg leading-none">👤</span>
           <span className="text-[10px] font-bold tracking-wider uppercase font-mono">
@@ -86,9 +105,12 @@ const MobileBottomNav = () => {
             to="/admin"
             className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl relative transition-all ${
               isActive('/admin')
-                ? 'text-[#ff3b3f]'
-                : 'text-[#fbbf24] hover:text-[#ff3b3f]'
+                ? 'font-bold'
+                : 'hover:opacity-100 opacity-80'
             }`}
+            style={{
+              color: isActive('/admin') ? 'var(--nav-accent)' : '#F59E0B',
+            }}
           >
             <span className="text-lg leading-none">🛡️</span>
             <span className="text-[10px] font-bold tracking-wider uppercase font-mono">

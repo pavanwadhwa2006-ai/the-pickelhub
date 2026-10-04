@@ -10,15 +10,22 @@ const Player = require('../models/Player');
 
 /**
  * Calculate dynamic skill category from Elo rating (PRD Section 8.1)
+ * Checkpoints:
+ * - Beginner: 0 - 1099 (New players start at 1000 Baseline as Beginner)
+ * - Intermediate: 1100 - 1299 (Earned after winning matches and crossing 1100)
+ * - Advanced Intermediate: 1300 - 1499
+ * - Pro: 1500 - 1799
+ * - God Level: 1800+ (Pinnacle Echelon)
  * @param {number} rating
- * @returns {string} - 'Beginner' | 'Intermediate' | 'Advanced Intermediate' | 'Pro'
+ * @returns {string} - 'Beginner' | 'Intermediate' | 'Advanced Intermediate' | 'Pro' | 'God Level'
  */
 const calculateCategory = (rating) => {
   const r = typeof rating === 'number' ? rating : 1000;
-  if (r < 1000) return 'Beginner';
-  if (r < 1200) return 'Intermediate';
-  if (r < 1400) return 'Advanced Intermediate';
-  return 'Pro';
+  if (r < 1100) return 'Beginner';
+  if (r < 1300) return 'Intermediate';
+  if (r < 1500) return 'Advanced Intermediate';
+  if (r < 1800) return 'Pro';
+  return 'God Level';
 };
 
 /**

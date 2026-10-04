@@ -66,12 +66,12 @@ const GoogleAuthButton = ({ text = 'signin_with', onSuccessCustom, onErrorCustom
   return (
     <div className="w-full flex flex-col items-center gap-2">
       {errorMsg && (
-        <div className="w-full p-3 bg-[#93000a]/20 border border-[#ff3b3f]/50 text-[#ffdad6] text-xs leading-relaxed animate-fade-in flex items-start justify-between gap-2">
+        <div className="w-full p-3 bg-rose-50 dark:bg-[#93000a]/20 border border-rose-300 dark:border-[#ff3b3f]/50 text-rose-900 dark:text-[#ffdad6] text-xs leading-relaxed animate-fade-in flex items-start justify-between gap-2 rounded-xl">
           <span>{errorMsg}</span>
           <button
             type="button"
             onClick={() => setErrorMsg(null)}
-            className="text-[#ffb4ab] hover:text-white font-bold text-xs shrink-0"
+            className="text-rose-700 dark:text-[#ffb4ab] hover:text-rose-950 dark:hover:text-white font-bold text-xs shrink-0 cursor-pointer"
           >
             ✕
           </button>
@@ -79,8 +79,8 @@ const GoogleAuthButton = ({ text = 'signin_with', onSuccessCustom, onErrorCustom
       )}
 
       {loading ? (
-        <div className="w-full py-3 px-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] text-xs font-bold tracking-wider text-[#ffb3ad] flex items-center justify-center gap-3">
-          <div className="w-4 h-4 border-2 border-[var(--color-border-subtle,#3b3423)] border-t-[#ff3b3f] animate-spin rounded-full" />
+        <div className="w-full py-3 px-4 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] text-xs font-bold tracking-wider text-[var(--color-accent-primary)] flex items-center justify-center gap-3 rounded-xl">
+          <div className="w-4 h-4 border-2 border-[var(--color-border-subtle,#3b3423)] border-t-[var(--color-accent-primary)] animate-spin rounded-full" />
           VERIFYING GOOGLE CREDENTIALS...
         </div>
       ) : isConfigured ? (
@@ -99,7 +99,7 @@ const GoogleAuthButton = ({ text = 'signin_with', onSuccessCustom, onErrorCustom
         <button
           type="button"
           onClick={handleUnconfiguredClick}
-          className="w-full py-3 px-4 bg-[var(--color-bg-base,#181305)] hover:bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] hover:border-[var(--color-border-strong,#ad8885)] text-[var(--color-text-primary,#ede1c9)] hover:text-white text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm group"
+          className="w-full py-3 px-4 bg-[var(--color-bg-base,#181305)] hover:bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] hover:border-[var(--color-accent-primary)] text-[var(--color-text-primary,#ede1c9)] hover:text-[var(--color-accent-primary)] text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm group rounded-xl"
         >
           {/* Google G Logo SVG */}
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">

@@ -117,22 +117,26 @@ const HomePage = () => {
               <div className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted)] uppercase mb-1">
                 DYNAMIC SKILL TIERS
               </div>
-              <div className="space-y-2.5 mt-3">
-                <div className="flex justify-between text-xs py-1.5 border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
+              <div className="space-y-2 mt-3">
+                <div className="flex justify-between text-xs py-1 border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
                   <span className="text-[var(--color-text-muted)]">Beginner</span>
-                  <span className="font-bold text-[var(--color-text-primary)]">0 – 999</span>
+                  <span className="font-bold text-[var(--color-text-primary)]">0 – 1099</span>
                 </div>
-                <div className="flex justify-between text-xs py-1.5 border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
-                  <span className="text-[var(--color-accent-primary)]">Intermediate</span>
-                  <span className="font-bold text-[var(--color-text-primary)]">1000 – 1199</span>
+                <div className="flex justify-between text-xs py-1 border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
+                  <span className="text-[var(--color-text-primary)]">Intermediate</span>
+                  <span className="font-bold text-[var(--color-text-primary)]">1100 – 1299</span>
                 </div>
-                <div className="flex justify-between text-xs py-1.5 border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
+                <div className="flex justify-between text-xs py-1 border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
                   <span className="text-[var(--color-text-primary)]">Adv. Intermediate</span>
-                  <span className="font-bold text-[var(--color-text-primary)]">1200 – 1399</span>
+                  <span className="font-bold text-[var(--color-text-primary)]">1300 – 1499</span>
                 </div>
-                <div className="flex justify-between text-xs py-1.5 hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
+                <div className="flex justify-between text-xs py-1 border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
                   <span className="text-[var(--color-accent-primary)] font-bold">Pro Division</span>
-                  <span className="font-bold text-[var(--color-accent-primary)]">1400+</span>
+                  <span className="font-bold text-[var(--color-accent-primary)]">1500 – 1799</span>
+                </div>
+                <div className="flex justify-between text-xs py-1 hover:bg-[var(--color-bg-card-hover)] px-1 transition-colors">
+                  <span className="text-amber-500 font-bold flex items-center gap-1">⚡ God Level</span>
+                  <span className="font-bold text-amber-500">1800+</span>
                 </div>
               </div>
             </TiltCard>

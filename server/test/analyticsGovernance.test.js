@@ -205,7 +205,7 @@ describe('Milestone 9 — Analytics & Governance Test Suite', () => {
         user: adminUser,
         body: {
           playerId: testPlayer.playerId,
-          newRating: 1250,
+          newRating: 1350,
           reason: 'Annual club championship seeding adjustment',
         },
       };
@@ -227,7 +227,7 @@ describe('Milestone 9 — Analytics & Governance Test Suite', () => {
 
       assert.equal(statusCode, 200);
       assert.equal(responseBody.success, true);
-      assert.equal(responseBody.data.player.currentRating, 1250);
+      assert.equal(responseBody.data.player.currentRating, 1350);
       assert.equal(responseBody.data.player.category, 'Advanced Intermediate');
 
       // Verify AuditLog record
@@ -236,7 +236,7 @@ describe('Milestone 9 — Analytics & Governance Test Suite', () => {
         targetId: testPlayer._id,
       });
       assert.ok(auditLog);
-      assert.equal(auditLog.metadata.newRating, 1250);
+      assert.equal(auditLog.metadata.newRating, 1350);
       assert.equal(auditLog.metadata.reason, 'Annual club championship seeding adjustment');
     });
   });

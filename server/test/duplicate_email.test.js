@@ -156,7 +156,7 @@ describe('Duplicate Email & Orphan Prevention Tests', () => {
             name: user.email.split('@')[0],
             email: user.email,
             currentRating: 1000,
-            category: 'Intermediate',
+            category: 'Beginner',
             matchesPlayed: 0,
             wins: 0,
             losses: 0,
@@ -170,7 +170,7 @@ describe('Duplicate Email & Orphan Prevention Tests', () => {
       assert.ok(player, 'Player profile should be created by lazy-repair');
       assert.equal(player.userId, mockUser._id);
       assert.equal(player.currentRating, 1000);
-      assert.equal(player.category, 'Intermediate');
+      assert.equal(player.category, 'Beginner');
       assert.equal(player.playerId, 'PH-00002');
     });
   });

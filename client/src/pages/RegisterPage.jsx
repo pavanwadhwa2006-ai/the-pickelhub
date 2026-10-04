@@ -65,15 +65,15 @@ const RegisterPage = () => {
       {/* Subtle ambient light pool */}
       <div
         aria-hidden="true"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[#ff3b3f]/5 rounded-full blur-3xl pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[var(--color-accent-primary)]/5 rounded-full blur-3xl pointer-events-none"
       />
 
-      <div className="w-full max-w-md bg-[var(--color-bg-card,#251f10)] border border-[var(--color-border-subtle,#3b3423)] p-8 sm:p-10 shadow-2xl relative animate-fade-in-up hover:border-[var(--color-border-strong,#5d3f3d)] transition-colors">
+      <div className="w-full max-w-md bg-[var(--color-bg-card,#251f10)] border border-[var(--color-border-subtle,#3b3423)] p-8 sm:p-10 shadow-2xl relative animate-fade-in-up hover:border-[var(--color-accent-primary)]/50 transition-colors rounded-2xl">
         {/* Accent top bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-[#ff3b3f] shadow-[0_0_8px_rgba(255,59,63,0.8)]" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--color-accent-primary)] rounded-t-2xl shadow-[0_0_8px_rgba(255,59,63,0.8)]" />
 
         <div className="mb-8">
-          <span className="text-[10px] font-bold tracking-[0.25em] text-[#ffb3ad] uppercase block mb-2">
+          <span className="text-[10px] font-bold tracking-[0.25em] text-[var(--color-accent-primary)] uppercase block mb-2">
             JOIN THE ECOSYSTEM
           </span>
           <h1 className="font-['Playfair_Display'] text-3xl sm:text-4xl font-bold text-[var(--color-text-primary,#ede1c9)]">
@@ -99,20 +99,20 @@ const RegisterPage = () => {
         </div>
 
         {/* Starting Elo Pill with Count-Up */}
-        <div className="mb-6 p-3 bg-[var(--color-bg-base,#1a1508)] border border-[var(--color-border-subtle,#3b3423)] flex items-center justify-between shadow-inner">
+        <div className="mb-6 p-3 bg-[var(--color-bg-base,#1a1508)] border border-[var(--color-border-subtle,#3b3423)] flex items-center justify-between shadow-inner rounded-xl">
           <div className="text-[11px] font-bold tracking-wider text-[var(--color-text-primary,#d8cdb5)] uppercase">
             Initial Rating Base
           </div>
-          <div className="text-xs font-bold font-mono px-2 py-0.5 bg-[var(--color-bg-card-hover,#2f2919)] text-[#ffb3ad] border border-[var(--color-border-subtle,#5d3f3d)] flex items-baseline gap-1">
+          <div className="text-xs font-bold font-mono px-2 py-0.5 bg-[var(--color-bg-card-hover,#2f2919)] text-[var(--color-accent-primary)] border border-[var(--color-border-subtle)] flex items-baseline gap-1 rounded-md">
             <AnimatedNumber value={1000} duration={800} /> Elo
           </div>
         </div>
 
         {/* Error Alert */}
         {localError && (
-          <div className="mb-6 p-4 bg-[#93000a]/20 border-l-4 border-[#ff3b3f] text-[#ffdad6] text-xs leading-relaxed animate-fade-in shadow-[0_0_12px_rgba(255,59,63,0.2)]">
-            <div className="font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5">
-              <svg className="w-4 h-4 text-[#ffb4ab]" fill="currentColor" viewBox="0 0 20 20">
+          <div className="mb-6 p-4 bg-rose-50 dark:bg-[#93000a]/20 border-l-4 border-[var(--color-accent-primary)] text-rose-900 dark:text-[#ffdad6] text-xs leading-relaxed animate-fade-in shadow-sm rounded-r-xl">
+            <div className="font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5 text-rose-950 dark:text-rose-100">
+              <svg className="w-4 h-4 text-rose-700 dark:text-[#ffb4ab]" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               Registration Error
@@ -132,7 +132,7 @@ const RegisterPage = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Alex Morgan"
-              className="w-full px-4 py-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] placeholder-[var(--color-text-muted,#5d3f3d)] text-sm focus:outline-none transition-colors duration-200"
+              className="w-full px-4 py-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[var(--color-accent-primary)] text-[var(--color-text-primary,#ede1c9)] placeholder-[var(--color-text-muted,#5d3f3d)] text-sm focus:outline-none transition-colors duration-200 rounded-xl"
             />
           </div>
 
@@ -146,7 +146,7 @@ const RegisterPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="athlete@picklehub.com"
-              className="w-full px-4 py-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] placeholder-[var(--color-text-muted,#5d3f3d)] text-sm focus:outline-none transition-colors duration-200"
+              className="w-full px-4 py-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[var(--color-accent-primary)] text-[var(--color-text-primary,#ede1c9)] placeholder-[var(--color-text-muted,#5d3f3d)] text-sm focus:outline-none transition-colors duration-200 rounded-xl"
             />
           </div>
 
@@ -160,7 +160,7 @@ const RegisterPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] placeholder-[var(--color-text-muted,#5d3f3d)] text-sm focus:outline-none transition-colors duration-200"
+              className="w-full px-4 py-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[var(--color-accent-primary)] text-[var(--color-text-primary,#ede1c9)] placeholder-[var(--color-text-muted,#5d3f3d)] text-sm focus:outline-none transition-colors duration-200 rounded-xl"
             />
           </div>
 
@@ -174,7 +174,7 @@ const RegisterPage = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[#ff3b3f] text-[var(--color-text-primary,#ede1c9)] placeholder-[var(--color-text-muted,#5d3f3d)] text-sm focus:outline-none transition-colors duration-200"
+              className="w-full px-4 py-3 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] focus:border-[var(--color-accent-primary)] text-[var(--color-text-primary,#ede1c9)] placeholder-[var(--color-text-muted,#5d3f3d)] text-sm focus:outline-none transition-colors duration-200 rounded-xl"
             />
           </div>
 
@@ -186,9 +186,9 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={() => setRole('PLAYER')}
-                className={`py-2.5 px-3 text-xs font-bold tracking-wider uppercase border text-center transition-all duration-200 cursor-pointer ${
+                className={`py-2.5 px-3 text-xs font-bold tracking-wider uppercase border text-center transition-all duration-200 cursor-pointer rounded-xl ${
                   role === 'PLAYER'
-                    ? 'bg-[#ff3b3f] text-white border-[#ff3b3f] shadow-[0_0_12px_rgba(255,59,63,0.35)]'
+                    ? 'bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-md'
                     : 'bg-[var(--color-bg-base,#181305)] text-[var(--color-text-muted,#9a8e7a)] border-[var(--color-border-subtle,#3b3423)] hover:text-[var(--color-text-primary,#ede1c9)] hover:border-[var(--color-border-strong,#ad8885)]'
                 }`}
               >
@@ -197,9 +197,9 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={() => setRole('ADMIN')}
-                className={`py-2.5 px-3 text-xs font-bold tracking-wider uppercase border text-center transition-all duration-200 cursor-pointer ${
+                className={`py-2.5 px-3 text-xs font-bold tracking-wider uppercase border text-center transition-all duration-200 cursor-pointer rounded-xl ${
                   role === 'ADMIN'
-                    ? 'bg-[#ff3b3f] text-white border-[#ff3b3f] shadow-[0_0_12px_rgba(255,59,63,0.35)]'
+                    ? 'bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-md'
                     : 'bg-[var(--color-bg-base,#181305)] text-[var(--color-text-muted,#9a8e7a)] border-[var(--color-border-subtle,#3b3423)] hover:text-[var(--color-text-primary,#ede1c9)] hover:border-[var(--color-border-strong,#ad8885)]'
                 }`}
               >
@@ -214,7 +214,7 @@ const RegisterPage = () => {
           <MagneticButton
             type="submit"
             disabled={submitting}
-            className="w-full py-4 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.2em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] disabled:opacity-50"
+            className="w-full py-4 bg-[var(--color-accent-primary)] hover:brightness-110 text-white text-xs font-bold tracking-[0.2em] uppercase transition-all shadow-md disabled:opacity-50 rounded-xl"
           >
             {submitting ? 'CREATING PROFILE...' : 'CLAIM RATING PROFILE →'}
           </MagneticButton>
@@ -225,7 +225,7 @@ const RegisterPage = () => {
             Already have an account?{' '}
             <Link
               to="/login"
-              className="text-[#ff3b3f] font-bold hover:underline ml-1"
+              className="text-[var(--color-accent-primary)] font-bold hover:underline ml-1"
             >
               Sign In
             </Link>

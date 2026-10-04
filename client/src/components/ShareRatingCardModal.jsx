@@ -102,25 +102,45 @@ const ShareRatingCardModal = ({ isOpen, onClose, player }) => {
     ctx.fillText(player.name || 'Pickle Athlete', 80, 205);
 
     // Category / Division Badge
-    const category = player.category || 'Intermediate';
-    ctx.fillStyle = '#ff3b3f';
-    ctx.fillRect(80, 235, 180, 38);
+    const category = player.category || 'Beginner';
+    const isGodLevel = category.toLowerCase().includes('god');
+
     ctx.font = 'bold 16px sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(category.toUpperCase(), 98, 260);
+    const catUpper = category.toUpperCase();
+    const catTextWidth = ctx.measureText(catUpper).width;
+    const catBadgeWidth = Math.max(160, catTextWidth + 36);
+
+    if (isGodLevel) {
+      const goldGrad = ctx.createLinearGradient(80, 235, 80 + catBadgeWidth, 273);
+      goldGrad.addColorStop(0, '#f59e0b');
+      goldGrad.addColorStop(1, '#d97706');
+      ctx.fillStyle = goldGrad;
+    } else {
+      ctx.fillStyle = '#ff3b3f';
+    }
+    ctx.beginPath();
+    ctx.roundRect(80, 235, catBadgeWidth, 38, 8);
+    ctx.fill();
+
+    ctx.fillStyle = isGodLevel ? '#1c1608' : '#ffffff';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText(catUpper, 98, 260);
 
     // 6. Rating Showcase
     ctx.font = '14px monospace';
     ctx.fillStyle = '#ad8885';
     ctx.fillText('OFFICIAL ELO RATING', 80, 340);
 
+    // Fix: Draw 105px rating and measure width BEFORE changing font to 32px so Elo does NOT overlap
+    const ratingStr = `${player.currentRating || 1000}`;
     ctx.font = 'bold 105px "Playfair Display", serif';
     ctx.fillStyle = '#ede1c9';
-    ctx.fillText(`${player.currentRating || 1000}`, 80, 445);
+    ctx.fillText(ratingStr, 80, 445);
+    const ratingWidth = ctx.measureText(ratingStr).width;
 
     ctx.font = 'bold 32px sans-serif';
-    ctx.fillStyle = '#ff3b3f';
-    ctx.fillText('Elo', ctx.measureText(`${player.currentRating || 1000}`).width + 95, 445);
+    ctx.fillStyle = isGodLevel ? '#f59e0b' : '#ff3b3f';
+    ctx.fillText('Elo', 80 + ratingWidth + 18, 445);
 
     // 7. Stats Trio (Wins / Win Rate / Peak)
     const statsY = 540;
@@ -254,17 +274,17 @@ const ShareRatingCardModal = ({ isOpen, onClose, player }) => {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.94, opacity: 0, y: 12 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative z-10 w-full max-w-2xl bg-[#1a1508] border-2 border-[#ff3b3f] rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden"
+        className="relative z-10 w-full max-w-2xl bg-[var(--color-bg-card)] border-2 border-[var(--color-accent-primary)] rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#3b3423] mb-6">
+        <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border-subtle)] mb-6">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🎴</span>
             <div>
-              <div className="text-[10px] font-bold tracking-[0.25em] text-[#ff3b3f] uppercase font-mono">
+              <div className="text-[10px] font-bold tracking-[0.25em] text-[var(--color-accent-primary)] uppercase font-mono">
                 SHAREABLE ATHLETE CARD
               </div>
-              <h3 className="font-['Playfair_Display'] text-lg font-bold text-[#ede1c9]">
+              <h3 className="font-['Playfair_Display'] text-lg font-bold text-[var(--color-text-primary)]">
                 Export Official Rating Card
               </h3>
             </div>
@@ -272,7 +292,8 @@ const ShareRatingCardModal = ({ isOpen, onClose, player }) => {
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#140f02] border border-[#3b3423] text-[#9a8e7a] hover:text-white flex items-center justify-center font-bold text-xs cursor-pointer transition-colors"
+            aria-label="Close modal"
+            className="w-8 h-8 rounded-full bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] hover:bg-rose-500 hover:text-white hover:border-rose-500 flex items-center justify-center font-bold text-sm cursor-pointer transition-all shadow-xs"
           >
             ✕
           </button>
@@ -310,14 +331,14 @@ const ShareRatingCardModal = ({ isOpen, onClose, player }) => {
             type="button"
             onClick={handleDownload}
             disabled={generating}
-            className="w-full sm:w-auto py-3.5 px-6 bg-[#251f10] hover:bg-[#2f2919] border border-[#3b3423] text-[#ede1c9] hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full sm:w-auto py-3.5 px-6 bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] hover:border-[var(--color-accent-primary)] rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <span>💾</span>
             <span>Download HD PNG</span>
           </button>
         </div>
 
-        <p className="text-[11px] font-mono text-[#9a8e7a] text-center mt-4">
+        <p className="text-[11px] font-mono text-[var(--color-text-muted)] text-center mt-4">
           Card formatted at 1200×675 HD resolution — perfect for Instagram stories, WhatsApp status, or club messaging.
         </p>
       </motion.div>

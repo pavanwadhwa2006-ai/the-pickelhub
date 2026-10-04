@@ -18,21 +18,21 @@ const EmptyState = ({
   className = '',
 }) => {
   return (
-    <div className={`p-8 sm:p-12 bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] text-center flex flex-col items-center justify-center relative overflow-hidden ${className}`}>
+    <div className={`p-8 sm:p-12 bg-[var(--color-bg-card,#201b0c)] border border-[var(--color-border-subtle,#3b3423)] text-center flex flex-col items-center justify-center relative overflow-hidden rounded-2xl shadow-sm ${className}`}>
       {/* Subtle background glow */}
       <div
         aria-hidden="true"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#ff3b3f]/5 rounded-full blur-3xl pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[var(--color-accent-primary)]/5 rounded-full blur-3xl pointer-events-none"
       />
 
       {badgeText && (
-        <span className="text-[9px] font-bold tracking-[0.25em] text-[#ffb3ad] uppercase px-2.5 py-1 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] mb-4">
+        <span className="text-[9px] font-bold tracking-[0.25em] text-[var(--color-accent-primary)] uppercase px-2.5 py-1 bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-subtle,#3b3423)] mb-4 rounded-lg">
           {badgeText}
         </span>
       )}
 
       {/* Decorative Icon */}
-      <div className="w-12 h-12 rounded-full bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-strong,#5d3f3d)] flex items-center justify-center text-[#ff3b3f] mb-4 shadow-inner">
+      <div className="w-12 h-12 rounded-full bg-[var(--color-bg-base,#181305)] border border-[var(--color-border-strong,#5d3f3d)] flex items-center justify-center text-[var(--color-accent-primary)] mb-4 shadow-inner">
         {icon === 'paddle' && (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -57,7 +57,7 @@ const EmptyState = ({
       {actionLabel && actionTo && (
         <Link
           to={actionTo}
-          className="px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)]"
+          className="px-6 py-3 bg-[var(--color-accent-primary)] hover:brightness-110 text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-md rounded-xl"
         >
           {actionLabel}
         </Link>
@@ -67,7 +67,7 @@ const EmptyState = ({
         <button
           type="button"
           onClick={actionOnClick}
-          className="px-6 py-3 bg-[#ff3b3f] hover:bg-[#e02b2f] text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-[0_0_15px_rgba(255,59,63,0.3)] hover:shadow-[0_0_22px_rgba(255,59,63,0.5)] cursor-pointer"
+          className="px-6 py-3 bg-[var(--color-accent-primary)] hover:brightness-110 text-white text-xs font-bold tracking-[0.15em] uppercase transition-all shadow-md cursor-pointer rounded-xl"
         >
           {actionLabel}
         </button>
