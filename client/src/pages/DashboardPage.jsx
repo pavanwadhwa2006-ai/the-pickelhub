@@ -244,7 +244,10 @@ const DashboardPage = () => {
         {/* Next Skill Tier Progression Bar */}
         <TierProgressBar
           rating={player?.currentRating || 1000}
-          category={player?.category || 'Intermediate'}
+          category={player?.category || 'Beginner'}
+          wins={player?.wins || 0}
+          matchesPlayed={player?.matchesPlayed || 0}
+          playerId={player?.playerId}
           className="mb-10 animate-fade-in"
         />
 

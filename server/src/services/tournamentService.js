@@ -340,7 +340,7 @@ const executeTournamentBonusPayout = async (tournamentId, adminUserId) => {
       const ratingBefore = player.currentRating;
       const categoryBefore = player.category;
       const ratingAfter = ratingBefore + bonusPoints;
-      const categoryAfter = calculateCategory(ratingAfter);
+      const categoryAfter = calculateCategory(ratingAfter, player.wins || 0, player.matchesPlayed || 0);
 
       player.currentRating = ratingAfter;
       if (ratingAfter > player.highestRating) {

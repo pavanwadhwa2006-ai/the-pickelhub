@@ -1,31 +1,136 @@
 /**
  * Player Service
  *
- * Handles atomic Player ID generation, dynamic category calculations,
- * and player profile creation with lazy-repair fallback.
+ * Handles atomic Player ID generation, dynamic category calculations
+ * with dual-gate unlock system (Elo + Matches Played), and player
+ * profile creation with lazy-repair fallback.
  */
 
 const Counter = require('../models/Counter');
 const Player = require('../models/Player');
 
+// ──────────────────────────────────────────────
+// Tier Definitions — Central Source of Truth
+// ──────────────────────────────────────────────
+
 /**
- * Calculate dynamic skill category from Elo rating (PRD Section 8.1)
- * Checkpoints:
- * - Beginner: 0 - 1099 (New players start at 1000 Baseline as Beginner)
- * - Intermediate: 1100 - 1299 (Earned after winning matches and crossing 1100)
- * - Advanced Intermediate: 1300 - 1499
- * - Pro: 1500 - 1799
- * - God Level: 1800+ (Pinnacle Echelon)
- * @param {number} rating
- * @returns {string} - 'Beginner' | 'Intermediate' | 'Advanced Intermediate' | 'Pro' | 'God Level'
+ * Ordered tier definitions. Each tier requires BOTH:
+ *   1. Minimum Elo rating threshold
+ *   2. Minimum number of match wins (player must push to WIN matches)
+ *   3. Minimum matches played
+ *
+ * Players must "push themselves" — you can't simply have a high
+ * rating from one match; you must earn match victories to unlock
+ * higher divisions.
  */
-const calculateCategory = (rating) => {
+const TIER_DEFINITIONS = [
+  { key: 'beginner',              name: 'Beginner',              minElo: 0,    minWins: 0,  minMatches: 0,  icon: '🏓', color: '#B9AE7E', description: 'Starting Rank (Baseline 1000 Elo)' },
+  { key: 'intermediate',          name: 'Intermediate',          minElo: 1100, minWins: 3,  minMatches: 5,  icon: '🔥', color: '#D3968C', description: 'Requires 1100+ Elo & 3 Match Victories' },
+  { key: 'advanced_intermediate', name: 'Advanced Intermediate', minElo: 1300, minWins: 10, minMatches: 15, icon: '⚔️', color: '#839958', description: 'Requires 1300+ Elo & 10 Match Victories' },
+  { key: 'pro',                   name: 'Pro',                   minElo: 1500, minWins: 25, minMatches: 30, icon: '🏆', color: '#10586B', description: 'Requires 1500+ Elo & 25 Match Victories' },
+  { key: 'god_level',             name: 'God Level',             minElo: 1800, minWins: 50, minMatches: 50, icon: '⚡', color: '#FFD700', description: 'Pinnacle Echelon: 1800+ Elo & 50 Victories' },
+];
+
+/**
+ * Calculate dynamic skill category from Elo rating AND match wins.
+ * Dual-gate system: player must meet BOTH the Elo threshold AND the
+ * minimum wins requirement to qualify for a tier.
+ *
+ * @param {number} rating                  - Current Elo rating
+ * @param {number|object} [winsOrStats]   - Total match wins, or options object { wins, matchesPlayed }
+ * @param {number} [matchesPlayed]        - Total matches played (optional)
+ * @returns {string} Category name
+ */
+const calculateCategory = (rating, winsOrStats = undefined, matchesPlayed = undefined) => {
   const r = typeof rating === 'number' ? rating : 1000;
-  if (r < 1100) return 'Beginner';
-  if (r < 1300) return 'Intermediate';
-  if (r < 1500) return 'Advanced Intermediate';
-  if (r < 1800) return 'Pro';
-  return 'God Level';
+  let w = winsOrStats;
+  let m = matchesPlayed;
+
+  if (typeof winsOrStats === 'object' && winsOrStats !== null) {
+    w = winsOrStats.wins;
+    m = winsOrStats.matchesPlayed;
+  }
+
+  // Walk backwards from highest tier to find the best qualifying tier
+  for (let i = TIER_DEFINITIONS.length - 1; i >= 0; i--) {
+    const tier = TIER_DEFINITIONS[i];
+    const eloMet = r >= tier.minElo;
+    const winsMet = w === undefined || (typeof w === 'number' && w >= tier.minWins);
+    const matchesMet = m === undefined || (typeof m === 'number' && m >= (tier.minMatches || 0));
+
+    if (eloMet && winsMet && matchesMet) {
+      return tier.name;
+    }
+  }
+  return 'Beginner';
+};
+
+/**
+ * Get detailed unlock progress for all tiers.
+ * Used by the frontend to render a gamified tier roadmap with
+ * locked/unlocked states, progress indicators, and milestone tracking.
+ *
+ * @param {number} rating         - Current Elo rating
+ * @param {number} wins           - Total match wins
+ * @param {number} matchesPlayed  - Total matches played
+ * @returns {object} { currentTier, totalWins, totalMatches, rating, nextTier, tiers }
+ */
+const getTierUnlockProgress = (rating, wins = 0, matchesPlayed = 0) => {
+  const r = typeof rating === 'number' ? rating : 1000;
+  const w = typeof wins === 'number' ? wins : 0;
+  const m = typeof matchesPlayed === 'number' ? matchesPlayed : 0;
+  const currentCategory = calculateCategory(r, w, m);
+
+  const tiers = TIER_DEFINITIONS.map((tier, index) => {
+    const eloMet = r >= tier.minElo;
+    const winsMet = w >= tier.minWins;
+    const matchesMet = m >= (tier.minMatches || 0);
+    const unlocked = eloMet && winsMet && matchesMet;
+
+    // Progress percentages for each gate
+    const eloProgress = tier.minElo === 0 ? 100 : Math.min(100, Math.round((r / tier.minElo) * 100));
+    const winsProgress = tier.minWins === 0 ? 100 : Math.min(100, Math.round((w / tier.minWins) * 100));
+    const matchesProgress = (tier.minMatches || 0) === 0 ? 100 : Math.min(100, Math.round((m / (tier.minMatches || 1)) * 100));
+
+    // Remaining to unlock
+    const eloRemaining = Math.max(0, tier.minElo - r);
+    const winsRemaining = Math.max(0, tier.minWins - w);
+    const matchesRemaining = Math.max(0, (tier.minMatches || 0) - m);
+
+    // Is this the player's current active tier?
+    const isCurrent = tier.name === currentCategory;
+
+    // Is this the next tier to unlock?
+    const isNext = !unlocked && (index === 0 || calculateCategory(r, w, m) === TIER_DEFINITIONS[index - 1]?.name);
+
+    return {
+      ...tier,
+      index,
+      unlocked,
+      isCurrent,
+      isNext,
+      eloMet,
+      winsMet,
+      matchesMet,
+      eloProgress,
+      winsProgress,
+      matchesProgress,
+      eloRemaining,
+      winsRemaining,
+      matchesRemaining,
+    };
+  });
+
+  const nextTier = tiers.find((t) => !t.unlocked) || null;
+
+  return {
+    currentTier: currentCategory,
+    totalWins: w,
+    totalMatches: m,
+    rating: r,
+    nextTier,
+    tiers,
+  };
 };
 
 /**
@@ -45,7 +150,7 @@ const generatePlayerId = async () => {
 const createPlayerProfile = async ({ userId, email, name, profilePhoto }) => {
   const playerId = await generatePlayerId();
   const initialRating = 1000;
-  const initialCategory = calculateCategory(initialRating);
+  const initialCategory = calculateCategory(initialRating, 0);
 
   const fallbackName = name && name.trim().length > 0
     ? name.trim()
@@ -92,7 +197,9 @@ const getOrCreatePlayerProfile = async (user) => {
 };
 
 module.exports = {
+  TIER_DEFINITIONS,
   calculateCategory,
+  getTierUnlockProgress,
   generatePlayerId,
   createPlayerProfile,
   getOrCreatePlayerProfile,

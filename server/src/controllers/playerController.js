@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 const Player = require('../models/Player');
 const Match = require('../models/Match');
 const RatingHistory = require('../models/RatingHistory');
-const { getOrCreatePlayerProfile } = require('../services/playerService');
+const { getOrCreatePlayerProfile, getTierUnlockProgress, TIER_DEFINITIONS } = require('../services/playerService');
 const { calculateExpectedScore } = require('../services/ratingService');
 const { broadcast, CHANNELS, EVENTS } = require('../services/realtimeService');
 
@@ -527,6 +527,50 @@ const getPlayerRatingHistory = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Get tier unlock progress for a player (gamified tier roadmap)
+ * @route   GET /api/players/:id/tier-progress
+ * @access  Public
+ */
+const getTierProgress = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const player = await resolvePlayer(id);
+
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        message: `Player '${id}' not found.`,
+      });
+    }
+
+    const progress = getTierUnlockProgress(
+      player.currentRating,
+      player.matchesPlayed || 0,
+      player.wins || 0
+    );
+
+    res.status(200).json({
+      success: true,
+      data: progress,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get tier definitions (public reference data)
+ * @route   GET /api/tiers
+ * @access  Public
+ */
+const getTierDefinitions = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: TIER_DEFINITIONS,
+  });
+};
+
 module.exports = {
   getPlayers,
   getLeaderboardSpecialties,
@@ -536,4 +580,6 @@ module.exports = {
   getMyPlayerProfile,
   updateMyProfile,
   searchPlayers,
+  getTierProgress,
+  getTierDefinitions,
 };

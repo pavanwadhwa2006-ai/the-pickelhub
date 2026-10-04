@@ -14,6 +14,7 @@ import TiltCard from '../components/TiltCard';
 import AnimatedNumber from '../components/AnimatedNumber';
 import RevealOnScroll from '../components/RevealOnScroll';
 import TierBadge from '../components/TierBadge';
+import TierProgressBar from '../components/TierProgressBar';
 import RatingHistoryChart from '../components/RatingHistoryChart';
 import DigitalClubPassModal from '../components/DigitalClubPassModal';
 import ShareRatingCardModal from '../components/ShareRatingCardModal';
@@ -316,6 +317,18 @@ const PlayerProfilePage = () => {
             <span className="text-xs text-[var(--color-text-muted)]">All-time highest rating</span>
           </TiltCard>
         </div>
+
+        {/* Division Progression & Tier Unlock Roadmap */}
+        <RevealOnScroll variant="fade-rise">
+          <TierProgressBar
+            rating={player.currentRating || 1000}
+            category={player.category || 'Beginner'}
+            wins={player.wins || 0}
+            matchesPlayed={player.matchesPlayed || 0}
+            playerId={player.playerId}
+            className="mb-12"
+          />
+        </RevealOnScroll>
 
         {/* Historical Rating Trajectory Chart (Milestone 9) */}
         <RevealOnScroll variant="fade-rise">

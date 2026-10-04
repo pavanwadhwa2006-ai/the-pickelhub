@@ -113,14 +113,13 @@ const executeAtomicMatchApproval = async ({
       const oldRating = player.currentRating;
       const newRating = change.newRating;
       const oldCategory = player.category;
-      const newCategory = calculateCategory(newRating);
 
       const isWinner = winningPlayerIds.has(pIdStr);
 
-      // Mutate player career stats
+      // Mutate player career stats — update match count BEFORE category calc
+      // so the dual-gate (Elo + matches played) system evaluates correctly
       player.currentRating = newRating;
       player.highestRating = Math.max(player.highestRating || 1000, newRating);
-      player.category = newCategory;
       player.matchesPlayed = (player.matchesPlayed || 0) + 1;
 
       if (isWinner) {
@@ -131,6 +130,10 @@ const executeAtomicMatchApproval = async ({
         player.winningStreak = 0;
       }
       player.winPercentage = Math.round((player.wins / player.matchesPlayed) * 100);
+
+      // Category uses dual-gate: Elo + wins (players must push to win matches)
+      const newCategory = calculateCategory(newRating, player.wins, player.matchesPlayed);
+      player.category = newCategory;
 
       await player.save({ session });
 
@@ -303,6 +306,7 @@ const executeManualRatingAdjustment = async ({ adminUserId, playerId, newRating,
   const ratingBefore = player.currentRating;
   const categoryBefore = player.category;
   const delta = ratingNum - ratingBefore;
+  // Admin override calculates category directly from target rating
   const categoryAfter = calculateCategory(ratingNum);
 
   // Update Player
