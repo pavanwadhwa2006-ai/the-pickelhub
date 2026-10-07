@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/useAuth';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 import useLiveSync from '../hooks/useLiveSync';
 import { REALTIME_CHANNELS, REALTIME_EVENTS } from '../services/realtime';
@@ -23,16 +23,13 @@ import HowItWorksCard from '../components/HowItWorksCard';
 import DigitalClubPassModal from '../components/DigitalClubPassModal';
 import ShareRatingCardModal from '../components/ShareRatingCardModal';
 import RatingHistoryChart from '../components/RatingHistoryChart';
-import QRScannerModal from '../components/QRScannerModal';
 
 const DashboardPage = () => {
   const { user, player } = useAuth();
-  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [updateMsg, setUpdateMsg] = useState(null);
   const [showClubPass, setShowClubPass] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
-  const [showQrScanner, setShowQrScanner] = useState(false);
 
   // Active Pending Matches & Rating History State
   const [pendingMatches, setPendingMatches] = useState([]);
@@ -196,16 +193,6 @@ const DashboardPage = () => {
                   <span>Share Rating Card</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setShowQrScanner(true)}
-                  className="px-3 py-1.5 bg-[var(--color-bg-base)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] text-[var(--color-text-primary)] rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                  title="Scan opponent's pass QR code with mobile camera"
-                >
-                  <span>📷</span>
-                  <span>Scan Opponent QR</span>
-                </button>
-
                 {player?.playerId && (
                   <Link
                     to={`/players/${player.playerId}`}
@@ -219,17 +206,8 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Right: Primary Action Buttons (Submit Match Scores & Scan Opponent) */}
+          {/* Right: Primary Action Button (Submit Match Scores) */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => setShowQrScanner(true)}
-              className="px-4 py-3 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-primary)] text-[var(--color-text-primary)] text-xs font-bold tracking-wider uppercase transition-all rounded-xl flex items-center justify-center gap-2 text-center cursor-pointer shadow-sm"
-              title="Scan Opponent's Pass with Camera"
-            >
-              <span className="text-sm">📷</span>
-              <span>Scan Pass</span>
-            </button>
             <Link
               to="/matches/submit"
               id="dashboard-submit-match-btn"
@@ -502,18 +480,6 @@ const DashboardPage = () => {
         isOpen={showShareCard}
         onClose={() => setShowShareCard(false)}
         player={player}
-      />
-
-      {/* Mobile Courtside QR Scanner Modal */}
-      <QRScannerModal
-        isOpen={showQrScanner}
-        onClose={() => setShowQrScanner(false)}
-        onPlayerFound={(scannedPlayer) => {
-          setShowQrScanner(false);
-          if (scannedPlayer?.playerId) {
-            navigate(`/matches/submit?opponent=${scannedPlayer.playerId}`);
-          }
-        }}
       />
 
     </PageTransition>
