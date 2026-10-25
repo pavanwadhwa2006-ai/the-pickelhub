@@ -16,6 +16,7 @@ const { calculateMatchRatingChanges } = require('./ratingService');
 const { calculateCategory } = require('./playerService');
 const { invalidateCache } = require('../middleware/responseCache');
 const { broadcast, CHANNELS, EVENTS } = require('./realtimeService');
+const { queueAndSendMatchResultEmails, queueAndSendRatingMilestoneEmail } = require('./emailService');
 
 /**
  * Executes atomic rating updates and audit logging for an approved or direct match
@@ -106,6 +107,7 @@ const executeAtomicMatchApproval = async ({
     // 5. Atomically update each player and record RatingHistory
     const ratingHistoryDocs = [];
 
+    const promotions = [];
     for (const change of ratingChanges) {
       const pIdStr = change.playerId.toString();
       const player = playerMap.get(pIdStr);
@@ -133,6 +135,16 @@ const executeAtomicMatchApproval = async ({
 
       // Category uses dual-gate: Elo + wins (players must push to win matches)
       const newCategory = calculateCategory(newRating, player.wins, player.matchesPlayed);
+      if (oldCategory !== newCategory && newRating > oldRating) {
+        promotions.push({
+          playerId: player._id,
+          oldCategory,
+          newCategory,
+          newRating,
+          matchesPlayed: player.matchesPlayed,
+          wins: player.wins,
+        });
+      }
       player.category = newCategory;
 
       await player.save({ session });
@@ -215,6 +227,33 @@ const executeAtomicMatchApproval = async ({
       },
     });
     broadcast(CHANNELS.GLOBAL, EVENTS.LEADERBOARD_UPDATED, {});
+
+    // Dispatch official match result notifications (outbox-persisted, non-blocking)
+    try {
+      await queueAndSendMatchResultEmails({ match: populatedMatch });
+    } catch (notifErr) {
+      console.error('Match result email notification warning:', notifErr.message);
+    }
+
+    // Dispatch milestone promotion notifications for promoted players
+    for (const promo of promotions) {
+      try {
+        const fullPlayer = await Player.findById(promo.playerId).populate('userId');
+        if (fullPlayer && fullPlayer.userId) {
+          await queueAndSendRatingMilestoneEmail({
+            user: fullPlayer.userId,
+            player: fullPlayer,
+            oldCategory: promo.oldCategory,
+            newCategory: promo.newCategory,
+            newRating: promo.newRating,
+            matchesPlayed: promo.matchesPlayed,
+            wins: promo.wins,
+          });
+        }
+      } catch (promoErr) {
+        console.error('Milestone promotion email notification warning:', promoErr.message);
+      }
+    }
 
     return populatedMatch;
   } catch (error) {

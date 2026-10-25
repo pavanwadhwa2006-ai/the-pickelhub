@@ -57,5 +57,10 @@ module.exports = {
   PUSHER_KEY: process.env.PUSHER_KEY || '',
   PUSHER_SECRET: process.env.PUSHER_SECRET || '',
   PUSHER_CLUSTER: process.env.PUSHER_CLUSTER || 'ap2',
+  // Resend Transactional Email
+  RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+  EMAIL_FROM: process.env.EMAIL_FROM || 'The PickleHub <onboarding@resend.dev>',
+  RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET || '',
+  RESEND_DEV_FORWARD_TO: process.env.RESEND_DEV_FORWARD_TO || '',
 };
 

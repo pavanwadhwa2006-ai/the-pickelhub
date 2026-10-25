@@ -12,7 +12,7 @@ const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Counter = require('../models/Counter');
 const { getOrCreatePlayerProfile } = require('../services/playerService');
-const { broadcast, CHANNELS, EVENTS } = require('../services/realtimeService');
+const { broadcast, CHANNELS } = require('../services/realtimeService');
 
 // Club Court Definitions
 const COURTS = ['Court 1', 'Court 2'];

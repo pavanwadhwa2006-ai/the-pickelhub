@@ -60,6 +60,20 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    notificationPreferences: {
+      emailMatchResults: {
+        type: Boolean,
+        default: true,
+      },
+      emailLoginAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      emailAnnouncements: {
+        type: Boolean,
+        default: true,
+      },
+    },
     createdAt: {
       type: Date,
       default: Date.now,

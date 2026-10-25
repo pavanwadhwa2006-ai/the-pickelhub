@@ -16,6 +16,11 @@ const {
   getRefreshCookieMaxAge,
 } = require('../services/authService');
 const { createPlayerProfile, getOrCreatePlayerProfile } = require('../services/playerService');
+const {
+  queueAndSendWelcomeEmail,
+  queueAndSendLoginAlertEmail,
+  queueAndSendAccountLockedEmail,
+} = require('../services/emailService');
 const { NODE_ENV } = require('../config/env');
 
 /**
@@ -100,6 +105,13 @@ const register = async (req, res, next) => {
 
     setRefreshCookie(res, refreshToken);
 
+    // Queue welcome email (outbox-persisted, non-blocking to registration outcome)
+    try {
+      await queueAndSendWelcomeEmail({ user, player });
+    } catch (emailErr) {
+      console.error('Welcome email dispatch warning:', emailErr.message);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Registration successful.',
@@ -159,6 +171,13 @@ const login = async (req, res, next) => {
       await user.handleFailedLogin();
 
       if (user.isLocked()) {
+        const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || req.socket.remoteAddress;
+        queueAndSendAccountLockedEmail({
+          user,
+          lockoutMinutes: 15,
+          ipAddress: clientIp,
+        }).catch((err) => console.error('Account locked notification warning:', err.message));
+
         return res.status(423).json({
           success: false,
           message: 'Account locked due to 5 consecutive failed login attempts. Please try again in 15 minutes.',
@@ -180,6 +199,17 @@ const login = async (req, res, next) => {
     const player = await getOrCreatePlayerProfile(user);
 
     setRefreshCookie(res, refreshToken);
+
+    // Queue login alert email notification (outbox-persisted, non-blocking)
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+    queueAndSendLoginAlertEmail({
+      user,
+      player,
+      ipAddress: clientIp,
+      userAgent,
+      loginTime: new Date(),
+    }).catch((err) => console.error('Login alert notification warning:', err.message));
 
     res.status(200).json({
       success: true,
@@ -228,6 +258,7 @@ const googleAuth = async (req, res, _next) => {
     let user = await User.findOne({
       $or: [{ googleId }, { email: email.toLowerCase().trim() }],
     });
+    const isNewUser = !user;
 
     if (user) {
       // If user exists, link googleId if missing and clear any lockouts
@@ -271,6 +302,25 @@ const googleAuth = async (req, res, _next) => {
       if (playerUpdated) {
         await player.save();
       }
+    }
+
+    // Send Welcome Email if this was a first-time Google account creation, else Login Alert
+    if (isNewUser) {
+      try {
+        await queueAndSendWelcomeEmail({ user, player });
+      } catch (emailErr) {
+        console.error('Google welcome email dispatch warning:', emailErr.message);
+      }
+    } else {
+      const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || req.socket.remoteAddress;
+      const userAgent = req.headers['user-agent'] || 'Unknown';
+      queueAndSendLoginAlertEmail({
+        user,
+        player,
+        ipAddress: clientIp,
+        userAgent,
+        loginTime: new Date(),
+      }).catch((err) => console.error('Google login alert notification warning:', err.message));
     }
 
     const accessToken = generateToken(user._id, user.role);

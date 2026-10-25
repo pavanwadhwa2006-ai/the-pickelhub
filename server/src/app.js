@@ -23,6 +23,7 @@ const profileRoutes = require('./routes/profileRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tournamentRoutes = require('./routes/tournamentRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const { authenticateChannel } = require('./services/realtimeService');
 
@@ -108,6 +109,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Pusher private channel authentication (real-time WebSocket sync)
 app.post('/api/pusher/auth', (req, res) => {

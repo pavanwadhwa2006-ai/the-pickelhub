@@ -148,7 +148,7 @@ const getLeaderboardSpecialties = async (req, res, next) => {
   try {
     const activeCondition = { ...AUTHENTIC_PLAYER_QUERY };
 
-    let [highestRated, mostWins, highestWinRate, longestStreak] = await Promise.all([
+    const [highestRated, mostWins, initialHighestWinRate, initialLongestStreak] = await Promise.all([
       // 1. Highest Rated Player
       Player.findOne(activeCondition).select(PUBLIC_PLAYER_FIELDS).sort({ currentRating: -1, wins: -1 }),
 
@@ -165,6 +165,9 @@ const getLeaderboardSpecialties = async (req, res, next) => {
         .select(PUBLIC_PLAYER_FIELDS)
         .sort({ winningStreak: -1, currentRating: -1 }),
     ]);
+
+    let highestWinRate = initialHighestWinRate;
+    let longestStreak = initialLongestStreak;
 
     // Fallback if no player has an active winning streak > 0
     if (!longestStreak) {

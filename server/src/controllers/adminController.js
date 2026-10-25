@@ -20,6 +20,7 @@ const {
   executeManualRatingAdjustment,
   executeMatchCorrection,
 } = require('../services/adminService');
+const { queueAndSendMatchRejectedEmail } = require('../services/emailService');
 
 /**
  * @desc    Get all pending match submissions awaiting admin approval
@@ -175,6 +176,16 @@ const rejectMatch = async (req, res, next) => {
       .populate('teamB', 'playerId name currentRating category profilePhoto')
       .populate('submittedBy', 'playerId name')
       .populate('approvedBy', 'email role');
+
+    // Dispatch match rejection notifications (outbox-persisted, non-blocking)
+    try {
+      await queueAndSendMatchRejectedEmail({
+        match: populatedMatch,
+        reason: reason.trim(),
+      });
+    } catch (notifErr) {
+      console.error('Match rejection email notification warning:', notifErr.message);
+    }
 
     res.status(200).json({
       success: true,

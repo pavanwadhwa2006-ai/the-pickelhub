@@ -28,6 +28,9 @@ const ProfileSettingsMenu = () => {
   const [successMsg, setSuccessMsg] = useState(null);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [qrCopied, setQrCopied] = useState(false);
+  const [emailMatchResults, setEmailMatchResults] = useState(true);
+  const [emailLoginAlerts, setEmailLoginAlerts] = useState(true);
+  const [savingPrefs, setSavingPrefs] = useState(false);
 
   const menuRef = useRef(null);
   const modalRef = useRef(null);
@@ -59,6 +62,54 @@ const ProfileSettingsMenu = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Fetch notification preferences when menu opens
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    api
+      .get('/notifications/preferences')
+      .then((res) => {
+        if (!cancelled && res.data?.data?.preferences) {
+          setEmailMatchResults(res.data.data.preferences.emailMatchResults !== false);
+          setEmailLoginAlerts(res.data.data.preferences.emailLoginAlerts !== false);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
+
+  const handleToggleMatchEmail = async () => {
+    const nextVal = !emailMatchResults;
+    setEmailMatchResults(nextVal);
+    setSavingPrefs(true);
+    try {
+      await api.patch('/notifications/preferences', {
+        emailMatchResults: nextVal,
+      });
+    } catch {
+      setEmailMatchResults(!nextVal);
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
+
+  const handleToggleLoginAlert = async () => {
+    const nextVal = !emailLoginAlerts;
+    setEmailLoginAlerts(nextVal);
+    setSavingPrefs(true);
+    try {
+      await api.patch('/notifications/preferences', {
+        emailLoginAlerts: nextVal,
+      });
+    } catch {
+      setEmailLoginAlerts(!nextVal);
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
 
   // Generate QR Code for instant match fixation
   useEffect(() => {
@@ -492,6 +543,40 @@ const ProfileSettingsMenu = () => {
                 <span className="text-[9px] text-[var(--color-accent-primary)] font-mono">DARK</span>
               </label>
             </div>
+          </div>
+
+          {/* Email Notifications Preferences */}
+          <div className="py-4 space-y-2">
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--color-text-muted)] uppercase block mb-2">
+              EMAIL NOTIFICATIONS
+            </span>
+            <label className="flex items-center justify-between p-2.5 border rounded-xl text-xs font-bold transition-all bg-[var(--color-bg-base)] border-[var(--color-border-subtle)] cursor-pointer">
+              <div className="flex flex-col pr-2">
+                <span className="text-[var(--color-text-primary)]">Match Results</span>
+                <span className="text-[10px] text-[var(--color-text-muted)] font-normal">Rating deltas & official match scores</span>
+              </div>
+              <input
+                type="checkbox"
+                checked={emailMatchResults}
+                disabled={savingPrefs}
+                onChange={handleToggleMatchEmail}
+                className="w-4 h-4 accent-[var(--color-accent-primary)] cursor-pointer shrink-0"
+              />
+            </label>
+
+            <label className="flex items-center justify-between p-2.5 border rounded-xl text-xs font-bold transition-all bg-[var(--color-bg-base)] border-[var(--color-border-subtle)] cursor-pointer">
+              <div className="flex flex-col pr-2">
+                <span className="text-[var(--color-text-primary)]">Sign-In Alerts</span>
+                <span className="text-[10px] text-[var(--color-text-muted)] font-normal">Security alerts when signing in</span>
+              </div>
+              <input
+                type="checkbox"
+                checked={emailLoginAlerts}
+                disabled={savingPrefs}
+                onChange={handleToggleLoginAlert}
+                className="w-4 h-4 accent-[var(--color-accent-primary)] cursor-pointer shrink-0"
+              />
+            </label>
           </div>
 
           {/* Quick Actions & Logout */}

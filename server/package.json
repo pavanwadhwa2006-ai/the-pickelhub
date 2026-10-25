@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "node --test test/auth.test.js test/player.test.js test/duplicate_email.test.js test/rating.test.js test/match.test.js test/leaderboard.test.js test/profile.test.js test/adminApprovals.test.js test/securityPatch.test.js test/tournaments.test.js test/authRefresh.test.js test/batchApproval.test.js test/analyticsGovernance.test.js test/trafficResilience.test.js test/securityPenTest.test.js",
+    "test": "node --test test/auth.test.js test/player.test.js test/duplicate_email.test.js test/rating.test.js test/match.test.js test/leaderboard.test.js test/profile.test.js test/adminApprovals.test.js test/securityPatch.test.js test/tournaments.test.js test/authRefresh.test.js test/batchApproval.test.js test/analyticsGovernance.test.js test/trafficResilience.test.js test/securityPenTest.test.js test/emailNotification.test.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.js\""
@@ -25,7 +25,8 @@
     "mongoose": "^8.14.1",
     "morgan": "^1.10.0",
     "multer": "^2.2.0",
-    "pusher": "^5.3.4"
+    "pusher": "^5.3.4",
+    "resend": "^6.34.1"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
